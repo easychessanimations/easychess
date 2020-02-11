@@ -1,0 +1,11 @@
+
+node_modules
+
+/firebase/sacckeyorig.json
+/firebase/sacckey.json
+/firebase/makeenv.bat
+
+temp.txt
+state.json
+log.json
+

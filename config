@@ -1,0 +1,43 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[remote "pgithub"]
+	url = https://github.com/pgneditor/easychess.git
+	fetch = +refs/heads/*:refs/remotes/github/*
+[user]
+	name = pgneditor
+	email = pgneditorapplication@gmail.com
+	[credential "https://github.com/pgneditor/easychess.git"]
+		username = pgneditor
+[remote "pgitlab"]
+	url = https://gitlab.com/pgneditor/easychess.git
+	fetch = +refs/heads/*:refs/remotes/gitlab/*
+[user]
+	name = pgneditor
+	email = pgneditorapplication@gmail.com	
+	[credential "https://gitlab.com/pgneditor/easychess.git"]
+		username = pgneditor
+[remote "github"]
+	url = https://github.com/easychessanimations/easychess.git
+	fetch = +refs/heads/*:refs/remotes/github/*
+[user]
+	name = easychessanimations
+	email = chessbotroulette@gmail.com
+	[credential "https://github.com/easychessanimations/easychess.git"]
+		username = easychessanimations
+[remote "gitlab"]
+	url = https://gitlab.com/easychessanimations/easychess.git
+	fetch = +refs/heads/*:refs/remotes/gitlab/*
+[user]
+	name = easychessanimations
+	email = easychessanimations@gmail.com
+	[credential "https://gitlab.com/easychessanimations/easychess.git"]
+		username = easychessanimations
+[remote "heroku"]
+	url = https://git.heroku.com/easychess.git
+	fetch = +refs/heads/*:refs/remotes/heroku/*

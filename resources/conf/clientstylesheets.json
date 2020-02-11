@@ -1,0 +1,10 @@
+{
+    "dev": [
+        "resources/client/css/style.css",
+        "resources/client/piece/alpha.css"
+    ],
+    "prod": [
+        "resources/client/css/style.css",
+        "resources/client/piece/alpha.css"        
+    ]
+}

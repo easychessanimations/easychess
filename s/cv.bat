@@ -1,0 +1,1 @@
+node resources/utils/createversioninfo.js

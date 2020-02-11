@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+
+    <title>WASM test</title>
+
+    <link rel="icon" href="/favicon.ico?" />
+
+    <script src="board.js"></script>
+
+  </head>
+
+  <body>    
+
+    <script>
+        Module.onRuntimeInitialized = _ => {
+            console.log("runtime initialized")
+            let setFromFen = Module.cwrap('setFromFen', 'string', ["string", "string"])            
+            console.log(setFromFen("startpos", "standard"))
+        }
+    </script>
+
+  </body>
+
+</html>

@@ -1,0 +1,28 @@
+{
+    "dev": [        
+        "resources/client/cdn/Chart.js",
+        "resources/client/cdn/showdown.min.js",
+        "resources/client/cdn/jszip.js",
+        "resources/client/cdn/gif.js",
+        "resources/shared/js/commonutils.js",
+        "resources/client/js/utils.js",
+        "resources/shared/js/chessboard.js",
+        "resources/client/js/lichess.js",        
+        "resources/client/js/smartdom.js",
+        "resources/client/js/board.js",
+        "resources/client/js/indexeddb.js"
+    ],
+    "prod": [
+        "resources/client/cdn/Chart.min.js",
+        "resources/client/cdn/showdown.min.js",
+        "resources/client/cdn/jszip.min.js",
+        "resources/client/cdn/gif.js",
+        "resources/shared/js/commonutils.js",
+        "resources/client/js/utils.js",
+        "resources/shared/js/chessboard.js",
+        "resources/client/js/lichess.js",        
+        "resources/client/js/smartdom.js",
+        "resources/client/js/board.js",
+        "resources/client/js/indexeddb.js"
+    ]
+}
