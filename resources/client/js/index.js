@@ -839,16 +839,49 @@ class App extends SmartDomElement{
                                 this.playBotMove(id, board, moves, ratingDiff, "random", {bestmove: algeb, scorenumerical: null})
                             }else{
                                 let bookalgeb = null
+
                                 if(this.settings.useBotBookCheckbox.checked){
                                     let weightIndices = this.settings.allowOpponentWeightsInBotBookCheckbox.checked ? [0, 1] : [0]
                                     bookalgeb = this.g.weightedAlgebForFen(currentFen, weightIndices)
                                 }
-                                if(bookalgeb){
-                                    this.playBotMove(id, board, moves, ratingDiff, "book", {bestmove: bookalgeb, scorenumerical: null})
-                                }
-                                else engine.play(gameFull.initialFen, state.moves, gameFull.variant.key, timecontrol).then(
-                                    this.playBotMove.bind(this, id, board, moves, ratingDiff, "engine")
-                                )
+
+                                requestLichessBook(
+                                    currentFen,
+                                    gameFull.variant.key,
+                                    this.settings.lichessBookMaxMoves.selected,
+                                    this.settings.lichessBookAvgRatingMultipleSelect.selected.map(opt => opt.value),
+                                    this.settings.lichessBookTimeControlsMultipleSelect.selected.map(opt => opt.value)
+                                ).then(result => {
+                                    let bmoves = result.moves
+
+                                    if(bmoves && bmoves.length){
+                                        let grandTotal = 0
+
+                                        for(let bmove of bmoves){
+                                            bmove.total = bmove.white + bmove.draws + bmove.black
+                                            grandTotal += bmove.total
+                                        }
+
+                                        let rand = Math.round(Math.random() * grandTotal)
+
+                                        let currentTotal = 0
+
+                                        for(let bmove of bmoves){
+                                            currentTotal += bmove.total                                            
+                                            if(currentTotal >= rand){
+                                                bookalgeb = bmove.uci
+                                                break
+                                            }                                            
+                                        }
+                                    }
+
+                                    if(bookalgeb){
+                                        this.playBotMove(id, board, moves, ratingDiff, "book", {bestmove: bookalgeb, scorenumerical: null})
+                                    }
+                                    else engine.play(gameFull.initialFen, state.moves, gameFull.variant.key, timecontrol).then(
+                                        this.playBotMove.bind(this, id, board, moves, ratingDiff, "engine")
+                                    )  
+                                })                                
                             }                            
                         }
                     }
