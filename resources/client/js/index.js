@@ -947,6 +947,11 @@ class App extends SmartDomElement{
                 }
             }
 
+            if(event.challenge.timeControl.limit < 60){
+                ok = false
+                status = "initial clock < 60"
+            }
+
             if(ok) acceptLichessChallenge(event.challenge.id, this.USER().accessToken).then(result => {                
                 this.logBotEvent(result)                
             })
