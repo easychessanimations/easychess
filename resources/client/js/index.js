@@ -906,10 +906,10 @@ class App extends SmartDomElement{
     playBotMove(id, board, moves, ratingDiff, method, moveObj){
         let move = board.algebtomove(moveObj.bestmove)
 
+        let offeringDraw = false
+
         if(move){
             let msg = `My ${method} move : ${board.movetosan(move)} .`
-
-            let offeringDraw = false
 
             let scorenumerical = 0
 
@@ -952,7 +952,12 @@ class App extends SmartDomElement{
                 }))            
             }, 100)
         }else{
-            this.botEventLogger.log(LogItem({text: "Could not find move.", cls: "red"}))
+            this.botEventLogger.log(LogItem({text: `Could not find move. Making anyway ${moveObj.bestmove} .`, cls: "red"}))
+
+            // try to make move anyway
+            makeLichessBotMove(id, moveObj.bestmove, offeringDraw, this.USER().accessToken).then(result => {
+                //this.botEventLogger.log(LogItem({text: "make move result", json: result}))
+            })
         }
     }                            
 
