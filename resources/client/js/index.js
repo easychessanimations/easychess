@@ -845,7 +845,11 @@ class App extends SmartDomElement{
                                     bookalgeb = this.g.weightedAlgebForFen(currentFen, weightIndices)
                                 }
 
-                                (this.settings.useBotBookCheckbox.checked ? (requestLichessBook(
+                                ((
+                                    this.settings.useBotBookCheckbox.checked ||
+                                    ( this.settings.allowFallBackToBotBook.checked && (!bookalgeb) )
+                                ) ?
+                                    (requestLichessBook(
                                     currentFen,
                                     gameFull.variant.key,
                                     this.settings.lichessBookMaxMoves.selected,
@@ -2698,6 +2702,11 @@ class App extends SmartDomElement{
                 CheckBoxInput({
                     id: "allowOpponentWeightsInBotBookCheckbox",                    
                     display: "Allow opponent weights in own book",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowFallBackToBotBook",                    
+                    display: "Allow fall back to bot book",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
