@@ -840,18 +840,18 @@ class App extends SmartDomElement{
                             }else{
                                 let bookalgeb = null
 
-                                if(this.settings.useBotBookCheckbox.checked){
+                                if(this.settings.useOwnBookCheckbox.checked){
                                     let weightIndices = this.settings.allowOpponentWeightsInBotBookCheckbox.checked ? [0, 1] : [0]
                                     bookalgeb = this.g.weightedAlgebForFen(currentFen, weightIndices)
                                 }
 
-                                requestLichessBook(
+                                (this.settings.useBotBookCheckbox.checked ? (requestLichessBook(
                                     currentFen,
                                     gameFull.variant.key,
                                     this.settings.lichessBookMaxMoves.selected,
                                     this.settings.lichessBookAvgRatingMultipleSelect.selected.map(opt => opt.value),
                                     this.settings.lichessBookTimeControlsMultipleSelect.selected.map(opt => opt.value)
-                                ).then(result => {
+                                )) : RP({moves: null})).then(result => {
                                     let bmoves = result.moves
 
                                     if(bmoves && bmoves.length){
@@ -2688,6 +2688,11 @@ class App extends SmartDomElement{
                 CheckBoxInput({
                     id: "useBotBookCheckbox",                    
                     display: "Use bot book",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "useOwnBookCheckbox",                    
+                    display: "Use own book",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({

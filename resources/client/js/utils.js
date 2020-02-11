@@ -1,5 +1,9 @@
 const P = p => new Promise(p)
 
+const RP = value => P(resolve => {
+    resolve(value)
+})
+
 class OrderedHash_{
     constructor(blob){
         this.fromBlob(blob)
