@@ -2697,7 +2697,7 @@ class App extends SmartDomElement{
                 }),
                 CheckBoxInput({
                     id: "allowOpponentWeightsInBotBookCheckbox",                    
-                    display: "Allow opponent weights in bot book",                                        
+                    display: "Allow opponent weights in own book",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
