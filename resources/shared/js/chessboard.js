@@ -24,6 +24,8 @@ const STANDARD_PROMOTION_KINDS = ["q", "r", "b", "n"]
 const DO_COMMENTS = true
 const DO_MULTI = true
 
+const DEFAULT_MOVE_OVERHEAD = 1000
+
 function promotionKindsForVariant(variant){    
     return STANDARD_PROMOTION_KINDS
 }
@@ -1662,7 +1664,7 @@ class AbstractEngine{
     if(VERBOSE) console.log("setcommand", command, payload)
   }
 
-  play(initialFen, moves, variant, timecontrol, moveOverhead){
+  play(initialFen, moves, variant, timecontrol, moveOverHead){
       return P(resolve =>{
           this.resolvePlay = resolve
           this.go({
@@ -1670,7 +1672,7 @@ class AbstractEngine{
               moves: moves,
               variant: variant,
               timecontrol: timecontrol,
-              moveOverhead: moveOverhead
+              moveOverHead: moveOverHead
           })
       })
   }
@@ -1867,7 +1869,7 @@ class AbstractEngine{
     this.variant = payload.variant || DEFAULT_VARIANT        
     this.analysiskey = payload.analysiskey || `analysis/${this.variant}/${strippedfen(this.analyzedfen)}`               
     this.analyzedboard = ChessBoard().setfromfen(this.analyzedfen, this.variant)
-    this.moveOverhead = payload.moveOverhead || 2500
+    this.moveOverHead = payload.moveOverHead || DEFAULT_MOVE_OVERHEAD
 
     let lms = this.analyzedboard.legalmovesforallpieces()
 
@@ -1890,7 +1892,7 @@ class AbstractEngine{
     this.issuecommand(`setoption name UCI_Variant value ${this.variant == "standard" ? "chess" : this.variant}`)
     this.issuecommand(`setoption name MultiPV value ${this.multipv}`)        
     this.issuecommand(`setoption name Threads value ${this.threads}`)        
-    this.issuecommand(`setoption name Move Overhead value ${this.moveOverhead}`)        
+    this.issuecommand(`setoption name Move Overhead value ${this.moveOverHead}`)        
     this.issuecommand(`position fen ${this.analyzedfen}${this.moves ? " moves " + this.moves : ""}`)
     
     let goCommand = `go${this.timecontrol ? " wtime " + this.timecontrol.wtime + " winc " + this.timecontrol.winc + " btime " + this.timecontrol.btime + " binc " + this.timecontrol.binc : " infinite"}`

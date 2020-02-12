@@ -57,18 +57,20 @@ const LOAD_GAMES_INITIAL_DELAY      = 10000
 const ARCHIVE_RENDER_CHUNK          = () => IS_DEV() ? 500 : 500
 const LICHESS_USERS_RENDER_CHUNK    = () => IS_DEV() ? 50 : 50
 
-const SHOW_FILTER_BOOK_TIMEOUT  = 500
+const SHOW_FILTER_BOOK_TIMEOUT      = 500
 
-const TREE_WIDTH                = 20000
+const TREE_WIDTH                    = 20000
 
-const FORCE_QUERY               = true
-const SHOW_COMMENT              = true
-const MERGE_ALL_MOVES           = true
+const FORCE_QUERY                   = true
+const SHOW_COMMENT                  = true
+const MERGE_ALL_MOVES               = true
 
-const SHOULD_GO_DELAY           = 5000
-const BOT_STARTUP_DELAY         = 7500
+const SHOULD_GO_DELAY               = 5000
+const BOT_STARTUP_DELAY             = 7500
 
-const DELETE_MOVE_WARN_LIMIT    = 50
+const DELETE_MOVE_WARN_LIMIT        = 50
+
+const DEFAULT_REDUCE_THINKING_TIME  = 1
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -823,10 +825,11 @@ class App extends SmartDomElement{
                         let lms = board.legalmovesforallpieces()
 
                         if(lms.length){
+                            let reduceThinkingTime = parseInt(this.settings.reduceThinkingTimeCombo.selected)
                             let timecontrol = {
-                                wtime:  state.wtime ? Math.floor(state.wtime * 0.5) : 10000,
+                                wtime:  state.wtime ? Math.floor(state.wtime / reduceThinkingTime) : 10000,
                                 winc:   state.winc  || 0,
-                                btime:  state.btime ? Math.floor(state.btime * 0.5) : 10000,
+                                btime:  state.btime ? Math.floor(state.btime / reduceThinkingTime) : 10000,
                                 binc:   state.binc  || 0,
                             }
 
@@ -836,7 +839,7 @@ class App extends SmartDomElement{
                             if(this.settings.makeRandomBotMovesCheckbox.checked){
                                 let selmove = lms[Math.floor(Math.random() * lms.length)]
                                 let algeb = board.movetoalgeb(selmove)
-                                this.playBotMove(id, board, moves, ratingDiff, "random", {bestmove: algeb, scorenumerical: null})
+                                this.playBotMove(id, board, moves, ratingDiff, null, null, "random", {bestmove: algeb, scorenumerical: null})
                             }else{
                                 let bookalgeb = null
 
@@ -880,11 +883,14 @@ class App extends SmartDomElement{
                                     }
 
                                     if(bookalgeb){
-                                        this.playBotMove(id, board, moves, ratingDiff, "book", {bestmove: bookalgeb, scorenumerical: null})
+                                        this.playBotMove(id, board, moves, ratingDiff, null, null, "book", {bestmove: bookalgeb, scorenumerical: null})
                                     }
-                                    else engine.play(gameFull.initialFen, state.moves, gameFull.variant.key, timecontrol).then(
-                                        this.playBotMove.bind(this, id, board, moves, ratingDiff, "engine")
-                                    )  
+                                    else{
+                                        let moveOverHead = parseInt(this.settings.moveOverHeadCombo.selected)
+                                        engine.play(gameFull.initialFen, state.moves, gameFull.variant.key, timecontrol, moveOverHead).then(
+                                            this.playBotMove.bind(this, id, board, moves, ratingDiff, timecontrol, moveOverHead, "engine")
+                                        )
+                                    }
                                 })                                
                             }                            
                         }
@@ -907,7 +913,7 @@ class App extends SmartDomElement{
         gameStateReader.stream()
     }
 
-    playBotMove(id, board, moves, ratingDiff, method, moveObj){
+    playBotMove(id, board, moves, ratingDiff, timecontrol, moveOverHead, method, moveObj){
         let move = board.algebtomove(moveObj.bestmove)
 
         let offeringDraw = false
@@ -950,7 +956,9 @@ class App extends SmartDomElement{
                         randPercent: randPercent,             
                         movesLength: moves.length,                    
                         ratingDiff: ratingDiff,
-                        offeringDraw: offeringDraw
+                        offeringDraw: offeringDraw,
+                        timecontrol: timecontrol,
+                        moveOverHead: moveOverHead
                     },
                     cls: "green large"
                 }))            
@@ -2721,6 +2729,20 @@ class App extends SmartDomElement{
                     display: "Make random bot moves",                                        
                     settings: this.settings
                 }),
+                Combo({                    
+                    id: "moveOverHeadCombo",                    
+                    display: "Move Overhead",                                        
+                    options: Array(50).fill(null).map((_, i) => ({value: (i+1)*100, display: (i+1)*100})),
+                    selected: DEFAULT_MOVE_OVERHEAD,
+                    settings: this.settings
+                }),                
+                Combo({                    
+                    id: "reduceThinkingTimeCombo",                    
+                    display: "Reduce thinking time",                                        
+                    options: Array(10).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_REDUCE_THINKING_TIME,
+                    settings: this.settings
+                }),                
             ]   
         }))
     }
