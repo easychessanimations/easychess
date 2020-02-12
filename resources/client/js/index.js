@@ -1244,7 +1244,7 @@ class App extends SmartDomElement{
 
         this.buildGames()
 
-        if(ev.button){
+        if(ev) if(ev.button){
             window.open(lichessGameUrl(game.id))
         }
 
@@ -2678,7 +2678,14 @@ class App extends SmartDomElement{
                 this.lichessbutton = Button("L", this.lichess.bind(this)).bc(YELLOW_BUTTON_COLOR),                
                 Button("R", this.reloadPage.bind(this)).bc(YELLOW_BUTTON_COLOR),                                                      
                 this.commandInput = TextInput().w(60).ae("keyup", this.commandChanged.bind(this)),                                
+                Button("G", this.loadLatestGame.bind(this)).bc(GREEN_BUTTON_COLOR),                                                      
             )
+    }
+
+    loadLatestGame(){
+        if(this.games) if(this.games.length){
+            this.gameClicked(this.games[0], MERGE_ALL_MOVES)
+        }
     }
 
     renderBotSettingsForm(){
