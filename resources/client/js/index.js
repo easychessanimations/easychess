@@ -762,9 +762,13 @@ class App extends SmartDomElement{
 
         let ratingDiff = 0
 
+        let poweredBy = () => {
+            this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychess.herokuapp.com .`)
+        }
+
         let processGameEvent = (event) => {
             setTimeout(() => {
-                //this.botEventLogger.log(LogItem({text: "game event", json: event, cls: "brown"}))
+                this.botEventLogger.log(LogItem({text: "game event", json: event, cls: "brown"}))
             }, 100)
 
             let state
@@ -779,11 +783,17 @@ class App extends SmartDomElement{
                 let botRating = gameFull.white.rating || 1500
                 let oppRating = gameFull.black.rating || 1500
 
+                gameFull.botName = gameFull.white.name
+                gameFull.opponentName = gameFull.black.name
+
                 if(gameFull.black.id == this.USER().id){
                     gameFull.botTurn = BLACK
 
                     botRating = gameFull.black.rating || 1500
                     oppRating = gameFull.white.rating || 1500
+
+                    gameFull.botName = gameFull.black.name
+                    gameFull.opponentName = gameFull.white.name
                 }
 
                 ratingDiff = oppRating - botRating
@@ -796,6 +806,9 @@ class App extends SmartDomElement{
                 gameFull.initialFen = testBoard.fen
 
                 state = gameFull.state
+
+                this.writeBotChat(id, ["player", "spectator"], `Good luck, ${gameFull.opponentName} !`)                
+                poweredBy()
             }
 
             if(event.type == "gameState") state = event
@@ -903,6 +916,8 @@ class App extends SmartDomElement{
 
         let processTermination = () => {
             this.botEventLogger.log(LogItem({text: `Game ${id} terminated.`, cls: "red large"}))
+            this.writeBotChat(id, ["player", "spectator"], `Good game, ${gameFull.opponentName} !`)
+            poweredBy()
             engine.terminate()
         }
 
