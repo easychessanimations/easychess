@@ -1316,25 +1316,28 @@ class App extends SmartDomElement{
     }
 
     fetchGames(){
-        this.games = []
-        this.gamesLoadTime = null
-        this.buildGames()
+        return P(resolve => {
+            this.games = []
+            this.gamesLoadTime = null
+            this.buildGames()
 
-        let fetchStarted = performance.now()
+            let fetchStarted = performance.now()
 
-        getLichessGames(
-            this.username(),
-            {
-                max: MAX_GAMES
-            },
-            this.USER().accessToken
-        ).then(result => {
-            if(result.ok){        
-                this.gamesLoadTime = performance.now() - fetchStarted
-                this.games = result.content.map(game => LichessGame(game, this.username()))
-                this.buildGames()
-            }
-        })
+            getLichessGames(
+                this.username(),
+                {
+                    max: MAX_GAMES
+                },
+                this.USER().accessToken
+            ).then(result => {
+                if(result.ok){        
+                    this.gamesLoadTime = performance.now() - fetchStarted
+                    this.games = result.content.map(game => LichessGame(game, this.username()))
+                    this.buildGames()
+                    resolve(true)
+                }
+            })
+        })        
     }
 
     confirmDeleteMove(){
@@ -2691,9 +2694,11 @@ class App extends SmartDomElement{
     }
 
     loadLatestGame(){
-        if(this.games) if(this.games.length){
-            this.gameClicked(this.games[0], MERGE_ALL_MOVES)
-        }
+        this.fetchGames().then(_ => {
+            if(this.games) if(this.games.length){
+                this.gameClicked(this.games[0], MERGE_ALL_MOVES)
+            }
+        })
     }
 
     renderBotSettingsForm(){
