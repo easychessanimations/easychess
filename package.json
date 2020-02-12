@@ -24,5 +24,12 @@
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",
     "passport-lichess": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/register": "^7.8.3",
+    "browser-sync": "^2.26.7",
+    "gulp": "^4.0.2"
   }
 }
