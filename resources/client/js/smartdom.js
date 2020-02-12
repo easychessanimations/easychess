@@ -235,6 +235,7 @@ class SmartDomElement{
         x.split(" ").forEach(klass => this.ac(klass))
         return this
     }
+    dir(x){return this.addStyle("direction", x)}
     zi(x){return this.addStyle("zIndex", x)}
     op(x){return this.addStyle("opacity", x)}
     fs(x){return this.addStyle("fontSize", `${x}px`)}

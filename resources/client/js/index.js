@@ -7,7 +7,7 @@ const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
 
 const DEFAULT_USERNAME          = "lishadowapps"
 
-const MAX_GAMES                 = IS_DEV() ? 10 : 100
+const DEFAULT_MAX_GAMES         = IS_DEV() ? 10 : 100
 
 const POSITION_CHANGED_DELAY    = 500
 const ALERT_DELAY               = 3000
@@ -1283,7 +1283,9 @@ class App extends SmartDomElement{
 
     buildGames(){        
         let i = 0
-        this.gamesListDiv.miw(4000).mih(4000).pad(2).bc("#add").x().a(
+        this.gamesListDiv
+            .miw(4000).mah(window.innerHeight - 150).ovfy("auto").dir("rtl")
+            .pad(2).bc("#add").x().a(div().dir("ltr").a(
             this.games.map(game => div().sa("id", game.id)
                 .mart(3).c("#00f")
                 .bc(game.id == this.lastClickedGameId ? "#0f0" : (i++ % 2 ? "#dfdff0" : "#e0efe0"))
@@ -1296,7 +1298,7 @@ class App extends SmartDomElement{
                     .html(game.moves.join(" "))
                     .cp().ae("mousedown", this.gameClicked.bind(this, game, MERGE_ALL_MOVES))
             ))
-        )
+        ))
         this.loadTimeDiv.html(`load time ${Math.round(this.gamesLoadTime / 1000)} sec(s)`).show(this.gamesLoadTime)
 
         if(this.lastClickedGameId)
@@ -1326,7 +1328,7 @@ class App extends SmartDomElement{
             getLichessGames(
                 this.username(),
                 {
-                    max: MAX_GAMES
+                    max: parseInt(this.settings.fetchMaxGamesCombo.selected)
                 },
                 this.USER().accessToken
             ).then(result => {
@@ -2846,6 +2848,13 @@ class App extends SmartDomElement{
                     hideAddButton: true,
                     settings: this.settings,
                     changeCallback: this.positionchanged.bind(this)
+                }),
+                Combo({                    
+                    id: "fetchMaxGamesCombo",                    
+                    display: "Fetch max games",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1)*10, display: (i+1)*10})),
+                    selected: DEFAULT_MAX_GAMES,
+                    settings: this.settings
                 }),
                 CheckBoxInput({
                     id: "showAnalysisInBoardCheckbox",                    
