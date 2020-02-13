@@ -492,7 +492,7 @@ if(process.env.KEEPALIVE){
         console.log("keepalive, remaining", --keepalive)
         fetch("https://easychess.herokuapp.com/?keepalive=true")
         if(!keepalive) clearInterval(keepaliveInterval)
-    }, 3000)    
+    }, 10 * MINUTE)    
 }
 
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))
