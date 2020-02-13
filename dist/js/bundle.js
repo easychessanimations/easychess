@@ -2685,8 +2685,8 @@ class LichessBotGame_{
                             binc:   this.state.binc  || 0,
                         }
 
-                        if(this.timecontrol.wtime > HOUR) this.timecontrol.wtime = 10000
-                        if(this.timecontrol.btime > HOUR) this.timecontrol.btime = 10000                            
+                        if(this.timecontrol.wtime > utils.HOUR) this.timecontrol.wtime = 10000
+                        if(this.timecontrol.btime > utils.HOUR) this.timecontrol.btime = 10000                            
 
                         if(this.parentBot.props.makeRandomMoves){
                             let selmove = lms[Math.floor(Math.random() * lms.length)]
@@ -2862,6 +2862,14 @@ module.exports.LichessBot = LichessBot
 
 },{"./chessboard":1,"./lichess":3,"./utils":5}],5:[function(require,module,exports){
 const P = p => new Promise(p)
+
+const SECOND = 1000
+const MINUTE = 60 * SECOND
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
+const WEEK = 7 * DAY
+const MONTH = 31 * DAY
+const YEAR = 366 * DAY
 
 function GET_PROPS(){    
     if(typeof PROPS != "undefined"){
@@ -3317,7 +3325,15 @@ module.exports = {
     simpleFetch: simpleFetch,
     GET_PROPS: GET_PROPS,
     GET_USER: GET_USER,
-    NdjsonReader: NdjsonReader
+    NdjsonReader: NdjsonReader,    
 }
+
+module.exports.SECOND = SECOND
+module.exports.MINUTE = MINUTE
+module.exports.HOUR = HOUR
+module.exports.DAY = DAY
+module.exports.WEEK = WEEK
+module.exports.MONTH = MONTH
+module.exports.YEAR = YEAR
 
 },{}]},{},[2]);

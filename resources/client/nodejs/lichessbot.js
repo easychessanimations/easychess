@@ -140,8 +140,8 @@ class LichessBotGame_{
                             binc:   this.state.binc  || 0,
                         }
 
-                        if(this.timecontrol.wtime > HOUR) this.timecontrol.wtime = 10000
-                        if(this.timecontrol.btime > HOUR) this.timecontrol.btime = 10000                            
+                        if(this.timecontrol.wtime > utils.HOUR) this.timecontrol.wtime = 10000
+                        if(this.timecontrol.btime > utils.HOUR) this.timecontrol.btime = 10000                            
 
                         if(this.parentBot.props.makeRandomMoves){
                             let selmove = lms[Math.floor(Math.random() * lms.length)]
