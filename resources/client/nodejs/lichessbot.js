@@ -62,6 +62,8 @@ class LichessBotGame_{
     }
 
     processGameEvent(event){
+        if(event.type == "chatline") return
+
         console.log(JSON.stringify(event, null, 2))
 
         console.log("token", this.parentBot.token, "id", this.id)
@@ -165,8 +167,8 @@ class LichessBotGame_{
                                 this.currentFen,
                                 this.variant,
                                 this.parentBot.props.lichessBookMaxMoves || lichess.LICHESS_BOOK_MAX_MOVES,
-                                (this.parentBot.props.lichessBookAvgRatings || lichess.LICHESS_BOOK_AVG_RATINGS).map(opt => opt.value),
-                                (this.parentBot.props.lichessBookTimeControls || lichess.LICHESS_BOOK_TIME_CONTROLS).map(opt => opt.value)
+                                (this.parentBot.props.lichessBookAvgRatings || lichess.LICHESS_BOOK_AVG_RATINGS),
+                                (this.parentBot.props.lichessBookTimeControls || lichess.LICHESS_BOOK_TIME_CONTROLS)
                             )) : utils.RP({moves: null})).then(result => {
                                 let bmoves = result.moves
 
