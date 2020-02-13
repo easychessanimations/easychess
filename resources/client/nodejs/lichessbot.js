@@ -159,7 +159,7 @@ class LichessBotGame_{
                                 this.parentBot.props.useBotBook ||
                                 ( this.parentBot.props.allowFallBackToBotBook && (!bookalgeb) )
                             ) ?
-                                (requestLichessBook(
+                                (lichess.requestLichessBook(
                                 this.currentFen,
                                 this.variant,
                                 this.parentBot.props.lichessBookMaxMoves || lichess.LICHESS_BOOK_MAX_MOVES,

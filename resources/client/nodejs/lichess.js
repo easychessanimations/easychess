@@ -464,6 +464,7 @@ module.exports = {
     acceptLichessChallenge: acceptLichessChallenge,
     writeLichessBotChat: writeLichessBotChat,
     makeLichessBotMove: makeLichessBotMove,
+    requestLichessBook: requestLichessBook,
 }
 
 /*
