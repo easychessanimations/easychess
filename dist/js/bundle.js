@@ -2554,6 +2554,8 @@ const DEFAULT_REDUCE_THINKING_TIME  = 1
 class LocalEngine_ extends chessboard.AbstractEngine{
     constructor(props){
         super(props.sendanalysisinfo)
+
+        this.props = props
     }
 
     spawnengineprocess(){
@@ -2580,6 +2582,8 @@ class LichessBotGame_{
     }
 
     constructor(props){
+        this.props = props
+
         this.parentBot = props.parentBot
         this.id = props.id        
 
@@ -2753,7 +2757,7 @@ class LichessBotGame_{
         let offeringDraw = false
 
         if(move){
-            let msg = `My ${method} move : ${board.movetosan(move)} .`
+            let msg = `My ${method} move : ${this.board.movetosan(move)} .`
 
             let randPercent = Math.round(Math.random() * 100)
 
@@ -2788,7 +2792,7 @@ class LichessBotGame_{
     }
 
     processTermination(){
-        this.writeBotChat(id, ["player", "spectator"], `Good game, ${this.opponentName} !`)
+        this.writeBotChat(this.id, ["player", "spectator"], `Good game, ${this.opponentName} !`)
         this.poweredBy()
         this.engine.terminate()
     }
@@ -2797,6 +2801,8 @@ function LichessBotGame(props){return new LichessBotGame_(props)}
 
 class LichessBot_{
     constructor(props){
+        this.props = props
+
         this.token = props.token
 
         this.userId = utils.GET_USER().id
