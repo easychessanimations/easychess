@@ -441,7 +441,8 @@ app.get('/node', (req, res) => res.send(`
         <script>
         const PROPS = ${JSON.stringify({...PROPS, ...{
             USER: req.user,
-            LOG_REMOTE: req.query.nolog != "true"
+            LOG_REMOTE: req.query.nolog != "true",
+            BOT_TOKEN: process.env.BOT_TOKEN,
         }}, null, 2)}
         </script>
 
