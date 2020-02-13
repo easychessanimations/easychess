@@ -427,6 +427,39 @@ app.get('/', (req, res) => res.send(`
 </html>
 `))
 
+app.get('/node', (req, res) => res.send(`
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <title>Easy Chess Node</title>    
+
+        <link rel="icon" href="/resources/client/favicon.ico" />
+
+        <script>
+        const PROPS = ${JSON.stringify({...PROPS, ...{
+            USER: req.user,
+            LOG_REMOTE: req.query.nolog != "true"
+        }}, null, 2)}
+        </script>
+
+        ${loadStyleSheets}
+
+    </head>
+
+    <body>    
+
+        <div id="root"></div>
+
+        <script src='dist/js/bundle.js?ver=${versionInfo['dist/js/bundle.js'].mtime}'></script>
+
+    </body>
+
+</html>
+`))
+
 app.get('/gif.worker.js', function(req, res) {  
     res.sendFile(`${__rootdirname}/resources/client/cdn/gif.worker.js`)
 })
