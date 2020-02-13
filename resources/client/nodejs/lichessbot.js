@@ -62,11 +62,9 @@ class LichessBotGame_{
     }
 
     processGameEvent(event){
-        if(event.type == "chatline") return
+        if(event.type == "chatLine") return
 
         console.log(JSON.stringify(event, null, 2))
-
-        console.log("token", this.parentBot.token, "id", this.id)
 
         if(event.type == "gameFull"){
             let gameFull = event
@@ -118,9 +116,10 @@ class LichessBotGame_{
 
             let allMovesOk = true
 
-            this.moves = this.state.moves.split(" ")
+            this.moves = null
 
-            if(this.moves){
+            if(this.state.moves){
+                this.moves = this.state.moves.split(" ")
                 for(let algeb of this.moves){
                     allMovesOk = allMovesOk && this.board.pushalgeb(algeb)
                 }
@@ -156,7 +155,7 @@ class LichessBotGame_{
 
                             if(this.parentBot.props.useOwnBook){
                                 let weightIndices = this.parentBot.props.allowOpponentWeightsInBotBook ? [0, 1] : [0]
-                                bookalgeb = null //this.g.weightedAlgebForFen(currentFen, weightIndices)
+                                bookalgeb = this.parentBot.props.bookGame ? this.parentBot.props.bookGame.weightedAlgebForFen(currentFen, weightIndices) : null
                             }
 
                             ((
@@ -223,7 +222,7 @@ class LichessBotGame_{
             if(!(moveObj.scorenumerical === null)){
                 let scorenumerical = moveObj.scorenumerical
                 msg += ` Score numerical cp : ${scorenumerical} .`                
-                if(this.moves.length > 40){
+                if(this.moves && this.moves.length > 40){
                     if(ratingDiff > -200){
                         if(scorenumerical == 0){
                             offeringDraw = true
@@ -251,6 +250,8 @@ class LichessBotGame_{
     }
 
     processTermination(){
+        console.log(`Game ${this.id} terminated .`)
+
         this.writeBotChat(["player", "spectator"], `Good game, ${this.opponentName} !`)
         this.poweredBy()
         this.engine.terminate()

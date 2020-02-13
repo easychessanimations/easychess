@@ -1,4 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const utils = require('./utils')
+
 const SUPPORTED_VARIANTS = [
     ["standard", "Standard"],
     ["atomic", "Atomic"]
@@ -1666,7 +1668,8 @@ class AbstractEngine{
   }
 
   play(initialFen, moves, variant, timecontrol, moveOverHead){
-      return P(resolve =>{
+      if(VERBOSE) console.log("play", initialFen, moves, variant, timecontrol, moveOverHead)
+      return utils.P(resolve => {
           this.resolvePlay = resolve
           this.go({
               fen: initialFen,
@@ -1894,7 +1897,7 @@ class AbstractEngine{
     this.issuecommand(`setoption name MultiPV value ${this.multipv}`)        
     this.issuecommand(`setoption name Threads value ${this.threads}`)        
     this.issuecommand(`setoption name Move Overhead value ${this.moveOverHead}`)        
-    this.issuecommand(`position fen ${this.analyzedfen}${this.moves ? " moves " + this.moves : ""}`)
+    this.issuecommand(`position fen ${this.analyzedfen}${this.moves ? " moves " + this.moves.join(" ") : ""}`)
     
     let goCommand = `go${this.timecontrol ? " wtime " + this.timecontrol.wtime + " winc " + this.timecontrol.winc + " btime " + this.timecontrol.btime + " binc " + this.timecontrol.binc : " infinite"}`
     
@@ -2016,7 +2019,7 @@ module.exports.DEFAULT_MOVE_OVERHEAD = DEFAULT_MOVE_OVERHEAD
 module.exports.WHITE = WHITE
 module.exports.BLACK = BLACK
 
-},{}],2:[function(require,module,exports){
+},{"./utils":5}],2:[function(require,module,exports){
 const { LichessBot } = require('./lichessbot')
 const utils = require('./utils')
 
@@ -2608,11 +2611,9 @@ class LichessBotGame_{
     }
 
     processGameEvent(event){
-        if(event.type == "chatline") return
+        if(event.type == "chatLine") return
 
         console.log(JSON.stringify(event, null, 2))
-
-        console.log("token", this.parentBot.token, "id", this.id)
 
         if(event.type == "gameFull"){
             let gameFull = event
@@ -2664,9 +2665,10 @@ class LichessBotGame_{
 
             let allMovesOk = true
 
-            this.moves = this.state.moves.split(" ")
+            this.moves = null
 
-            if(this.moves){
+            if(this.state.moves){
+                this.moves = this.state.moves.split(" ")
                 for(let algeb of this.moves){
                     allMovesOk = allMovesOk && this.board.pushalgeb(algeb)
                 }
@@ -2702,7 +2704,7 @@ class LichessBotGame_{
 
                             if(this.parentBot.props.useOwnBook){
                                 let weightIndices = this.parentBot.props.allowOpponentWeightsInBotBook ? [0, 1] : [0]
-                                bookalgeb = null //this.g.weightedAlgebForFen(currentFen, weightIndices)
+                                bookalgeb = this.parentBot.props.bookGame ? this.parentBot.props.bookGame.weightedAlgebForFen(currentFen, weightIndices) : null
                             }
 
                             ((
@@ -2769,7 +2771,7 @@ class LichessBotGame_{
             if(!(moveObj.scorenumerical === null)){
                 let scorenumerical = moveObj.scorenumerical
                 msg += ` Score numerical cp : ${scorenumerical} .`                
-                if(this.moves.length > 40){
+                if(this.moves && this.moves.length > 40){
                     if(ratingDiff > -200){
                         if(scorenumerical == 0){
                             offeringDraw = true
@@ -2797,6 +2799,8 @@ class LichessBotGame_{
     }
 
     processTermination(){
+        console.log(`Game ${this.id} terminated .`)
+
         this.writeBotChat(["player", "spectator"], `Good game, ${this.opponentName} !`)
         this.poweredBy()
         this.engine.terminate()

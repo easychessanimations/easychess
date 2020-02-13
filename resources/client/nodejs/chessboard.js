@@ -1,3 +1,5 @@
+const utils = require('./utils')
+
 const SUPPORTED_VARIANTS = [
     ["standard", "Standard"],
     ["atomic", "Atomic"]
@@ -1665,7 +1667,8 @@ class AbstractEngine{
   }
 
   play(initialFen, moves, variant, timecontrol, moveOverHead){
-      return P(resolve =>{
+      if(VERBOSE) console.log("play", initialFen, moves, variant, timecontrol, moveOverHead)
+      return utils.P(resolve => {
           this.resolvePlay = resolve
           this.go({
               fen: initialFen,
@@ -1893,7 +1896,7 @@ class AbstractEngine{
     this.issuecommand(`setoption name MultiPV value ${this.multipv}`)        
     this.issuecommand(`setoption name Threads value ${this.threads}`)        
     this.issuecommand(`setoption name Move Overhead value ${this.moveOverHead}`)        
-    this.issuecommand(`position fen ${this.analyzedfen}${this.moves ? " moves " + this.moves : ""}`)
+    this.issuecommand(`position fen ${this.analyzedfen}${this.moves ? " moves " + this.moves.join(" ") : ""}`)
     
     let goCommand = `go${this.timecontrol ? " wtime " + this.timecontrol.wtime + " winc " + this.timecontrol.winc + " btime " + this.timecontrol.btime + " binc " + this.timecontrol.binc : " infinite"}`
     
