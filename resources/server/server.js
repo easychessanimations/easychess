@@ -23,7 +23,7 @@ const spawn = require('child_process').spawn
 const fs = require('fs')
 const fetch = require('node-fetch')
 const { getFiles } = require('../utils/fileutils')
-const { YEAR } = require('../shared/js/commonutils')
+const { YEAR, MINUTE } = require('../shared/js/commonutils')
 const liapi = require('liapi')
 
 var admin = null
@@ -485,5 +485,14 @@ app.get('/gif.worker.js', function(req, res) {
 app.get('/book.worker.js', function(req, res) {  
     res.sendFile(`${__rootdirname}/resources/client/js/book.worker.js`)
 })
+
+if(process.env.KEEPALIVE){
+    let keepalive = parseInt(process.env.KEEPALIVE)
+    let keepaliveInterval = setInterval(()=>{
+        console.log("keepalive, remaining", --keepalive)
+        fetch("https://easychess.herokuapp.com/?keepalive=true")
+        if(!keepalive) clearInterval(keepaliveInterval)
+    }, 3000)    
+}
 
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))

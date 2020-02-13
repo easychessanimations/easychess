@@ -268,7 +268,9 @@ class NdjsonReader{
                         this.processChunk(chunk)
                     })
                     response.body.on('end', () => {
-                        this.onTerminated()
+                        try{
+                            this.onTerminated()
+                        }catch(err){}
                     })
                 }                
             },
