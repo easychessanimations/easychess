@@ -6,6 +6,46 @@ const STOCKFISH_JS_PATH             = "resources/client/cdn/stockfish.wasm.js"
 
 const DEFAULT_REDUCE_THINKING_TIME  = 1
 
+const path = require('path')
+const spawn = require('child_process').spawn
+
+const STOCKFISH_PATH = path.join(__dirname, "../../server/bin/stockfish")
+
+class ServerEngine extends chessboard.AbstractEngine{
+    constructor(sendanalysisinfo){
+        super(sendanalysisinfo)
+
+        this.minDepth = 10
+    }
+
+    processstdout(data){
+        data = data.replace(/\r/g, "")        
+        for(let line of data.split("\n")){
+            this.processstdoutline(line)
+        }
+    }
+
+    spawnengineprocess(){
+        this.process = spawn(STOCKFISH_PATH)
+
+        this.process.stdout.on('data', (data)=>{
+            this.processstdout(`${data}`)
+        })
+
+        this.process.stderr.on('data', (data)=>{
+            this.processstdout(`${data}`)
+        })
+    }
+
+    terminate(){
+        this.process.kill()
+    }
+
+    sendcommandtoengine(command){        
+        this.process.stdin.write(command + "\n")     
+    }
+}
+
 class LocalEngine_ extends chessboard.AbstractEngine{
     constructor(props){
         super(props.sendanalysisinfo)
@@ -42,9 +82,12 @@ class LichessBotGame_{
         this.parentBot = props.parentBot
         this.id = props.id        
 
-        this.engine = new LocalEngine({
+        this.engine = (typeof window != "undefined") ?
+        new LocalEngine({
             sendanalysisinfo: () => {}
         })
+        :
+        new ServerEngine(() => {})
 
         this.ratingDiff = 0
 

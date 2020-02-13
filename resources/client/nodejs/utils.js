@@ -1,3 +1,5 @@
+const fetch = require('node-fetch')
+
 const P = p => new Promise(p)
 
 const SECOND = 1000
@@ -210,33 +212,37 @@ class NdjsonReader{
         this.onTerminated = onTerminated
     }
 
-    read(){
+    processChunk(chunk){            
+        let content = this.pendingChunk + ( this.nodeReader ? chunk.toString() : new TextDecoder("utf-8").decode(chunk.value) )
+        if(content.length > 1) console.log(content)
+        let closed = content.match(/\n$/)
+        let hasline = content.match(/\n/)
+        let lines = content.split("\n")                
+        if(hasline){
+            if(!closed){
+                this.pendingChunk = lines.pop()
+            }
+            for(let line of lines){
+                if(line != "") this.processLineFunc(JSON.parse(line))
+            }            
+        }else{
+            this.pendingChunk += content
+        }        
+        return true
+    }
+
+    read(){        
         this.reader.read().then(
             chunk => {
                 if(chunk.done){
                     if(this.onTerminated) this.onTerminated()
-                    return
+                    return false
                 }
-                let content = this.pendingChunk + new TextDecoder("utf-8").decode(chunk.value)
-                let closed = content.match(/\n$/)
-                let hasline = content.match(/\n/)
-                let lines = content.split("\n")                
-                if(hasline){
-                    if(!closed){
-                        this.pendingChunk = lines.pop()
-                    }
-                    for(let line of lines){
-                        if(line != "") this.processLineFunc(JSON.parse(line))
-                    }
-                    this.read()
-                }else{
-                    this.pendingChunk += content
-                }
+                this.processChunk(chunk)
+                this.read()
             },
-            err => {
-                console.log(err)
-            }
-        )
+            err => console.log(err)
+        )    
     }
 
     stream(){        
@@ -251,8 +257,20 @@ class NdjsonReader{
         }).then(
             response => {        
                 this.pendingChunk = ""
-                this.reader = response.body.getReader()
-                this.read()        
+                this.nodeReader = false
+                try{
+                    this.reader = response.body.getReader()
+                    this.read()        
+                }catch(err){                    
+                    console.log("could not get reader, trying node reader")                                        
+                    this.nodeReader = true
+                    response.body.on('data', (chunk) => {                        
+                        this.processChunk(chunk)
+                    })
+                    response.body.on('end', () => {
+                        this.onTerminated()
+                    })
+                }                
             },
             err => {
                 console.log(err)

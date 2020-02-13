@@ -1,3 +1,20 @@
+const { LichessBot } = require('../client/nodejs/lichessbot')
+const utils = require('../client/nodejs/utils')
+
+if(process.env.BOT_TOKEN && true){
+
+    let b = LichessBot({
+        token: process.env.BOT_TOKEN,
+        acceptVariant: "atomic",
+        useBotBook: true
+    })
+    
+    console.log("created", b)
+    
+    b.stream()
+
+}
+
 const express = require('express')
 var passport = require('passport');
 var Strategy = require('passport-lichess').Strategy;

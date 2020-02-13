@@ -1,4 +1,5 @@
 const utils = require('./utils')
+const FormData = require('form-data')
 
 const P = utils.P
 const simpleFetch = utils.simpleFetch
