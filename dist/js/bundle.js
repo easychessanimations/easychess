@@ -2579,7 +2579,7 @@ function LocalEngine(props){return new LocalEngine_(props)}
 
 class LichessBotGame_{
     poweredBy(){
-        this.writeBotChat(this.id, ["player", "spectator"], `${this.botName} powered by https://easychess.herokuapp.com .`)
+        this.writeBotChat(["player", "spectator"], `${this.botName} powered by https://easychess.herokuapp.com .`)
     }
 
     constructor(props){
@@ -2609,6 +2609,8 @@ class LichessBotGame_{
 
     processGameEvent(event){
         console.log(JSON.stringify(event, null, 2))
+
+        console.log("token", this.parentBot.token, "id", this.id)
 
         if(event.type == "gameFull"){
             let gameFull = event
@@ -2645,7 +2647,7 @@ class LichessBotGame_{
 
             this.state = gameFull.state
 
-            this.writeBotChat(this.id, ["player", "spectator"], `Good luck, ${this.opponentName} !`)                
+            this.writeBotChat(["player", "spectator"], `Good luck, ${this.opponentName} !`)                
             
             this.poweredBy()
         }else if(event.type == "gameState"){
@@ -2779,21 +2781,21 @@ class LichessBotGame_{
 
             if(offeringDraw) msg += " I would agree to a draw ."            
 
-            lichess.makeLichessBotMove(this.id, moveObj.bestmove, offeringDraw, this.parentBot.userId).then(result => {
+            lichess.makeLichessBotMove(this.id, moveObj.bestmove, offeringDraw, this.parentBot.token).then(result => {
                 //
             })
 
-            this.writeBotChat(this.id, ["player", "spectator"], msg)
+            this.writeBotChat(["player", "spectator"], msg)
         }else{
             // try to make move anyway
-            lichess.makeLichessBotMove(this.id, moveObj.bestmove, offeringDraw, this.parentBot.userId).then(result => {
+            lichess.makeLichessBotMove(this.id, moveObj.bestmove, offeringDraw, this.parentBot.token).then(result => {
                 //
             })
         }
     }
 
     processTermination(){
-        this.writeBotChat(this.id, ["player", "spectator"], `Good game, ${this.opponentName} !`)
+        this.writeBotChat(["player", "spectator"], `Good game, ${this.opponentName} !`)
         this.poweredBy()
         this.engine.terminate()
     }
