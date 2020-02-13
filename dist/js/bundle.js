@@ -2,13 +2,21 @@
 const { LichessBot } = require('./lichessbot')
 const utils = require('./utils')
 
-let b = LichessBot({token: utils.GET_PROPS().BOT_TOKEN})
+let b = LichessBot({
+    token: utils.GET_PROPS().BOT_TOKEN,
+    acceptVariant: "atomic"
+})
 
 console.log("created", b)
 
 b.stream()
 
 },{"./lichessbot":3,"./utils":4}],2:[function(require,module,exports){
+const utils = require('./utils')
+
+const P = utils.P
+const simpleFetch = utils.simpleFetch
+
 const LICHESS_LOGIN_URL             = "/auth/lichess"
 const LICHESS_BASE_URL              = "https://lichess.org"
 const LICHESS_ANALYSIS_URL          = LICHESS_BASE_URL + "/analysis"
@@ -462,24 +470,122 @@ function writeLichessBotChat(gameId, room, text, accessToken){
 const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"
 
 module.exports = {
-    LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL
+    LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL,
+    LICHESS_STREAM_GAME_STATE_URL: LICHESS_STREAM_GAME_STATE_URL,
+    acceptLichessChallenge: acceptLichessChallenge
 }
 
-},{}],3:[function(require,module,exports){
+/*
+{
+  "type": "challenge",
+  "challenge": {
+    "id": "4x4HczZc",
+    "status": "created",
+    "challenger": {
+      "id": "lishadowapps",
+      "name": "lishadowapps",
+      "title": null,
+      "rating": 2182,
+      "online": true,
+      "lag": 4
+    },
+    "destUser": {
+      "id": "atomicroulettebot",
+      "name": "AtomicRouletteBot",
+      "title": "BOT",
+      "rating": 2025,
+      "online": true
+    },
+    "variant": {
+      "key": "atomic",
+      "name": "Atomic",
+      "short": "Atom"
+    },
+    "rated": false,
+    "speed": "bullet",
+    "timeControl": {
+      "type": "clock",
+      "limit": 60,
+      "increment": 0,
+      "show": "1+0"
+    },
+    "color": "random",
+    "perf": {
+      "icon": ">",
+      "name": "Atomic"
+    }
+  }
+}
+*/
+
+},{"./utils":4}],3:[function(require,module,exports){
 const lichess = require('./lichess')
 const utils = require('./utils')
+
+class LichessBotGame_{
+    constructor(props){
+        this.parentBot = props.parentBot
+        this.id = props.id        
+
+        this.gameStateReader = new utils.NdjsonReader(lichess.LICHESS_STREAM_GAME_STATE_URL + "/" + this.id, this.processGameEvent.bind(this), this.parentBot.token, this.processTermination.bind(this))
+
+        this.gameStateReader.stream()
+    }
+
+    processGameEvent(event){
+        console.log(JSON.stringify(event, null, 2))
+    }
+
+    processTermination(){
+
+    }
+}
+function LichessBotGame(props){return new LichessBotGame_(props)}
 
 class LichessBot_{
     constructor(props){
         this.token = props.token
+
+        this.acceptVariant = props.acceptVariant
+
+        if(props.acceptVariant){
+            if(typeof props.acceptVariant == "string") this.acceptVariant = props.acceptVariant.split(" ")
+        }
+
+        this.minInitialClock = props.minInitialClock || 60
     }
 
     toString(){
         return `bot ${this.token}`
     }
 
+    challengeRefused(msg){
+        console.log("Challenge refused .", msg)
+    }
+
     processBotEvent(event){
-        console.log(event)
+        console.log(JSON.stringify(event, null, 2))
+
+        if(event.type == "challenge"){
+            let challenge = event.challenge
+
+            if(this.acceptVariant){
+                if(!this.acceptVariant.includes(challenge.variant.key)){
+                    return this.challengeRefused(`Wrong variant . Acceptable variant(s) : ${this.acceptVariant.join(" , ")} .`)            
+                }
+            }
+
+            if(challenge.timeControl.limit < this.minInitialClock){
+                return this.challengeRefused(`Initial clock too low . Minimum initial clock : ${this.minInitialClock} sec(s) .`)            
+            }
+
+            lichess.acceptLichessChallenge(event.challenge.id, this.token)
+        }else if(event.type == "gameStart"){
+            LichessBotGame({
+                parentBot: this,
+                id: event.game.id
+            })
+        }
     }
 
     stream(){
@@ -936,6 +1042,8 @@ function confirm(msg, ack){
 }
 
 module.exports = {
+    P: P,
+    simpleFetch: simpleFetch,
     GET_PROPS: GET_PROPS,
     NdjsonReader: NdjsonReader
 }

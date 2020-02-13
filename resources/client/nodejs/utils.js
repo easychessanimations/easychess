@@ -441,6 +441,8 @@ function confirm(msg, ack){
 }
 
 module.exports = {
+    P: P,
+    simpleFetch: simpleFetch,
     GET_PROPS: GET_PROPS,
     NdjsonReader: NdjsonReader
 }

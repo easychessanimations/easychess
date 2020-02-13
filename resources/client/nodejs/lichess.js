@@ -1,3 +1,8 @@
+const utils = require('./utils')
+
+const P = utils.P
+const simpleFetch = utils.simpleFetch
+
 const LICHESS_LOGIN_URL             = "/auth/lichess"
 const LICHESS_BASE_URL              = "https://lichess.org"
 const LICHESS_ANALYSIS_URL          = LICHESS_BASE_URL + "/analysis"
@@ -451,5 +456,50 @@ function writeLichessBotChat(gameId, room, text, accessToken){
 const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"
 
 module.exports = {
-    LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL
+    LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL,
+    LICHESS_STREAM_GAME_STATE_URL: LICHESS_STREAM_GAME_STATE_URL,
+    acceptLichessChallenge: acceptLichessChallenge
 }
+
+/*
+{
+  "type": "challenge",
+  "challenge": {
+    "id": "4x4HczZc",
+    "status": "created",
+    "challenger": {
+      "id": "lishadowapps",
+      "name": "lishadowapps",
+      "title": null,
+      "rating": 2182,
+      "online": true,
+      "lag": 4
+    },
+    "destUser": {
+      "id": "atomicroulettebot",
+      "name": "AtomicRouletteBot",
+      "title": "BOT",
+      "rating": 2025,
+      "online": true
+    },
+    "variant": {
+      "key": "atomic",
+      "name": "Atomic",
+      "short": "Atom"
+    },
+    "rated": false,
+    "speed": "bullet",
+    "timeControl": {
+      "type": "clock",
+      "limit": 60,
+      "increment": 0,
+      "show": "1+0"
+    },
+    "color": "random",
+    "perf": {
+      "icon": ">",
+      "name": "Atomic"
+    }
+  }
+}
+*/
