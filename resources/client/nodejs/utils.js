@@ -7,6 +7,14 @@ function GET_PROPS(){
     return ({})
 }
 
+function GET_USER(){        
+    let user = GET_PROPS().USER
+    if(typeof user != "undefined"){
+        return user
+    }
+    return ({})
+}
+
 const RP = value => P(resolve => {
     resolve(value)
 })
@@ -442,7 +450,9 @@ function confirm(msg, ack){
 
 module.exports = {
     P: P,
+    RP: RP,
     simpleFetch: simpleFetch,
     GET_PROPS: GET_PROPS,
+    GET_USER: GET_USER,
     NdjsonReader: NdjsonReader
 }

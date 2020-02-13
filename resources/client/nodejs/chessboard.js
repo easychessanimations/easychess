@@ -2011,3 +2011,6 @@ class RichAnalysisInfo{
 
 module.exports.ChessBoard = ChessBoard
 module.exports.AbstractEngine = AbstractEngine
+module.exports.DEFAULT_MOVE_OVERHEAD = DEFAULT_MOVE_OVERHEAD
+module.exports.WHITE = WHITE
+module.exports.BLACK = BLACK

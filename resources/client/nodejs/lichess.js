@@ -458,7 +458,12 @@ const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"
 module.exports = {
     LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL,
     LICHESS_STREAM_GAME_STATE_URL: LICHESS_STREAM_GAME_STATE_URL,
-    acceptLichessChallenge: acceptLichessChallenge
+    LICHESS_BOOK_MAX_MOVES: LICHESS_BOOK_MAX_MOVES,
+    LICHESS_BOOK_AVG_RATINGS: LICHESS_BOOK_AVG_RATINGS,
+    LICHESS_BOOK_TIME_CONTROLS: LICHESS_BOOK_TIME_CONTROLS,
+    acceptLichessChallenge: acceptLichessChallenge,
+    writeLichessBotChat: writeLichessBotChat,
+    makeLichessBotMove: makeLichessBotMove,
 }
 
 /*
