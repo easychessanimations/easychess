@@ -448,4 +448,21 @@ function writeLichessBotChat(gameId, room, text, accessToken){
     })
 }
 
+function abortLichessGame(gameId, accessToken){    
+    return P(resolve => {        
+        simpleFetch(LICHESS_BOT_GAME_URL + "/" + gameId + "/abort", {
+            method: "POST",
+            body: ``,
+            accessToken : accessToken,            
+            asJson: true,
+            //server: true,
+            //asContent: true
+        }, result => {
+            if(result.ok){
+                resolve(result.content)
+            }
+        })
+    })
+}
+
 const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"

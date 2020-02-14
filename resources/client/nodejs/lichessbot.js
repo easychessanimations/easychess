@@ -82,6 +82,9 @@ class LichessBotGame_{
         this.parentBot = props.parentBot
         this.id = props.id        
 
+        // abort game if not started
+        setTimeout(() => lichess.abortLichessGame(this.id, this.parentBot.token), 30000)
+
         this.engine = (typeof window != "undefined") ?
         new LocalEngine({
             sendanalysisinfo: () => {}

@@ -756,6 +756,9 @@ class App extends SmartDomElement{
     }
 
     playGame(id){
+        // abort game if not started
+        setTimeout(() => abortLichessGame(id, this.USER().accessToken), 30000)
+
         let gameFull
 
         let engine = new LocalEngine(() => {})
