@@ -44,5 +44,9 @@ function watch(){
 
 if(process.env.BOT_COOKIE){
     watch()
-    setInterval(watch, 10 * utils.MINUTE)
+    let interval = 2
+    let envInterval = process.env.TOURNEY_WATCH_INTERVAL
+    if(envInterval) interval = parseInt(envInterval)
+    console.log(`Watching tourney with interval ${interval} min(s) .`)
+    setInterval(watch, interval * utils.MINUTE)
 }
