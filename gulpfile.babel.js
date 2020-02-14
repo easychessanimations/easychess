@@ -12,8 +12,8 @@ function reload(done) {
   
   function serve(done) {
     server.init({
-        //proxy: 'localhost:3000/?nolog=true',
-        proxy: 'localhost:3000/node',
+        proxy: 'localhost:3000/?nolog=true',
+        //proxy: 'localhost:3000/node',
         port: 3000,
         open: true,
         notify: false
@@ -32,9 +32,9 @@ function build() {
   )
 }
 
-//const watch = () => gulp.watch("resources/client/js/*.js", gulp.series(reload))
+const watch = () => gulp.watch("resources/client/js/*.js", gulp.series(reload))
 
-const watch = () => gulp.watch("resources/client/nodejs/*.js", gulp.series(build, reload))
+//const watch = () => gulp.watch("resources/client/nodejs/*.js", gulp.series(build, reload))
 
 const serveAndWatch = gulp.series(serve, watch)
 

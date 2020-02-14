@@ -1,5 +1,6 @@
 const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
+require('./tourneywatch')
 
 if(process.env.BOT_TOKEN && true){
 

@@ -454,7 +454,20 @@ function writeLichessBotChat(gameId, room, text, accessToken){
     })
 }
 
-const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"
+const LICHESS_TOURNAMENT_PAGE       = "https://lichess.org/tournament"
+const LICHESS_API_TOURNAMENT_PAGE   = "https://lichess.org/api/tournament"
+
+function getLichessTourneys(){
+    return P(resolve =>{
+        utils.simpleFetch(LICHESS_API_TOURNAMENT_PAGE, {
+            asNdjson: true
+        }, result => {
+            if(result.ok){
+                resolve(result.content)
+            }
+        })
+    })
+}
 
 module.exports = {
     LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL,
@@ -466,6 +479,7 @@ module.exports = {
     writeLichessBotChat: writeLichessBotChat,
     makeLichessBotMove: makeLichessBotMove,
     requestLichessBook: requestLichessBook,
+    getLichessTourneys: getLichessTourneys
 }
 
 /*

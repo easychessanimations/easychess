@@ -24,7 +24,8 @@
     "liapi": "^1.0.34",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",
-    "passport-lichess": "^1.1.0"
+    "passport-lichess": "^1.1.0",
+    "ws": "^7.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
