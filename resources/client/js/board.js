@@ -532,7 +532,7 @@ class Board_ extends SmartDomElement{
                 switch(drawing.kind){
                     case "circle":                                        
                         for(let sq of squares){                            
-                            let sqmc = this.squaremiddlecoords(sq)
+                            let sqmc = this.squaremiddlecoords(this.fasq(sq))
                             drawingscanvas.lineWidth(this.calcdrawingsize(drawing.thickness))
                             drawingscanvas.strokeStyle(this.getdrawingcolor(drawing))
                             drawingscanvas.strokeCircle(sqmc, this.squaresize / 2.5)                            
@@ -540,7 +540,7 @@ class Board_ extends SmartDomElement{
                         break
                     case "arrow":
                         for(let i=0;i<squares.length/2;i++){
-                            let move = Move(squares[i*2], squares[i*2+1])                                                        
+                            let move = Move(this.fasq(squares[i*2]), this.fasq(squares[i*2+1]))                                                        
                             this.drawmovearrow(drawingscanvas, move, {
                                 color: this.getdrawingcolor(drawing),
                                 auxscalefactor: drawing.thickness / 5
