@@ -3013,7 +3013,37 @@ function writeLichessBotChat(gameId, room, text, accessToken){
     })
 }
 
-const LICHESS_TOURNAMENT_PAGE = "https://lichess.org/tournament"
+function abortLichessGame(gameId, accessToken){    
+    return P(resolve => {        
+        simpleFetch(LICHESS_BOT_GAME_URL + "/" + gameId + "/abort", {
+            method: "POST",
+            body: ``,
+            accessToken : accessToken,            
+            asJson: true,
+            //server: true,
+            //asContent: true
+        }, result => {
+            if(result.ok){
+                resolve(result.content)
+            }
+        })
+    })
+}
+
+const LICHESS_TOURNAMENT_PAGE       = "https://lichess.org/tournament"
+const LICHESS_API_TOURNAMENT_PAGE   = "https://lichess.org/api/tournament"
+
+function getLichessTourneys(){
+    return P(resolve =>{
+        utils.simpleFetch(LICHESS_API_TOURNAMENT_PAGE, {
+            asNdjson: true
+        }, result => {
+            if(result.ok){
+                resolve(result.content)
+            }
+        })
+    })
+}
 
 module.exports = {
     LICHESS_STREAM_EVENTS_URL: LICHESS_STREAM_EVENTS_URL,
@@ -3025,6 +3055,8 @@ module.exports = {
     writeLichessBotChat: writeLichessBotChat,
     makeLichessBotMove: makeLichessBotMove,
     requestLichessBook: requestLichessBook,
+    getLichessTourneys: getLichessTourneys,
+    abortLichessGame: abortLichessGame
 }
 
 /*
@@ -3155,6 +3187,9 @@ class LichessBotGame_{
 
         this.parentBot = props.parentBot
         this.id = props.id        
+
+        // abort game if not started
+        setTimeout(() => lichess.abortLichessGame(this.id, this.parentBot.token), 30000)
 
         this.engine = (typeof window != "undefined") ?
         new LocalEngine({
@@ -3340,7 +3375,7 @@ class LichessBotGame_{
                 let scorenumerical = moveObj.scorenumerical
                 msg += ` Score numerical cp : ${scorenumerical} .`                
                 if(this.moves && this.moves.length > 40){
-                    if(ratingDiff > -200){
+                    if(this.ratingDiff > -200){
                         if(scorenumerical == 0){
                             offeringDraw = true
                         }
@@ -3709,7 +3744,9 @@ class NdjsonReader{
                         this.processChunk(chunk)
                     })
                     response.body.on('end', () => {
-                        this.onTerminated()
+                        try{
+                            this.onTerminated()
+                        }catch(err){}
                     })
                 }                
             },

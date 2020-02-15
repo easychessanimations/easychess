@@ -269,7 +269,7 @@ class LichessBotGame_{
                 let scorenumerical = moveObj.scorenumerical
                 msg += ` Score numerical cp : ${scorenumerical} .`                
                 if(this.moves && this.moves.length > 40){
-                    if(ratingDiff > -200){
+                    if(this.ratingDiff > -200){
                         if(scorenumerical == 0){
                             offeringDraw = true
                         }
