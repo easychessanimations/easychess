@@ -311,8 +311,8 @@ class LichessBot_{
 
         this.token = props.token
 
-        this.userId = utils.GET_USER().id
-        //this.userId = "atomicroulettebot" //TODO
+        if(typeof window != "undefined") this.userId = utils.GET_USER().id
+        else this.userId = "atomicroulettebot" //TODO
 
         this.acceptVariant = props.acceptVariant
 
