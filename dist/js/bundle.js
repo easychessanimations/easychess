@@ -2547,8 +2547,13 @@ module.exports.BLACK = BLACK
 const { LichessBot } = require('./lichessbot')
 const utils = require('./utils')
 
+let props = utils.GET_PROPS()
+console.log(props)
+let token = props.BOT_TOKEN
+if(props.USER) if(props.USER.accessToken) token = props.USER.accessToken
+
 let b = LichessBot({
-    token: utils.GET_PROPS().BOT_TOKEN,
+    token: token,
     acceptVariant: "atomic",
     useBotBook: true
 })
@@ -3418,7 +3423,7 @@ class LichessBot_{
         this.token = props.token
 
         this.userId = utils.GET_USER().id
-        this.userId = "atomicroulettebot" //TODO
+        //this.userId = "atomicroulettebot" //TODO
 
         this.acceptVariant = props.acceptVariant
 
