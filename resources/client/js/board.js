@@ -448,6 +448,14 @@ class Board_ extends SmartDomElement{
         this.forceWeights = false
         for(let child of currentnode.sortedchilds()){
             let move = this.game.board.movefromalgeb(child.genalgeb)
+            if(child.priority){
+                this.drawmovearrow(weightscanvas, move, {
+                    scalefactor: this.arrowscalefactor(),
+                    auxscalefactor: 1.4,
+                    color: "#0ff",
+                    opacity: 0.5
+                })
+            }
             this.drawmovearrow(weightscanvas, move, {
                 scalefactor: this.arrowscalefactor(),
                 auxscalefactor: 1.2,
