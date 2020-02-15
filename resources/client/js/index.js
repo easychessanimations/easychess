@@ -347,7 +347,7 @@ class App extends SmartDomElement{
 
         this.fetchGames()
 
-        this.loadGames()
+        this.doLater("loadGamesConditional", 100)
 
         this.doLater("loadLichessUsers", LOAD_LICHESS_USERS_DELAY)
 
@@ -362,6 +362,11 @@ class App extends SmartDomElement{
         this.buildStudies()
 
         this.setInfoBar("Welcome to easychess.")
+    }
+
+    loadGamesConditional(){
+        if(this.settings.skipGameArchiveCheckbox.checked) return
+        this.loadGames()
     }
 
     reportMultiPGN(docomments){
@@ -2783,6 +2788,11 @@ class App extends SmartDomElement{
                     display: "Variant",                                        
                     options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
                     selected: DEFAULT_VARIANT,
+                    settings: this.settings
+                }),                
+                CheckBoxInput({
+                    id: "skipGameArchiveCheckbox",                    
+                    display: "Skip game archive",                                        
                     settings: this.settings
                 }),                
                 CheckBoxInput({
