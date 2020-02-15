@@ -451,6 +451,12 @@ class Board_ extends SmartDomElement{
             this.drawmovearrow(weightscanvas, move, {
                 scalefactor: this.arrowscalefactor(),
                 auxscalefactor: 1.2,
+                color: child.weights[1] == 1 ? "#f00" : "#770",
+                opacity: child.weights[1] == 1 ? 0.5 : child.weights[1] / 10
+            })
+            this.drawmovearrow(weightscanvas, move, {
+                scalefactor: this.arrowscalefactor(),
+                auxscalefactor: 1.2,
                 color: "#00f",
                 opacity: child.weights[0] / 10
             })
