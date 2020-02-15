@@ -64,6 +64,7 @@ const TREE_WIDTH                    = 20000
 const FORCE_QUERY                   = true
 const SHOW_COMMENT                  = true
 const MERGE_ALL_MOVES               = true
+const MERGE_SILENT                  = true
 
 const SHOULD_GO_DELAY               = 5000
 const BOT_STARTUP_DELAY             = 7500
@@ -1502,23 +1503,25 @@ class App extends SmartDomElement{
         let moveListIndex = pgn.indexOf("\n\n")
         let curpos = this.pgnText.e.selectionStart
         let moveListStr = pgn.substring(moveListIndex+2, curpos)        
-        this.mergeMoveListStr(moveListStr, MERGE_ALL_MOVES)
+        this.mergeMoveListStr(moveListStr, MERGE_ALL_MOVES, MERGE_SILENT)
     }
 
-    mergeMoveList(moves, mergeAll){
+    mergeMoveList(moves, mergeAll, silent){
         if(!mergeAll) moves = moves.slice(0, Math.min(moves.length, parseInt(this.settings.mergeDepthCombo.selected)))
 
         let game = Game({variant: this.variant}).fromsans(moves)
 
-        this.alert(this.g.merge(game), "info")                
+        let result = this.g.merge(game)
+
+        if(!silent) this.alert(result, "info")                
 
         this.board.positionchanged()
     }
 
-    mergeMoveListStr(content, mergeAll){
+    mergeMoveListStr(content, mergeAll, silent){
         let moves = content.split(/ |\./).filter(item=>item.match(/^[a-zA-Z]/))        
 
-        this.mergeMoveList(moves, mergeAll)
+        this.mergeMoveList(moves, mergeAll, silent)
     }
 
     pgnPasted(ev){
