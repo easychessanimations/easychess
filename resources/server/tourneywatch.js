@@ -9,36 +9,43 @@ function connect(tid){
         conns[tid].close()
     }
 
-    let ws = new WebSocket(`wss://socket.lichess.org/tournament/${tid}/socket/v4?sri=fvXA_FtoWrXY&v=0`, {
-        headers: {
-            Cookie: `lila2=${process.env.BOT_COOKIE}`
-        }
-    })
+    let ws
 
-    conns[tid] = ws
+    try{
+        ws = new WebSocket(`wss://socket.lichess.org/tournament/${tid}/socket/v4?sri=fvXA_FtoWrXY&v=0`, {
+            headers: {
+                Cookie: `lila2=${process.env.BOT_COOKIE}`
+            }
+        })
 
-    ws.on('open', function open() {
-        console.log(`socket for ${tid} opened`)        
-    })
-      
-    ws.on('message', function incoming(data) {
-        //console.log(data)
-    })
-
-    ws.on('close', function open() {
-        console.log(`socket for ${tid} closed`)        
-    })
-
-    setInterval(() => {
-        ws.send("null")
-    }, 3000)
+        ws.on('open', function open() {
+            console.log(`socket for ${tid} opened`)        
+    
+            conns[tid] = ws
+    
+            setInterval(() => {
+                ws.send("null")
+            }, 3000)
+        })
+          
+        ws.on('message', function incoming(data) {
+            //console.log(data)
+        })
+    
+        ws.on('close', function open() {
+            console.log(`socket for ${tid} closed`)        
+        })
+    }catch(err){
+        console.log("Could not open socket .", err)
+    }
 }
 
 function watch(){
     lichess.getLichessTourneys().then(tourneys => {    
         let ts = tourneys[0].created.concat(tourneys[0].started)
-        let ats = ts.filter(t => t.variant.key == process.env.BOT_VARIANT || "atomic")
-        for(let t of ats) connect(t.id)
+        let ats = ts.filter(t => t.variant.key == ( process.env.BOT_VARIANT || "atomic") )
+        let i = 0
+        for(let t of ats) setTimeout(() => connect(t.id), i++ * 2000)
     })
 }
 

@@ -6,15 +6,21 @@ const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
 
 if(process.env.BOT_TOKEN && true){
 
-    let b = LichessBot({
-        token: process.env.BOT_TOKEN,
-        acceptVariant: "atomic",
-        useBotBook: true
-    })
-    
-    console.log("created", b)
-    
-    b.stream()
+    try{
+
+        let b = LichessBot({
+            token: process.env.BOT_TOKEN,
+            acceptVariant: process.env.BOT_VARIANT || "atomic",
+            useBotBook: true
+        })
+        
+        console.log("created", b)
+        
+        b.stream()
+
+    }catch(err){
+        console.log("Bot could not be started.", err)
+    }
 
 }
 
