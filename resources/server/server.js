@@ -369,6 +369,7 @@ const PROPS = {
     IS_DEV: IS_DEV(),
     QUERY_INTERVAL: QUERY_INTERVAL,
     LOG_REMOTE_URL: process.env.LOG_REMOTE_URL || "https://fbserv.herokuapp.com/games.html?ref=",
+    ACCEPT_VARIANT: process.env.ACCEPT_VARIANT,
     imagestore: getFiles(path.join(__rootdirname, "resources/client/img/imagestore")),
     backgrounds: getFiles(path.join(__rootdirname, "resources/client/img/backgrounds")),
     readme: fs.readFileSync(path.join(__rootdirname, "ReadMe.md")).toString()

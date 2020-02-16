@@ -37,7 +37,7 @@ function connect(tid){
 function watch(){
     lichess.getLichessTourneys().then(tourneys => {    
         let ts = tourneys[0].created.concat(tourneys[0].started)
-        let ats = ts.filter(t => t.variant.key == "atomic")
+        let ats = ts.filter(t => t.variant.key == process.env.BOT_VARIANT || "atomic")
         for(let t of ats) connect(t.id)
     })
 }
