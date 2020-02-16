@@ -42,7 +42,7 @@ function connect(tid){
 
 function watch(){
     lichess.getLichessTourneys().then(tourneys => {    
-        let ts = tourneys[0].created.concat(tourneys[0].started)
+        let ts = tourneys[0].started
         let ats = ts.filter(t => t.variant.key == ( process.env.BOT_VARIANT || "atomic") )
         let i = 0
         for(let t of ats) setTimeout(() => connect(t.id), i++ * 2000)
