@@ -2,6 +2,8 @@ const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
 require('./tourneywatch')
 
+const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
+
 if(process.env.BOT_TOKEN && true){
 
     let b = LichessBot({
@@ -39,7 +41,7 @@ passport.use(new Strategy({
         callbackURL: IS_DEV() ?
             'http://localhost:3000/auth/lichess/callback'
         :
-            'https://easychess.herokuapp.com/auth/lichess/callback'
+            `https://${SITE_HOST}/auth/lichess/callback`
     },
     function(accessToken, refreshToken, profile, cb) {
         clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
@@ -55,7 +57,7 @@ passport.use('lichess-bot', new Strategy({
     callbackURL: IS_DEV() ?
         'http://localhost:3000/auth/lichess/bot/callback'
     :
-        'https://easychess.herokuapp.com/auth/lichess/bot/callback'
+        `https://${SITE_HOST}/auth/lichess/bot/callback`
 },
 function(accessToken, refreshToken, profile, cb) {
     clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
@@ -172,7 +174,7 @@ app.get('/auth/lichess/callback',
             res.redirect(IS_DEV() ?
                 'http://localhost:3000/?login=ok'
             :
-                'https://easychess.herokuapp.com/?login=ok')
+                `https://${SITE_HOST}/?login=ok`)
         }
 )
 
@@ -185,7 +187,7 @@ app.get('/auth/lichess/bot/callback',
             res.redirect(IS_DEV() ?
                 'http://localhost:3000/?login-bot=ok'
             :
-                'https://easychess.herokuapp.com/?login-bot=ok')
+                `https://${SITE_HOST}/?login-bot=ok`)
         }
 )
 
@@ -491,7 +493,7 @@ if(process.env.KEEPALIVE){
     let keepalive = parseInt(process.env.KEEPALIVE)
     let keepaliveInterval = setInterval(()=>{
         console.log("keepalive, remaining", --keepalive)
-        fetch("https://easychess.herokuapp.com/?keepalive=true")
+        fetch(`https://${SITE_HOST}/?keepalive=true`)
         if(!keepalive) clearInterval(keepaliveInterval)
     }, 10 * MINUTE)    
 }

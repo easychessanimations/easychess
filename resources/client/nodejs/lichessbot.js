@@ -100,6 +100,10 @@ class LichessBotGame_{
     }
 
     writeBotChat(rooms, msg){
+        if(typeof process.env.DISABLE_BOT_CHAT != "undefined"){
+            return
+        }
+
         for(let room of rooms){
             lichess.writeLichessBotChat(this.id, room, msg, this.parentBot.token).then(result => {
                 //

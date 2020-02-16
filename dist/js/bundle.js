@@ -3108,7 +3108,7 @@ module.exports = {
 */
 
 },{"./utils":10,"form-data":2}],9:[function(require,module,exports){
-(function (__dirname){
+(function (process,__dirname){
 const lichess = require('./lichess')
 const utils = require('./utils')
 const chessboard = require('./chessboard')
@@ -3211,6 +3211,10 @@ class LichessBotGame_{
     }
 
     writeBotChat(rooms, msg){
+        if(typeof process.env.DISABLE_BOT_CHAT != "undefined"){
+            return
+        }
+
         for(let room of rooms){
             lichess.writeLichessBotChat(this.id, room, msg, this.parentBot.token).then(result => {
                 //
@@ -3477,8 +3481,8 @@ function LichessBot(props){return new LichessBot_(props)}
 
 module.exports.LichessBot = LichessBot
 
-}).call(this,"/resources/client/nodejs")
-},{"./chessboard":6,"./lichess":8,"./utils":10,"child_process":1,"path":4}],10:[function(require,module,exports){
+}).call(this,require('_process'),"/resources/client/nodejs")
+},{"./chessboard":6,"./lichess":8,"./utils":10,"_process":5,"child_process":1,"path":4}],10:[function(require,module,exports){
 const fetch = require('node-fetch')
 
 const P = p => new Promise(p)
