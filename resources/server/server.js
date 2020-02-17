@@ -505,4 +505,6 @@ if(process.env.KEEPALIVE){
     }, 10 * MINUTE)    
 }
 
+if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
+
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))
