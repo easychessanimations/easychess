@@ -65,7 +65,7 @@ const RACING_KINGS_START_FEN = "8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1"
 const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1"
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
-const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[EHeh] w KQkq - 0 1"
+const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[EHeh][] w KQkq - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -684,7 +684,7 @@ class ChessBoard_{
                 (sq.rank == baseRank(p.color))
                 && (p.kind != "e")
                 && (p.kind != "h")
-                && this.squareStore().find(sq => sq.equalto(sq))
+                && (!this.squareStore().find(tsq => tsq.equalto(sq)))
             ){
                 for(let psp of pstore){
                     acc = acc.concat(this.pseudolegalmovesforpieceatsquareinner(p, sq).map(psm => {                        
