@@ -349,8 +349,8 @@ class ChessBoard_{
     squaretoalgeb(sq){return `${String.fromCharCode(sq.file + 'a'.charCodeAt(0))}${String.fromCharCode(NUM_SQUARES - 1 - sq.rank + '1'.charCodeAt(0))}`}
 
     movetoalgeb(move){
-        if(this.IS_SCHESS()){
-            if(move.castling){
+        if(this.IS_SCHESS()){            
+            if(move.castling){                
                 let from = move.fromsq
                 let to = move.delrooksq
                 if(move.placeCastlingPiece){
@@ -359,6 +359,9 @@ class ChessBoard_{
                     }                    
                 }
                 return `${this.squaretoalgeb(from)}${this.squaretoalgeb(to)}${move.placeCastlingPiece ? move.placeCastlingPiece.kind : ''}`
+            }
+            if(move.placePiece){
+                return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${move.placePiece.kind}`
             }
         }
 
