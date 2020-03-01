@@ -144,11 +144,45 @@ class Board_ extends SmartDomElement{
                         let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
                         if(valid) if(valid.prompiece){
-                            let promkind = window.prompt("Promote piece, q = Queen, r = Rook, b = Bishop, n = Knight [ Enter / Ok = Queen ] : ")
+                            let pks = this.game.board.promkinds()
+                            let promkind = window.prompt(`Promote piece, ${pks.map(kind => kind + " = " + DISPLAY_FOR_PIECE_LETTER[kind]).join(" , ")}  [ Enter / Ok = Queen ] : `)
                             promkind = promkind || "q"
-                            if(!promotionKindsForVariant(this.game.variant).includes(promkind)) promkind = "q"
+                            if(!pks.includes(promkind)) promkind = "q"
                             valid.prompiece = Piece(promkind, valid.prompiece.color)
                         }
+
+                        if(valid) if(valid.placeMove){
+                            let pstore = this.game.board.pieceStoreColor(this.game.board.turn)
+                            if(pstore.length){
+                                if(!this.game.board.squareStore().find(sq => sq.equalto(valid.fromsq))){
+                                    let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + " = " + DISPLAY_FOR_PIECE_LETTER[p.kind]).join(" , ")}  [ Enter / Ok = None ] : `)
+                                    if(placeKind){
+                                        let pf = pstore.find(tp => tp.kind == placeKind)
+                                        if(pf){
+                                            valid.placePiece = pf
+                                        }
+                                    }
+                                }                                
+                            }                            
+                        }
+
+                        if(valid) if(valid.castling){
+                            let pstore = this.game.board.pieceStoreColor(this.game.board.turn)
+                            if(pstore.length){
+                                let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + "k = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ King , " + p.kind + "r = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ Rook").join(" , ")}  [ Enter / Ok = None ] : `)
+                                if(placeKind) if(placeKind.length > 1){
+                                    let pf = pstore.find(tp => tp.kind == placeKind.substring(0,1))
+                                    if(pf){
+                                        valid.placeCastlingPiece = pf
+                                        valid.placeCastlingSquare = placeKind.substring(1, 2) == "k" ?
+                                            valid.fromsq
+                                                :
+                                            valid.delrooksq
+                                        valid.san += "/" + pf.kind.toUpperCase() + this.game.board.squaretoalgeb(valid.placeCastlingSquare)
+                                    }
+                                }
+                            }
+                        }                        
 
                         if(valid){
                             if(this.parentApp.trainMode == this.game.board.turnVerbal){
@@ -236,13 +270,28 @@ class Board_ extends SmartDomElement{
 
     piecesize(){return this.squaresize * 0.85}
 
-    drawPiece(canvas, coords, p){                
+    drawPiece(canvas, coords, pOrig, scaleFactorOpt){                
+        let scaleFactor = scaleFactorOpt || 1
+        let p = Piece(pOrig.kind, pOrig.color)
+        let addKnight = false
+        let knightScaleFactor = 0.7
+        if(p.kind == "e"){
+            p.kind = "r"
+            addKnight = true
+        }
+        if(p.kind == "h"){
+            p.kind = "b"
+            addKnight = true
+        }
         const klasssel = "." + getclassforpiece(p, this.piecestyle)                                                    
         let img
         if(!this.imgcache) this.imgcache = {}
         if(this.imgcache[klasssel]){
             img = this.imgcache[klasssel]
-            canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize(), this.piecesize())
+            canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize() * scaleFactor, this.piecesize() * scaleFactor)
+            if(addKnight){
+                this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
+            }
         }else{
             let style = getStyle(klasssel)            
             let imgurl = style.match(/url\("(.*?)"/)[1]                
@@ -256,7 +305,10 @@ class Board_ extends SmartDomElement{
             let fen = this.game.fen()
             img.e.onload = () => {
                 if(this.game.fen() == fen){
-                    canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize(), this.piecesize())
+                    canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize() * scaleFactor, this.piecesize() * scaleFactor)
+                    if(addKnight){
+                        this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
+                    }
                 }                
                 this.imgcache[klasssel] = img                
             }

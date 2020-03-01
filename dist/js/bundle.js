@@ -3449,6 +3449,8 @@ class LichessBot_{
         }
 
         this.minInitialClock = props.minInitialClock || 60
+
+        if(typeof process.env.MIN_INITIAL_CLOCK != "undefined") this.minInitialClock = parseInt(process.env.MIN_INITIAL_CLOCK)
     }
 
     toString(){

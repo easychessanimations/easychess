@@ -1,10 +1,10 @@
 const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
-require('./tourneywatch')
+if(!process.env.SKIP_FIREBASE) require('./tourneywatch')
 
 const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
 
-if(process.env.BOT_TOKEN && true){
+if(process.env.BOT_TOKEN && (!process.env.SKIP_FIREBASE)){
 
     try{
 
