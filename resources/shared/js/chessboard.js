@@ -347,7 +347,23 @@ class ChessBoard_{
     }
 
     squaretoalgeb(sq){return `${String.fromCharCode(sq.file + 'a'.charCodeAt(0))}${String.fromCharCode(NUM_SQUARES - 1 - sq.rank + '1'.charCodeAt(0))}`}
-    movetoalgeb(move){return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${move.prompiece ? move.prompiece.kind : ''}`}
+
+    movetoalgeb(move){
+        if(this.IS_SCHESS()){
+            if(move.castling){
+                let from = move.fromsq
+                let to = move.delrooksq
+                if(move.placeCastlingPiece){
+                    if(move.placeCastlingSquare.equalto(to)){
+                        [from, to] = [to, from]
+                    }                    
+                }
+                return `${this.squaretoalgeb(from)}${this.squaretoalgeb(to)}${move.placeCastlingPiece ? move.placeCastlingPiece.kind : ''}`
+            }
+        }
+
+        return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${move.prompiece ? move.prompiece.kind : ''}`
+    }
 
     squaretorepindex(sq){
         return sq.file + sq.rank * NUM_SQUARES
@@ -524,7 +540,7 @@ class ChessBoard_{
     algebtomove(algeb){
         let lms = this.legalmovesforallpieces()
 
-        return lms.find((move) => this.movetoalgeb(move) == algeb)
+        return lms.find(move => this.movetoalgeb(move) == algeb)
     }
 
     pushalgeb(algeb){
@@ -1611,7 +1627,7 @@ class Game_{
         }
     }
 
-    movewithnumber(node, force, docomments){
+    movewithnumber(node, force, docomments, reportAsUCI){
         let fenparts = node.fen.split(" ")
         let number = fenparts[5] + "."
         if(fenparts[1] == "w") number = "" + ( parseInt(fenparts[5]) - 1 ) + ".."
@@ -1632,10 +1648,10 @@ class Game_{
                 comments = ` { ${(scorenumerical > 0 ? "+":"") + scorenumerical} }`
             }
         }
-        return `${((fenparts[1] == "b")||force)?number + " ":""}${node.gensan}${comments}`
+        return `${((fenparts[1] == "b")||force)?number + " ":""}${reportAsUCI ? node.genalgeb : node.gensan}${comments}`
     }
 
-    line(docomments, nodeOpt){
+    line(docomments, nodeOpt, reportAsUCI){
         let current = nodeOpt || this.getcurrentnode()
         let nodes = []
         while(current){
@@ -1645,13 +1661,13 @@ class Game_{
         nodes.shift()
         let first = true        
         return nodes.map((node)=>{            
-            let mn = this.movewithnumber(node, first, docomments)
+            let mn = this.movewithnumber(node, first, docomments, reportAsUCI)
             first = false            
             return mn
         }).join(" ")
     }
 
-    multiPGN(params){
+    multiPGN(params){        
         let childs = params.rootNode.sortedchilds()
 
         if(!childs.length){            
@@ -1661,12 +1677,12 @@ class Game_{
         let mainChild = childs[0]
 
         if(!params.variationStart) params.buff += " "
-        params.buff += this.movewithnumber(mainChild, params.variationStart, params.docomments)
+        params.buff += this.movewithnumber(mainChild, params.variationStart, params.docomments, params.reportAsUCI)
 
         if(childs.length > 1){            
             for(let child of childs.slice(1)){
                 params.buff += " ( "                            
-                params.buff += this.movewithnumber(child, true, params.docomments)
+                params.buff += this.movewithnumber(child, true, params.docomments, params.reportAsUCI)
                 params.buff = this.multiPGN({
                     docomments: params.docomments,
                     rootNode: child,
@@ -1681,7 +1697,8 @@ class Game_{
             docomments: params.docomments,
             rootNode: mainChild,
             variationStart: false,
-            buff: params.buff
+            buff: params.buff,
+            reportAsUCI: params.reportAsUCI
         })
     }
 
@@ -1692,15 +1709,16 @@ class Game_{
         return buff
     }
 
-    pgn(docomments, rootNodeOpt, domulti, keepBaseLine){
+    pgn(docomments, rootNodeOpt, domulti, keepBaseLine, reportAsUCI){
         let rootNode = rootNodeOpt || this.getrootnode()
 
         return `${this.reportPgnHeaders(keepBaseLine ? this.getrootnode() : rootNode)}\n\n${domulti ? this.multiPGN({
             docomments: docomments,
             rootNode: rootNode,
             variationStart: (!keepBaseLine) || (rootNode.id == "root"),
-            buff: keepBaseLine ? this.line(!DO_COMMENTS, rootNode) : ""
-        }) : this.line(docomments)}`
+            buff: keepBaseLine ? this.line(!DO_COMMENTS, rootNode, reportAsUCI) : "",
+            reportAsUCI: reportAsUCI
+        }) : this.line(docomments, null, reportAsUCI)}`
     }
 
     getcurrentnode(){

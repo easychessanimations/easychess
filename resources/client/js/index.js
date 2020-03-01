@@ -370,12 +370,12 @@ class App extends SmartDomElement{
     }
 
     reportMultiPGN(docomments){
-        this.multiPGNTextAreaInput.setValue(this.g.pgn(docomments, this.getcurrentnode(), DO_MULTI, this.settings.keepBaseLineCheckboxInput.checked)).copy()
+        this.multiPGNTextAreaInput.setValue(this.g.pgn(docomments, this.getcurrentnode(), DO_MULTI, this.settings.keepBaseLineCheckboxInput.checked, this.settings.reportAsUCICheckboxInput.checked)).copy()
     }
 
     reportMultiPGNWithAnalysis(){
         IDB.getKeys("engine", this.getcurrentnode().subnodes().map(node => node.analysiskey)).then(analysis => {            
-            this.multiPGNTextAreaInput.setValue(this.g.pgn(analysis, this.getcurrentnode(), DO_MULTI, this.settings.keepBaseLineCheckboxInput.checked)).copy()
+            this.multiPGNTextAreaInput.setValue(this.g.pgn(analysis, this.getcurrentnode(), DO_MULTI, this.settings.keepBaseLineCheckboxInput.checked, this.settings.reportAsUCICheckboxInput.checked)).copy()
         })
     }
 
@@ -394,6 +394,12 @@ class App extends SmartDomElement{
                     Labeled("Keep base",
                         this.keepBaseLineCheckboxInput = CheckBoxInput({
                             id: "keepBaseLineCheckboxInput",
+                            settings: this.settings
+                        })
+                    ),
+                    Labeled("Report as UCI",
+                        this.reportAsUCICheckboxInput = CheckBoxInput({
+                            id: "reportAsUCICheckboxInput",
                             settings: this.settings
                         })
                     )
