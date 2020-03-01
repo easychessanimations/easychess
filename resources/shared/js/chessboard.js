@@ -65,7 +65,7 @@ const RACING_KINGS_START_FEN = "8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1"
 const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1"
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
-const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[EHeh][] w KQkq - 0 1"
+const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[EHeh] w KQABCDEFGHkqabcdefgh - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -240,8 +240,17 @@ class ChessBoard_{
     }
 
     squareStore(){
-        if(!this.squarestorefen) return []
-        return this.squarestorefen.split(",").map(algeb => this.algebtosquare(algeb))
+        if(!this.castlefen == "-") return []
+
+        return this.castlefen.split("")
+            .filter(letter => (letter != "K") && (letter != "Q") && (letter != "k") && (letter != "q"))
+            .map(letter => {
+                let lower = letter.toLowerCase()
+                let color = letter == lower ? BLACK : WHITE
+                let file = lower.charCodeAt(0) - "a".charCodeAt(0)
+                let rank = baseRank(color)                
+                return Square(file, rank)
+            })
     }
 
     pieceStoreColor(color){
@@ -290,8 +299,7 @@ class ChessBoard_{
 
         // schess piece store
         let rawfenparts = this.rawfen.split(/\[|\]/)
-        this.piecestorefen = rawfenparts.length > 1 ? rawfenparts[1] : ""
-        this.squarestorefen = rawfenparts.length > 3 ? rawfenparts[3] : ""
+        this.piecestorefen = rawfenparts.length > 1 ? rawfenparts[1] : ""        
 
         this.turn = this.turnfen == "w" ? WHITE : BLACK
 
@@ -481,8 +489,7 @@ class ChessBoard_{
             epfen: this.epfen,
             halfmovefen: this.halfmovefen,
             fullmovefen: this.fullmovefen,
-            piecestorefen: this.piecestorefen,
-            squarestorefen: this.squarestorefen,
+            piecestorefen: this.piecestorefen,            
 
             fen: this.fen
         }
@@ -505,8 +512,7 @@ class ChessBoard_{
         this.epfen = state.epfen
         this.halfmovefen = state.halfmovefen
         this.fullmovefen = state.fullmovefen
-        this.piecestorefen = state.piecestorefen
-        this.squarestorefen = state.squarestorefen
+        this.piecestorefen = state.piecestorefen        
 
         this.fen = state.fen
     }
@@ -537,9 +543,19 @@ class ChessBoard_{
         this.piecestorefen = pstore.join("")
     }
 
-    addSquareToStore(sq){
-        if(!this.squarestorefen) this.squarestorefen = this.squaretoalgeb(sq)
-        else this.squarestorefen += "," + this.squaretoalgeb(sq)
+    removeSquareFromStore(sq){
+        let algeb = this.squaretoalgeb(sq)
+        let fileLetter = algeb.substring(0, 1)
+
+        if(sq.rank == baseRank(WHITE)){
+            this.deletecastlingrights(fileLetter, WHITE)
+            return
+        }
+
+        if(sq.rank == baseRank(BLACK)){
+            this.deletecastlingrights(fileLetter, BLACK)
+            return
+        }
     }
 
     push(move){                
@@ -556,7 +572,7 @@ class ChessBoard_{
             this.setpieaceatsquare(move.fromsq, move.placePiece)
 
             this.removePlacePieceFromStore(move.placePiece)
-            this.addSquareToStore(move.fromsq)
+            this.removeSquareFromStore(move.fromsq)
         }
 
         if(move.prompiece){            
@@ -621,11 +637,14 @@ class ChessBoard_{
         }
 
         // place castling
-        if(move.placeCastlingPiece){            
-            this.setpieaceatsquare(move.placeCastlingSquare, move.placeCastlingPiece)
+        if(move.castling && this.IS_SCHESS()){            
+            if(move.placeCastlingPiece){
+                this.setpieaceatsquare(move.placeCastlingSquare, move.placeCastlingPiece)
 
-            this.removePlacePieceFromStore(move.placeCastlingPiece)
-            for(let sq of move.passingSquares) this.addSquareToStore(sq)
+                this.removePlacePieceFromStore(move.placeCastlingPiece)
+            }   
+
+            for(let sq of move.passingSquares) this.removeSquareFromStore(sq)
         }
 
         this.halfmovefen = `${this.halfmoveclock}`
@@ -656,7 +675,7 @@ class ChessBoard_{
 
         this.rawfen = rawfenbuff
 
-        let psb = this.IS_SCHESS() ? `[${this.piecestorefen}][${this.squarestorefen}]` : ""
+        let psb = this.IS_SCHESS() ? `[${this.piecestorefen}]` : ""
 
         this.fen = this.rawfen + psb + " " + this.turnfen + " " + this.castlefen + " " + this.epfen + " " + this.halfmovefen + " " + this.fullmovefen
     }
@@ -684,7 +703,7 @@ class ChessBoard_{
                 (sq.rank == baseRank(p.color))
                 && (p.kind != "e")
                 && (p.kind != "h")
-                && (!this.squareStore().find(tsq => tsq.equalto(sq)))
+                //&& this.squareStore().find(tsq => tsq.equalto(sq))
             ){
                 for(let psp of pstore){
                     acc = acc.concat(this.pseudolegalmovesforpieceatsquareinner(p, sq).map(psm => {                        

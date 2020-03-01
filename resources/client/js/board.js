@@ -154,7 +154,7 @@ class Board_ extends SmartDomElement{
                         if(valid) if(valid.placeMove){
                             let pstore = this.game.board.pieceStoreColor(this.game.board.turn)
                             if(pstore.length){
-                                if(!this.game.board.squareStore().find(sq => sq.equalto(valid.fromsq))){
+                                if(this.game.board.squareStore().find(sq => sq.equalto(valid.fromsq))){
                                     let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + " = " + DISPLAY_FOR_PIECE_LETTER[p.kind]).join(" , ")}  [ Enter / Ok = None ] : `)
                                     if(placeKind){
                                         let pf = pstore.find(tp => tp.kind == placeKind)
