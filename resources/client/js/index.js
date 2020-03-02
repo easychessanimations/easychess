@@ -2904,8 +2904,12 @@ class App extends SmartDomElement{
 
     reset(){
         let variant = this.settings.variantCombo.selected
-        if(!confirm(`Are you sure you want to delete all moves and create a new study with variant ${displayNameForVariant(variant)}?`, "reset")) return
+        if(!confirm(`Are you sure you want to delete all moves and create a new study with variant ${displayNameForVariant(variant)}?`, "reset")){
+            this.alert(`Resetting to variant " ${variant} " canceled .`, "warning")
+            return
+        }
         this.board.reset(variant)
+        this.alert(`Resetted study to variant " ${variant} " ok .`, "success")
     }
 
     reportFilterBook(info){

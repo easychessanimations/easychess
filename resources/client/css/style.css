@@ -45,6 +45,10 @@ button {
     background-color: #ddf;
 }
 
+.alert.warning {    
+    background-color: #ffc;
+}
+
 .alert.error {
     background-color: #fdd;
 }

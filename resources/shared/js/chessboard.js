@@ -1,7 +1,7 @@
 const SUPPORTED_VARIANTS = [
     ["standard", "Standard"],
     ["atomic", "Atomic"],
-    ["schess", "S-Chess"]
+    ["seirawan", "S-Chess"]
 ]
 
 const SUPPORTED_PERFS = [
@@ -65,7 +65,7 @@ const RACING_KINGS_START_FEN = "8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1"
 const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1"
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
-const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[EHeh] w KQABCDEFGHkqabcdefgh - 0 1"
+const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -116,7 +116,7 @@ const VARIANT_KEYS = [
     [ "kingOfTheHill", "King of the Hill", STANDARD_START_FEN ],
     [ "racingKings", "Racing Kings", RACING_KINGS_START_FEN ],
     [ "threeCheck", "Three-check", THREE_CHECK_START_FEN ],
-    [ "schess", "S-Chess", SCHESS_START_FEN ],
+    [ "seirawan", "S-Chess", SCHESS_START_FEN ],
 ]
 
 const INCLUDE_LIMITS = true
@@ -231,7 +231,7 @@ class ChessBoard_{
     }
 
     IS_SCHESS(){
-        return this.variant == "schess"
+        return this.variant == "seirawan"
     }
 
     pieceStore(){
@@ -242,15 +242,24 @@ class ChessBoard_{
     squareStore(){
         if(!this.castlefen == "-") return []
 
-        return this.castlefen.split("")
-            .filter(letter => (letter != "K") && (letter != "Q") && (letter != "k") && (letter != "q"))
-            .map(letter => {
-                let lower = letter.toLowerCase()
-                let color = letter == lower ? BLACK : WHITE
-                let file = lower.charCodeAt(0) - "a".charCodeAt(0)
-                let rank = baseRank(color)                
-                return Square(file, rank)
-            })
+        return this.castlefen.split("").map(letter => {
+            switch(letter){
+                case "K":                    
+                    return this.rookorigsq("k", WHITE)
+                case "Q":
+                    return this.rookorigsq("q", WHITE)
+                case "k":
+                    return this.rookorigsq("k", BLACK)
+                case "q":
+                    return this.rookorigsq("q", BLACK)
+                default:
+                    let lower = letter.toLowerCase()
+                    let color = letter == lower ? BLACK : WHITE
+                    let file = lower.charCodeAt(0) - "a".charCodeAt(0)
+                    let rank = baseRank(color)                
+                    return Square(file, rank)
+            }            
+        })
     }
 
     pieceStoreColor(color){
@@ -590,7 +599,10 @@ class ChessBoard_{
         if(move.placePiece){
             this.setpieaceatsquare(move.fromsq, move.placePiece)
 
-            this.removePlacePieceFromStore(move.placePiece)
+            this.removePlacePieceFromStore(move.placePiece)            
+        }
+
+        if(move.placeMove){
             this.removeSquareFromStore(move.fromsq)
         }
 
@@ -611,8 +623,20 @@ class ChessBoard_{
 
         // set castling rights
 
+        if(move.castling) this.deletecastlingrights("kq", this.turn)
+
         if(fromp.kind == "k"){
-            this.deletecastlingrights("kq", this.turn)
+            for(let side of ["k", "q"]){
+                if(this.cancastle(side, this.turn)){
+                    let letter = side
+                    let newLetter = this.squaretoalgeb(this.rookorigsq(side, this.turn))[0]
+                    if(this.turn == WHITE){
+                        letter = letter.toUpperCase()
+                        newLetter = newLetter.toUpperCase()
+                    }
+                    this.castlefen = this.castlefen.replace(letter, newLetter)
+                }
+            }
         }
 
         for(let side of ["k", "q"]){
@@ -661,9 +685,7 @@ class ChessBoard_{
                 this.setpieaceatsquare(move.placeCastlingSquare, move.placeCastlingPiece)
 
                 this.removePlacePieceFromStore(move.placeCastlingPiece)
-            }   
-
-            for(let sq of move.passingSquares) this.removeSquareFromStore(sq)
+            }
         }
 
         this.halfmovefen = `${this.halfmoveclock}`
@@ -718,13 +740,8 @@ class ChessBoard_{
         let pstore = this.pieceStoreColor(p.color)
         
         if(this.IS_SCHESS()){
-            if(
-                (sq.rank == baseRank(p.color))
-                && (p.kind != "e")
-                && (p.kind != "h")
-                //&& this.squareStore().find(tsq => tsq.equalto(sq))
-            ){
-                for(let psp of pstore){
+            if(sq.rank == baseRank(p.color)){
+                if(this.squareStore().find(tsq => tsq.equalto(sq))) for(let psp of pstore){
                     acc = acc.concat(this.pseudolegalmovesforpieceatsquareinner(p, sq).map(psm => {                        
                         psm.placePiece = psp
                         return psm
