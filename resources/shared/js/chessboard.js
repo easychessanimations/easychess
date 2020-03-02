@@ -391,7 +391,9 @@ class ChessBoard_{
     }
 
     issquareattackedbycolor(sq, color){
-        for(let pl of ['q', 'r', 'b', 'n', 'k']){
+        let pieceLetters = ['q', 'r', 'b', 'n', 'k']
+        if(this.IS_SCHESS()) pieceLetters = pieceLetters.concat(["e", "h"])
+        for(let pl of pieceLetters){
             if(this.attacksonsquarebypiece(sq, Piece(pl, color)).length > 0) return true
         }
         let pd = PAWNDIRS(!color)
