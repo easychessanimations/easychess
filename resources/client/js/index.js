@@ -2828,8 +2828,8 @@ class App extends SmartDomElement{
                 Combo({                    
                     id: "boardBackgroundCombo",                    
                     display: "Board bakcground",                    
-                    options: (PROPS.backgrounds || ["maple.jpg"]).map(name => ({value: name, display: name})),
-                    selected: "maple.jpg",
+                    options: (PROPS.backgrounds || [DEFAULT_BOARD_BACKGROUND]).map(name => ({value: name, display: name})),
+                    selected: DEFAULT_BOARD_BACKGROUND,
                     settings: this.settings
                 }),
                 Combo({                    

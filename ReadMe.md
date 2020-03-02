@@ -12,9 +12,9 @@ It runs in the Heroku cloud:
 
 It is open source under the MIT license:
 
-[source on GitHub](https://github.com/easychessanimations/easychess)
+[Source on GitHub](https://github.com/easychessanimations/easychess)
 
-[source on GitLab](https://gitlab.com/easychessanimations/easychess)
+[Source on GitLab](https://gitlab.com/easychessanimations/easychess)
 
 ## Variant quick start
 

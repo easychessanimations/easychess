@@ -2,6 +2,8 @@ const RICH = true
 
 const DEFAULT_SQUARESIZE = 57.5
 
+const DEFAULT_BOARD_BACKGROUND = "maple.jpg"
+
 class Board_ extends SmartDomElement{
     constructor(props){
         super("div", props)
@@ -257,7 +259,7 @@ class Board_ extends SmartDomElement{
     drawSquares(){        
         let backgroundcanvas = this.getCanvasByName("background")
 
-        backgroundcanvas.loadBackgroundImage(`resources/client/img/backgrounds/${getLocal("app/maintabpane/boardBackgroundCombo", {selected: "wood.jpg"}).selected}`, Vect(this.boardsize(), this.boardsize()))
+        backgroundcanvas.loadBackgroundImage(`resources/client/img/backgrounds/${getLocal("app/maintabpane/boardBackgroundCombo", {selected: DEFAULT_BOARD_BACKGROUND}).selected}`, Vect(this.boardsize(), this.boardsize()))
 
         let squarecanvas = this.getCanvasByName("square").op(this.squareopacity)
         
