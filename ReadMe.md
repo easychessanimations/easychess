@@ -2,9 +2,11 @@
 
 ## About easychess
 
-Easy Chess offers new ideas for searching and analyzing your lichess games
+Easy Chess is a chess interface that supports variants Standard, Atomic and S-Chess. 
 
-Easy Chess is a chess interface that runs in the Heroku cloud:
+Easy Chess offers new ideas for searching and analyzing your lichess games.
+
+It runs in the Heroku cloud:
 
 [Easy Chess online](https://easychess.herokuapp.com)
 
@@ -14,7 +16,25 @@ It is open source under the MIT license:
 
 [source on GitLab](https://gitlab.com/easychessanimations/easychess)
 
-Easy Chess supports variants Standard and Atomic. I created chess interfaces before, but this one has new ideas and is built on a completely different basis than the former ones.
+## Variant quick start
+
+In the `Settings` tab select the desired variant:
+
+![](https://i.imgur.com/myqKjmf.png)
+
+Under the board press the leftmost red button:
+
+![](https://i.imgur.com/aldbCzc.png)
+
+In the dialog box that pops up type `reset` :
+
+![](https://i.imgur.com/2HMp7au.png)
+
+You should get a confirmation message.
+
+## New ideas
+
+I created chess interfaces before, but this one has new ideas and is built on a completely different basis than the former ones.
 
 Most importanlty it does not require server attention for move generation and storing the game state. 
 
