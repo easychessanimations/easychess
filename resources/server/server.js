@@ -4,7 +4,7 @@ if(!process.env.SKIP_FIREBASE) require('./tourneywatch')
 
 const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
 
-if(process.env.BOT_TOKEN && (!process.env.SKIP_FIREBASE)){
+if(process.env.BOT_TOKEN && (!process.env.SKIP_BOT)){
 
     try{
 
@@ -22,6 +22,8 @@ if(process.env.BOT_TOKEN && (!process.env.SKIP_FIREBASE)){
         console.log("Bot could not be started.", err)
     }
 
+}else{
+    console.log("skip bot")
 }
 
 const express = require('express')
@@ -41,7 +43,10 @@ var bucket = null
 var db = null
 var firestore = null
 
-passport.use(new Strategy({
+if(process.env.SKIP_OAUTH){
+    console.log("skip oauth")
+}else{
+    passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
         clientSecret: process.env.LICHESS_CLIENT_SECRET,
         callbackURL: IS_DEV() ?
@@ -54,24 +59,25 @@ passport.use(new Strategy({
         profile.accessToken = accessToken
         return cb(null, profile)
     }
-))
+    ))
 
-passport.use('lichess-bot', new Strategy({
-    clientID: process.env.LICHESS_BOT_CLIENT_ID,
-    clientSecret: process.env.LICHESS_BOT_CLIENT_SECRET,
-    scope: "challenge:read challenge:write bot:play",
-    callbackURL: IS_DEV() ?
-        'http://localhost:3000/auth/lichess/bot/callback'
-    :
-        `https://${SITE_HOST}/auth/lichess/bot/callback`
-},
-function(accessToken, refreshToken, profile, cb) {
-    clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
-    profile.accessToken = accessToken
-    profile.isBot = true
-    return cb(null, profile)
+    passport.use('lichess-bot', new Strategy({
+        clientID: process.env.LICHESS_BOT_CLIENT_ID,
+        clientSecret: process.env.LICHESS_BOT_CLIENT_SECRET,
+        scope: "challenge:read challenge:write bot:play",
+        callbackURL: IS_DEV() ?
+            'http://localhost:3000/auth/lichess/bot/callback'
+        :
+            `https://${SITE_HOST}/auth/lichess/bot/callback`
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
+        profile.accessToken = accessToken
+        profile.isBot = true
+        return cb(null, profile)
+    }
+    ))
 }
-))
 
 passport.serializeUser(function(user, cb) {
     cb(null, user)
@@ -171,31 +177,33 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.get('/auth/lichess',
-  passport.authenticate('lichess'))
+if(!process.env.SKIP_OAUTH){
+    app.get('/auth/lichess',
+    passport.authenticate('lichess'))
 
-app.get('/auth/lichess/callback', 
-    passport.authenticate('lichess', { failureRedirect: '/?login=failed' }),
-        function(req, res) {
-            res.redirect(IS_DEV() ?
-                'http://localhost:3000/?login=ok'
-            :
-                `https://${SITE_HOST}/?login=ok`)
-        }
-)
+    app.get('/auth/lichess/callback', 
+        passport.authenticate('lichess', { failureRedirect: '/?login=failed' }),
+            function(req, res) {
+                res.redirect(IS_DEV() ?
+                    'http://localhost:3000/?login=ok'
+                :
+                    `https://${SITE_HOST}/?login=ok`)
+            }
+    )
 
-app.get('/auth/lichess/bot',
-  passport.authenticate('lichess-bot'))
+    app.get('/auth/lichess/bot',
+    passport.authenticate('lichess-bot'))
 
-app.get('/auth/lichess/bot/callback', 
-    passport.authenticate('lichess-bot', { failureRedirect: '/?login=failed' }),
-        function(req, res) {
-            res.redirect(IS_DEV() ?
-                'http://localhost:3000/?login-bot=ok'
-            :
-                `https://${SITE_HOST}/?login-bot=ok`)
-        }
-)
+    app.get('/auth/lichess/bot/callback', 
+        passport.authenticate('lichess-bot', { failureRedirect: '/?login=failed' }),
+            function(req, res) {
+                res.redirect(IS_DEV() ?
+                    'http://localhost:3000/?login-bot=ok'
+                :
+                    `https://${SITE_HOST}/?login-bot=ok`)
+            }
+    )
+}
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
 const FAIRY_PATH = path.join(__dirname, "bin/fairy")

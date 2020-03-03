@@ -1,6 +1,9 @@
 echo off
 
 set SKIP_FIREBASE=1
+set SKIP_BOT=1
+set SKIP_OAUTH=1
+set ALLOW_SERVER_ENGINE=1
 
 start s\s
 

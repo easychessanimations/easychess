@@ -16,6 +16,32 @@ It is open source under the MIT license:
 
 [Source on GitLab](https://gitlab.com/easychessanimations/easychess)
 
+## Install locally
+
+```
+git clone https://github.com/easychessanimations/easychess.git
+cd easychess
+npm install
+```
+
+## Run server locally
+
+Start the server using the below platform specific instructions, then visit:
+
+[http://localhost:3000](http://localhost:3000)
+
+### Start server on Windows
+
+```
+sw\sl
+```
+
+### Start server on Linux
+
+```
+bash sh/sl.sh
+```
+
 ## Variant quick start
 
 In the `Settings` tab select the desired variant:
