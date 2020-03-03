@@ -39,6 +39,7 @@ sw\sl
 ### Start server on Linux
 
 ```
+chmod a+x sh/*
 bash sh/sl.sh
 ```
 
