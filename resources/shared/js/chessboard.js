@@ -4,6 +4,12 @@ const SUPPORTED_VARIANTS = [
     ["seirawan", "S-Chess"]
 ]
 
+const VARIANT_TO_ENGINE = {
+    standard: "stockfish",
+    atomic: "stockfish",
+    seirawan: "fairy"
+}
+
 const SUPPORTED_PERFS = [
     ["bullet", "Bullet"],
     ["blitz", "Blitz"],
@@ -2166,8 +2172,10 @@ class AbstractEngine{
     }
   }
 
-  constructor(sendanalysisinfo){      
+  constructor(sendanalysisinfo, path){      
       this.sendanalysisinfo = sendanalysisinfo
+
+      this.path = path
 
       this.spawn()
 
@@ -2222,4 +2230,5 @@ class RichAnalysisInfo{
 
 if(typeof module != "undefined") if(typeof module.exports != "undefined"){
     module.exports.AbstractEngine = AbstractEngine
+    module.exports.VARIANT_TO_ENGINE = VARIANT_TO_ENGINE
 }

@@ -1214,7 +1214,7 @@ class App extends SmartDomElement{
         }
 
         if(this.settings.useServerStockfishCheckbox.checked){
-            payload.password = this.askPass()
+            payload.password = this.askPass(PROPS.ALLOW_SERVER_ENGINE)
             
             payload.threads = parseInt(this.settings.threadsCombo.selected) || DEFAULT_THREADS,
 
@@ -1232,7 +1232,8 @@ class App extends SmartDomElement{
 
         if(this.settings.useServerStockfishCheckbox.checked){
             api("engine:stop", {
-                password: this.askPass(),
+                variant: this.variant,
+                password: this.askPass(PROPS.ALLOW_SERVER_ENGINE),
             }, response => {
                 this.clog(response)
             })
@@ -2239,7 +2240,9 @@ class App extends SmartDomElement{
         })
     })}
 
-    askPass(){
+    askPass(skip){
+        if(skip) return "none"
+
         let storedPass = localStorage.getItem(PASSWORD_KEY)
 
         if(storedPass) return storedPass
@@ -2803,7 +2806,7 @@ class App extends SmartDomElement{
                 }),                
                 CheckBoxInput({
                     id: "useServerStockfishCheckbox",                    
-                    display: "Use server Stockfish ( admin )",                                        
+                    display: `Use server Stockfish${PROPS.ALLOW_SERVER_ENGINE ? "":" ( admin )"}`,                                        
                     settings: this.settings
                 }),
                 Combo({                    

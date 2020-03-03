@@ -86,7 +86,7 @@ const app = express()
 const { readJson } = require('../utils/rwjson')
 const { update } = require('../utils/octokit')
 const sse = require('./sse')
-const { AbstractEngine } = require('../shared/js/chessboard')
+const { AbstractEngine, VARIANT_TO_ENGINE } = require('../shared/js/chessboard')
 const { fromchunks } = require('../utils/firebase')
 
 const PORT = process.env.PORT || 3000
@@ -95,18 +95,18 @@ const MAX_SSE_CONNECTIONS = 100
 
 const QUERY_INTERVAL = 3000
 
-const AUTH_TOPICS = [
+let AUTH_TOPICS = [
     "bucket:put",
     "bucket:get",
-    "git:put",
-    "engine:go",
-    "engine:stop",
+    "git:put",    
     "liapi:getstate",
     "liapi:writestate",
     "liapi:login",
     "liapi:jointourney",
     "liapi:createtourney",
 ]
+
+if(!process.env.ALLOW_SERVER_ENGINE) AUTH_TOPICS = AUTH_TOPICS.concat(["engine:go", "engine:stop"])
 
 function IS_DEV(){
     return !!process.env.EASYCHESS_DEV
@@ -198,6 +198,7 @@ app.get('/auth/lichess/bot/callback',
 )
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
+const FAIRY_PATH = path.join(__dirname, "bin/fairy")
 
 let clientScripts = readJson('resources/conf/clientscripts.json')[IS_DEV() ? "dev" : "prod"]
 let clientStyleSheets = readJson('resources/conf/clientstylesheets.json')[IS_DEV() ? "dev" : "prod"]
@@ -299,12 +300,13 @@ const HANDLERS = {
             }
         )
     },
-    "engine:go": function(res, payload){
-      engine.setcommand("go", payload)    
+    "engine:go": function(res, payload){        
+      if(process.env.ALLOW_SERVER_ENGINE) payload.threads = 1
+      engines[VARIANT_TO_ENGINE[payload.variant]].setcommand("go", payload)    
       apisend(`engine:go issued`, null, res)
     },
-    "engine:stop":function(res, _){
-      engine.setcommand("stop", null)
+    "engine:stop":function(res, payload){
+      engines[VARIANT_TO_ENGINE[payload.variant]].setcommand("stop", null)
       apisend(`engine:stop issued`, null, res)
     },
     "bucket:put":function(res, payload){    
@@ -376,14 +378,15 @@ const PROPS = {
     QUERY_INTERVAL: QUERY_INTERVAL,
     LOG_REMOTE_URL: process.env.LOG_REMOTE_URL || "https://fbserv.herokuapp.com/games.html?ref=",
     ACCEPT_VARIANT: process.env.ACCEPT_VARIANT,
+    ALLOW_SERVER_ENGINE: !!process.env.ALLOW_SERVER_ENGINE,
     imagestore: getFiles(path.join(__rootdirname, "resources/client/img/imagestore")),
     backgrounds: getFiles(path.join(__rootdirname, "resources/client/img/backgrounds")),
     readme: fs.readFileSync(path.join(__rootdirname, "ReadMe.md")).toString()
 }
 
 class ServerEngine extends AbstractEngine{
-    constructor(sendanalysisinfo){
-        super(sendanalysisinfo)
+    constructor(sendanalysisinfo, path){
+        super(sendanalysisinfo, path)
 
         this.minDepth = 10
     }
@@ -396,7 +399,7 @@ class ServerEngine extends AbstractEngine{
     }
 
     spawnengineprocess(){
-        this.process = spawn(STOCKFISH_PATH)
+        this.process = spawn(this.path)
 
         this.process.stdout.on('data', (data)=>{
             this.processstdout(`${data}`)
@@ -413,7 +416,10 @@ class ServerEngine extends AbstractEngine{
     }
 }
 
-let engine = new ServerEngine(ssesend)
+const engines = {
+    stockfish: new ServerEngine(ssesend, STOCKFISH_PATH),
+    fairy:  new ServerEngine(ssesend, FAIRY_PATH),
+}
 
 setInterval(function(){
     ssesend({kind: "tick"})
