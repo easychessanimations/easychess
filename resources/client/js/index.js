@@ -1,6 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const urlParams                 = new URLSearchParams(window.location.search)
+
+const DO_ALERT                  = true
+
 const STOCKFISH_JS_PATH         = "resources/client/cdn/stockfish.wasm.js"
 const BACKUP_FETCH_URL          = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
 const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
@@ -308,6 +312,8 @@ class App extends SmartDomElement{
 
         this.studyDiv = this.renderStudyDiv()
 
+        this.smartdomDiv = this.renderSmartdomDiv()
+
         this.tourneyDiv = this.renderTourneyDiv()
 
         this.gamesDiv = this.renderGamesDiv()
@@ -362,6 +368,23 @@ class App extends SmartDomElement{
         this.buildStudies()
 
         this.setInfoBar("Welcome to easychess.")
+
+        setTimeout(this.smartdomChanged.bind(this, !DO_ALERT), 1000)
+
+        setTimeout(this.selectQueryTab.bind(this), 500)
+    }
+
+    selectQueryTab(){
+        let tab = urlParams.get("tab")
+        if(tab){
+            let parts = tab.split("/")        
+            let tp = this.tabs
+            while(parts.length){
+                let t = parts.shift()                
+                tp.selectTab(t)
+                tp = tp.selected.content
+            }
+        }
     }
 
     loadGamesConditional(){
@@ -559,6 +582,29 @@ class App extends SmartDomElement{
             ),
             div().marl(5).marr(5).a(
                 this.studiesDiv = div()
+            )
+        )
+    }
+
+    smartdomChanged(doAlert){
+        let content = this.smartdomTextAreaInput.value()
+        try{
+            let se = eval(content)
+            this.smartdomHook.x().a(se)
+            if(doAlert) this.alert("Smartdom render ok .", "success")
+        }catch(err){
+            if(doAlert) this.alert("Smartdom render error .", "error")
+        }
+    }
+
+    renderSmartdomDiv(){
+        return div().a(
+            div().bc("#eee").mar(5).pad(5).a(
+                this.smartdomTextAreaInput = TextAreaInput({id: "smartdomTextAreaInput"})
+                    .toolTip({msg: "Enter smartdom tree here ."})
+                    .w(600).h(200)
+                    .ae("input", this.smartdomChanged.bind(this, DO_ALERT)),
+                this.smartdomHook = div().mart(5).pad(2).bc("#afa")
             )
         )
     }
@@ -2515,24 +2561,38 @@ class App extends SmartDomElement{
             Tab({id: "multiPGN", caption: "Multi PGN", content: this.multiPGNDiv}),
             Tab({id: "fen", caption: "FEN", content: this.fenDiv}),
             Tab({id: "study", caption: "Studies", content: this.studyDiv}),
+            Tab({id: "smartdom", caption: "Smartdom", content: this.smartdomDiv}),
             Tab({id: "tourney", caption: "Tourney", content: this.tourneyDiv}),
         ])
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
-            Tab({id: "moves", caption: "Moves", content: this.movesDiv}),            
+            Tab({id: "moves", caption: "Moves", content: this.movesDiv})
+                .toolTip({msg: "Moves, analysis, comments"}),            
             this.transpositionsTab = 
-            Tab({id: "transpositions", caption: "Transp", content: this.transpositionsDiv}),            
-            Tab({id: "games", caption: "Games", content: this.gamesTabPane}),
-            Tab({id: "train", caption: "Train", content: this.trainDiv}),            
-            Tab({id: "tree", caption: "Tree", content: this.treeDiv}),            
-            Tab({id: "bot", caption: "Bot", content: this.botTabPane}),                        
-            Tab({id: "anims", caption: "Anims", content: this.animsTabPane}),
-            Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
-            Tab({id: "settings", caption: "Settings", content: this.settingsDiv}),
-            Tab({id: "users", caption: "Users", content: this.lichessUsersDiv}),
-            Tab({id: "tools", caption: "Tools", content: this.toolsTabPane}),
-            Tab({id: "about", caption: "About", content: this.aboutDiv}),
-            Tab({id: "auth", caption: username, content: this.authDiv}),            
+            Tab({id: "transpositions", caption: "Transp", content: this.transpositionsDiv})
+                .toolTip({msg: "Transpositions"}),            
+            Tab({id: "games", caption: "Games", content: this.gamesTabPane})
+                .toolTip({msg: "Lichess games"}),
+            Tab({id: "train", caption: "Train", content: this.trainDiv})
+                .toolTip({msg: "Training"}),            
+            Tab({id: "tree", caption: "Tree", content: this.treeDiv})
+                .toolTip({msg: "Study tree"}),            
+            Tab({id: "bot", caption: "Bot", content: this.botTabPane})
+                .toolTip({msg: "Lichess bot"}),                        
+            Tab({id: "anims", caption: "Anims", content: this.animsTabPane})
+                .toolTip({msg: "Animations"}),
+            Tab({id: "backup", caption: "Backup", content: this.backupDiv})
+                .toolTip({msg: "Backup application state"}),            
+            Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
+                .toolTip({msg: "Settings"}),
+            Tab({id: "users", caption: "Users", content: this.lichessUsersDiv})
+                .toolTip({msg: "Lichess users"}),
+            Tab({id: "tools", caption: "Tools", content: this.toolsTabPane})
+                .toolTip({msg: "Tools ( FEN, PGN, Study )"}),
+            Tab({id: "about", caption: "About", content: this.aboutDiv})
+                .toolTip({msg: "About easychess, ReadMe"}),
+            Tab({id: "auth", caption: username, content: this.authDiv})
+                .toolTip({msg: "User login"}),            
         ])
 
         this.containerPane = SplitPane({            
@@ -2714,19 +2774,31 @@ class App extends SmartDomElement{
             .dfc().flww().w(this.board.boardsize() - 6)
             .mar(3).marl(0).pad(3).bc("#cca")
             .a(
-                Button("i", this.reset.bind(this)).ff("lichess").bc(RED_BUTTON_COLOR),
-                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc(CYAN_BUTTON_COLOR),
-                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),                
-                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
-                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
-                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),
-                Button("L", this.delMove.bind(this)).ff("lichess").bc(RED_BUTTON_COLOR),                                  
-                this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
-                this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),                
-                this.lichessbutton = Button("L", this.lichess.bind(this)).bc(YELLOW_BUTTON_COLOR),                
-                Button("R", this.reloadPage.bind(this)).bc(YELLOW_BUTTON_COLOR),                                                      
+                Button("i", this.reset.bind(this)).ff("lichess").bc(RED_BUTTON_COLOR)
+                    .toolTip({msg: "Reset"}),
+                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc(CYAN_BUTTON_COLOR)
+                    .toolTip({msg: "Flip"}),
+                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR)
+                    .toolTip({msg: "To begin"}),                
+                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR)
+                    .toolTip({msg: "Back"}),
+                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR)
+                    .toolTip({msg: "Forward"}),
+                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR)
+                    .toolTip({msg: "To end"}),
+                Button("L", this.delMove.bind(this)).ff("lichess").bc(RED_BUTTON_COLOR)
+                    .toolTip({msg: "Delete move and subtree"}),                                  
+                this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR)
+                    .toolTip({msg: "Engine go"}),                                  
+                this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR)
+                    .toolTip({msg: "Engine stop"}),                                                  
+                this.lichessbutton = Button("L", this.lichess.bind(this)).bc(YELLOW_BUTTON_COLOR)
+                    .toolTip({msg: "Lichess analysis"}),                                                  
+                Button("R", this.reloadPage.bind(this)).bc(YELLOW_BUTTON_COLOR)
+                    .toolTip({msg: "Reload page"}),                                                                                        
                 this.commandInput = TextInput().w(60).ae("keyup", this.commandChanged.bind(this)),                                
-                Button("G", this.loadLatestGame.bind(this)).bc(GREEN_BUTTON_COLOR),                                                      
+                Button("G", this.loadLatestGame.bind(this)).bc(GREEN_BUTTON_COLOR)
+                    .toolTip({msg: "Load latest game"}),                                                                                        
             )
     }
 

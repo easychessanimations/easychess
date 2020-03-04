@@ -1,7 +1,11 @@
 const ALLOW_NON_ID = true
 const EXCEPT_THIS = true
 
+const DEFAULT_TOOLTIP_DELAY = 2000
+
 var allNodes = {}
+
+var toolTipElementHook = null
 
 class SmartDomEvent{
     constructor(ev, e){
@@ -16,6 +20,44 @@ class SmartDomEvent{
 }
 
 class SmartDomElement{
+    showToolTip(){
+        if(!toolTipElementHook){
+            let de = document.documentElement
+            de.style.position = "relative"
+            toolTipElementHook = div()
+            de.appendChild(toolTipElementHook.e)
+        }
+        let bcr = this.e.getBoundingClientRect()            
+        console.log(bcr)
+        toolTipElementHook.x().a(div()
+            .zi(1000).poa().ff("monospace")
+            .bc("#ddf").pad(4).bdr("solid", 2, "#777", 5)
+            .t(bcr.y + bcr.height + 5).l(bcr.x + 5)
+            .disp("initial")
+            .html(this.toolTipMessage)
+        )
+    }
+
+    hideToolTip(){
+        if(toolTipElementHook) toolTipElementHook.x()
+        if(this.toolTipTimeout){
+            clearTimeout(this.toolTipTimeout)
+            this.toolTipTimeout = null
+        }
+    }
+
+    toolTipHover(){        
+        if(!this.toolTipTimeout) this.toolTipTimeout = setTimeout(this.showToolTip.bind(this), this.toolTipDelay)
+    }
+
+    toolTip(props){
+        this.toolTipMessage = props.msg
+        this.toolTipDelay = props.delay || DEFAULT_TOOLTIP_DELAY
+        this.ae("mouseover", this.toolTipHover.bind(this))
+        this.ae("mouseout mousedown", this.hideToolTip.bind(this))
+        return this
+    }
+
     copy(){
         setTimeout(() => {
             this.focus().select()
