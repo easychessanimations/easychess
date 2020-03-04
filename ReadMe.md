@@ -59,6 +59,28 @@ In the dialog box that pops up type `reset` :
 
 You should get a confirmation message.
 
+## Import PGN quick start
+
+To import a PGN initiating from the starting position, navigate to the starting position using the blue `<<` button under the board, then in `Tools / Multi PGN` tab paste the PGN into the text box.
+
+*This is a merge operation, so the PGN will be merged into the existing study.*
+
+## Import PGN / FEN advanced
+
+### Merge PGN with custom starting position
+
+To import a PGN initiating from a custom position, navigate the study to a position that matches the starting FEN of the PGN, then in `Tools / Multi PGN` tab paste the PGN into the text box.
+
+*Looking up the position with the right FEN cannot be made automatic, because several transpositions can result in a position with the same FEN, so it is a user decision where to merge the PGN.*
+
+### Set study from PGN
+
+To set the study from a PGN, go to `Tools / FEN` and paste the PGN into the `Reset from this PGN` text box. This will delete the entire study and build it from the PGN. If necessary, the variant will be changed to that of the PGN.
+
+### Set study from FEN
+
+To set the study from a FEN, go to `Tools / FEN` and paste the PGN into the `Reset from this FEN` text box. This will delete the entire study and set it as a single position described by the FEN. The variant will be the current variant.
+
 ## New ideas
 
 I created chess interfaces before, but this one has new ideas and is built on a completely different basis than the former ones.

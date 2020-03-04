@@ -443,6 +443,7 @@ class App extends SmartDomElement{
                     .mar(3)
                     .addStyle("width", "calc(100% - 10px)").h(480)
                     .ae("paste", this.multiPGNPasted.bind(this))
+                    .toolTip({msg: "Paste PGN here .", align: "center"})
             )
         )
     }
