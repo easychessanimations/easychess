@@ -601,7 +601,7 @@ class App extends SmartDomElement{
         return div().a(
             div().bc("#eee").mar(5).pad(5).a(
                 this.smartdomTextAreaInput = TextAreaInput({id: "smartdomTextAreaInput"})
-                    .toolTip({msg: "Enter smartdom tree here ."})
+                    .toolTip({msg: "Enter smartdom tree here . <br>During typing you get a message on whether your tree is correct .", align: "center"})
                     .w(600).h(200)
                     .ae("input", this.smartdomChanged.bind(this, DO_ALERT)),
                 this.smartdomHook = div().mart(5).pad(2).bc("#afa")

@@ -1,5 +1,6 @@
-const ALLOW_NON_ID = true
-const EXCEPT_THIS = true
+const ALLOW_NON_ID                  = true
+const EXCEPT_THIS                   = true
+const TOOLTIP_MARGIN                = 5
 
 const DEFAULT_TOOLTIP_DELAY = 2000
 
@@ -26,16 +27,26 @@ class SmartDomElement{
             de.style.position = "relative"
             toolTipElementHook = div()
             de.appendChild(toolTipElementHook.e)
-        }
-        let bcr = this.e.getBoundingClientRect()            
-        console.log(bcr)
-        toolTipElementHook.x().a(div()
-            .zi(1000).poa().ff("monospace")
-            .bc("#ddf").pad(4).bdr("solid", 2, "#777", 5)
-            .t(bcr.y + bcr.height + 5).l(bcr.x + 5)
-            .disp("initial")
+        }        
+        
+        toolTipElementHook.x().a(this.toolTipElement = div().op(0)
+            .zi(1000).poa().ff("monospace").t(0).l(0).tac()
+            .bc("#ddf").pad(4).bdr("solid", 2, "#777", 5)                        
             .html(this.toolTipMessage)
         )
+        setTimeout(this.positionTooltip.bind(this), 0)
+    }
+
+    positionTooltip(){
+        let bcr = this.e.getBoundingClientRect()            
+        let bcrt = this.toolTipElement.e.getBoundingClientRect()            
+        let x = bcr.x + TOOLTIP_MARGIN
+        if(this.toolTipAlignX == "center") x = bcr.x + bcr.width / 2 - bcrt.width / 2
+        let y = bcr.y + bcr.height + TOOLTIP_MARGIN
+        if(this.toolTipAlignY == "center") y = bcr.y + bcr.height / 2 - bcrt.height / 2
+        if(x + bcrt.width + TOOLTIP_MARGIN > window.innerWidth) x = window.innerWidth - bcrt.width - TOOLTIP_MARGIN
+        if(y + bcrt.height + TOOLTIP_MARGIN > window.innerHeight) y = window.innerHeight - bcrt.height - TOOLTIP_MARGIN
+        this.toolTipElement.t(y).l(x).op(1)
     }
 
     hideToolTip(){
@@ -53,6 +64,8 @@ class SmartDomElement{
     toolTip(props){
         this.toolTipMessage = props.msg
         this.toolTipDelay = props.delay || DEFAULT_TOOLTIP_DELAY
+        this.toolTipAlignX = props.alignX || props.align
+        this.toolTipAlignY = props.alignY || props.align
         this.ae("mouseover", this.toolTipHover.bind(this))
         this.ae("mouseout mousedown", this.hideToolTip.bind(this))
         return this
