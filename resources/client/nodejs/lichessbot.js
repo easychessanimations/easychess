@@ -365,10 +365,10 @@ class LichessBot_{
             if(this.lastGameStartedAt){
                 if( ( now - this.lastGameStartedAt ) < GAME_START_DELAY ){
                     this.lastGameStartedAt = this.lastGameStartedAt + GAME_START_DELAY
-                    delay = Math.min(0, this.lastGameStartedAt - now)
+                    delay = Math.max(0, this.lastGameStartedAt - now)
                     console.log("scheduling game start with delay", delay)                    
                 }else{
-                    this.lastGameStartedAt = now    
+                    this.lastGameStartedAt = now
                 }
             }else{
                 this.lastGameStartedAt = now
