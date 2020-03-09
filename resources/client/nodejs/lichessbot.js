@@ -360,7 +360,7 @@ class LichessBot_{
         }else if(event.type == "gameStart"){
             const GAME_START_DELAY = 30000
             let delay = 0
-            let now = performance.now()
+            let now = new Date().getTime()
             console.log("last game started at", this.lastGameStartedAt)
             if(this.lastGameStartedAt){
                 if( ( now - this.lastGameStartedAt ) < GAME_START_DELAY ){
@@ -373,7 +373,7 @@ class LichessBot_{
             }else{
                 this.lastGameStartedAt = now
             }
-            
+
             setTimeout(_ => LichessBotGame({
                 parentBot: this,
                 id: event.game.id
