@@ -1092,7 +1092,22 @@ class App extends SmartDomElement{
         }
 
         if(event.type == "gameStart"){
-            this.playGame(event.game.id)
+            const GAME_START_DELAY = 30000
+            let delay = 0
+            let now = performance.now()
+            console.log("last game started at", this.lastGameStartedAt)
+            if(this.lastGameStartedAt){
+                if( ( now - this.lastGameStartedAt ) < GAME_START_DELAY ){
+                    this.lastGameStartedAt = this.lastGameStartedAt + GAME_START_DELAY
+                    delay = Math.min(0, this.lastGameStartedAt - now)
+                    console.log("scheduling game start with delay", delay)                    
+                }else{
+                    this.lastGameStartedAt = now    
+                }
+            }else{
+                this.lastGameStartedAt = now
+            }
+            setTimeout(_ => this.playGame(event.game.id), delay)
         }
     }
 
