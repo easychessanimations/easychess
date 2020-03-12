@@ -643,7 +643,15 @@ class App extends SmartDomElement{
                     .download("board.png")
                     .ae("click", this.exportBoard.bind(this))
                     .toolTip({msg: "Export board screenshot"})
-            )
+            ),
+            FormTable({
+                options: EXPORTED_CANVAS_NAMES.map(name => CheckBoxInput({
+                    id: name + "CanvasExportCheckboxInput",                    
+                    display: "Skip " + name + " canvas export",
+                    settings: this.settings
+                }))
+            })
+                .marl(10)
         )
     }
 
@@ -3016,11 +3024,7 @@ class App extends SmartDomElement{
                     display: "Show analysis in board",                                        
                     settings: this.settings
                 }),
-            ].concat(EXPORTED_CANVAS_NAMES.map(name => CheckBoxInput({
-                id: name + "CanvasExportCheckboxInput",                    
-                display: "Skip " + name + " canvas export",
-                settings: this.settings
-            })))   
+            ]
         }))
     }
 
