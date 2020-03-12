@@ -637,8 +637,19 @@ class App extends SmartDomElement{
                     .ae("paste", this.multiPGNResetPasted.bind(this))
             ),
             Button("Reduce Line", this.reduceLine.bind(this)).mar(5).bc(RED_BUTTON_COLOR),
-            Button("Reduce", this.reduce.bind(this)).mar(5).bc(RED_BUTTON_COLOR)
+            Button("Reduce", this.reduce.bind(this)).mar(5).bc(RED_BUTTON_COLOR),
+            div().mar(10).fs(20).a(
+                this.exportLink = a().href("#").html("Export")
+                    .download("board.png")
+                    .ae("click", this.exportBoard.bind(this))
+                    .toolTip({msg: "Export board screenshot"})
+            )
         )
+    }
+
+    exportBoard(){
+        let boardcanvas = this.exportedBoardCanvas()
+        this.exportLink.href(boardcanvas.downloadHref("board", "png"))
     }
 
     reduceLine(){
@@ -2157,6 +2168,22 @@ class App extends SmartDomElement{
         this.animsDiv.ame()
     }
 
+    exportedBoardCanvas(){
+        let bs = this.board.boardsize()
+
+        let canvas = Canvas({width: bs, height: bs})
+
+        for(let name of EXPORTED_CANVAS_NAMES){
+            canvas.ctx.globalAlpha = 1
+            if(name == "square") canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
+            if(!this.settings[name + "CanvasExportCheckboxInput"].checked){
+                canvas.ctx.drawImage(this.board.getCanvasByName(name).e, 0, 0)    
+            }            
+        }
+
+        return canvas
+    }
+
     record(){return P(resolve => {
         let bs = this.board.boardsize()
         let props = this.getcurrentnode().props()
@@ -2167,7 +2194,7 @@ class App extends SmartDomElement{
         canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
         
         canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
-        canvas.ctx.globalAlpha = 0.3
+        canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
         canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
         canvas.ctx.globalAlpha = 1
         if(this.settings.highlightanimationmovesCheckbox.checked)
@@ -2803,7 +2830,7 @@ class App extends SmartDomElement{
                 Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR)
                     .toolTip({msg: "To end"}),
                 Button("L", this.delMove.bind(this)).ff("lichess").bc(RED_BUTTON_COLOR)
-                    .toolTip({msg: "Delete move and subtree"}),                                  
+                    .toolTip({msg: "Delete move and subtree"}),
                 this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR)
                     .toolTip({msg: "Engine go"}),                                  
                 this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR)
@@ -2873,7 +2900,7 @@ class App extends SmartDomElement{
                     selected: DEFAULT_REDUCE_THINKING_TIME,
                     settings: this.settings
                 }),                
-            ]   
+            ]
         }))
     }
 
@@ -2989,7 +3016,11 @@ class App extends SmartDomElement{
                     display: "Show analysis in board",                                        
                     settings: this.settings
                 }),
-            ]
+            ].concat(EXPORTED_CANVAS_NAMES.map(name => CheckBoxInput({
+                id: name + "CanvasExportCheckboxInput",                    
+                display: "Skip " + name + " canvas export",
+                settings: this.settings
+            })))   
         }))
     }
 

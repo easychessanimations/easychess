@@ -1978,3 +1978,20 @@ class Logger_ extends SmartDomElement{
     }
 }
 function Logger(props){return new Logger_(props)}
+
+class a_ extends SmartDomElement{
+    constructor(props){
+        super("a", props)
+    }
+
+    href(href){
+        this.sa("href", href)
+        return this
+    }
+
+    download(download){
+        this.sa("download", download)
+        return this
+    }
+}
+function a(props){return new a_(props)}

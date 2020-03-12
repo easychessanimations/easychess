@@ -4,13 +4,30 @@ const DEFAULT_SQUARESIZE = 57.5
 
 const DEFAULT_BOARD_BACKGROUND = "maple.jpg"
 
+const CANVAS_NAMES = [
+    "background",
+    "square",
+    "highlight",            
+    "weights",
+    "showanalysis",
+    "analysis",
+    "drawings",            
+    "piece",
+    "dragpiece",
+    "gif"
+]
+
+const EXPORTED_CANVAS_NAMES = CANVAS_NAMES.filter(name => !["dragpiece", "gif"].includes(name))
+
+const DEFAULT_SQUARE_OPACITY = 0.3
+
 class Board_ extends SmartDomElement{
     constructor(props){
         super("div", props)
 
         this.squaresize = this.props.squaresize || DEFAULT_SQUARESIZE
 
-        this.squareopacity = this.props.squareopacity || 0.3
+        this.squareopacity = this.props.squareopacity || DEFAULT_SQUARE_OPACITY
 
         this.positionchangedcallback = this.props.positionchangedcallback
 
@@ -18,18 +35,7 @@ class Board_ extends SmartDomElement{
 
         this.game = Game({variant: this.props.variant || DEFAULT_VARIANT}).setfromfen()        
 
-        this.canvasnames = [
-            "background",
-            "square",
-            "highlight",            
-            "weights",
-            "showanalysis",
-            "analysis",
-            "drawings",            
-            "piece",
-            "dragpiece",
-            "gif"
-        ]
+        this.canvasnames = CANVAS_NAMES
     }
 
     positionWheeled(ev){
