@@ -76,6 +76,7 @@ const BOT_STARTUP_DELAY             = 7500
 const DELETE_MOVE_WARN_LIMIT        = 50
 
 const DEFAULT_REDUCE_THINKING_TIME  = 1
+const DEFAULT_THREE_ANIMATION_DELAY = 250
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -613,36 +614,7 @@ class App extends SmartDomElement{
     }
 
     animateThree(){
-        this.THREE_WIDTH = 400
-        this.THREE_HEIGHT = 400
-
-        this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: this.THREE_WIDTH, RENDERER_HEIGHT: this.THREE_HEIGHT})
-
         this.threeRendererHook.x().a(this.threeRenderer)
-
-        let boardTexture = new THREE.ImageUtils.loadTexture("resources/client/texture/board/board-pattern.png")
-        boardTexture.repeat.set(4,4)
-        boardTexture.wrapS = THREE.RepeatWrapping
-        boardTexture.wrapT = THREE.RepeatWrapping
-
-        let boardMaterials = [
-
-            new THREE.MeshLambertMaterial({color: 0x555555}),
-            new THREE.MeshLambertMaterial({color: 0x555555}),
-            new THREE.MeshLambertMaterial({color: 0x555555}),
-            new THREE.MeshLambertMaterial({color: 0x555555}),
-            new THREE.MeshLambertMaterial({ map: boardTexture }),
-            new THREE.MeshLambertMaterial({color: 0x555555})
-
-        ]
-
-        let geometry = new THREE.BoxGeometry(
-            this.THREE_WIDTH / 250,
-            this.THREE_HEIGHT / 250,
-            ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000
-        )
-        let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
-        this.threeRenderer.scene.add(threeBoard)
 
         let BOARD_GRID_WIDTH = this.THREE_WIDTH / 2000
         let BOARD_GRID_HEIGHT = this.THREE_HEIGHT / 2000
@@ -671,6 +643,8 @@ class App extends SmartDomElement{
         this.threeRenderer.camera.position.z = 2
 
         this.animI = 0
+
+        let threeAnimationDelay = parseInt(this.settings.threeAnimationDelayCombo.selected)
         
         this.threeGif = new GIF({
             workers: 2,
@@ -684,7 +658,7 @@ class App extends SmartDomElement{
         let steps = 20
 
         this.animate = function () {            
-            this.threeQueen.position.set((0.5 - 4*this.animI/steps)* BOARD_GRID_WIDTH, (0.5 - 4*this.animI/steps) * BOARD_GRID_HEIGHT, 0)
+            this.threeQueen.position.set((0.5 - 1*this.animI/steps)* BOARD_GRID_WIDTH, (0.5 - 1*this.animI/steps) * BOARD_GRID_HEIGHT, 0)
 
             this.threeRenderer.render()
 
@@ -694,12 +668,12 @@ class App extends SmartDomElement{
 
             canvas.ctx.drawImage(this.threeRenderer.renderer.domElement, 0, 0)
 
-            this.threeGif.addFrame(canvas.e, {delay: 100})
+            this.threeGif.addFrame(canvas.e, {delay: threeAnimationDelay})
 
             this.threeRenderer.scene.rotation.x += Math.PI / steps
             this.threeRenderer.scene.rotation.y += Math.PI / steps
 
-            if(this.animI <= steps) setTimeout(this.animate.bind(this), 100)
+            if(this.animI <= steps) setTimeout(this.animate.bind(this), threeAnimationDelay)
         }
         this.animate()
     }
@@ -710,6 +684,11 @@ class App extends SmartDomElement{
     }
 
     renderThreeDiv(){
+        this.THREE_WIDTH = 400
+        this.THREE_HEIGHT = 400
+
+        this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: this.THREE_WIDTH, RENDERER_HEIGHT: this.THREE_HEIGHT})
+        
         this.objLoader = new THREE.OBJLoader()
 
         for(let threePieceKind of ["Queen", "Rook"])
@@ -724,9 +703,40 @@ class App extends SmartDomElement{
             })
         })
 
+        let boardTexture = new THREE.ImageUtils.loadTexture("resources/client/texture/board/board-pattern.png")
+        boardTexture.repeat.set(4,4)
+        boardTexture.wrapS = THREE.RepeatWrapping
+        boardTexture.wrapT = THREE.RepeatWrapping
+
+        let boardMaterials = [
+
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({ map: boardTexture }),
+            new THREE.MeshLambertMaterial({color: 0x555555})
+
+        ]
+
+        let geometry = new THREE.BoxGeometry(
+            this.THREE_WIDTH / 250,
+            this.THREE_HEIGHT / 250,
+            ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000
+        )
+        let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
+        this.threeRenderer.scene.add(threeBoard)
+
         return div().a(
             Button("Animate", this.animateThree.bind(this)),
             Button("Render", this.renderThree.bind(this)),
+            Labeled("Delay" , this.threeAnimationDelayCombo = Combo({                    
+                id: "threeAnimationDelayCombo",                    
+                display: "Perf",                                        
+                options: Array(41).fill(0).map((_, i) => ({value: i*50, display: i*50})),
+                selected: DEFAULT_THREE_ANIMATION_DELAY,
+                settings: this.settings
+            })),
             div().a(
                 this.animInfoDiv = div().dib().w(100)
             ),
