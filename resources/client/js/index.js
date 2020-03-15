@@ -314,6 +314,8 @@ class App extends SmartDomElement{
 
         this.smartdomDiv = this.renderSmartdomDiv()
 
+        this.threeDiv = this.renderThreeDiv()
+
         this.tourneyDiv = this.renderTourneyDiv()
 
         this.gamesDiv = this.renderGamesDiv()
@@ -607,6 +609,31 @@ class App extends SmartDomElement{
                     .ae("input", this.smartdomChanged.bind(this, DO_ALERT)),
                 this.smartdomHook = div().mart(5).pad(2).bc("#afa")
             )
+        )
+    }
+
+    animateThree(){
+        var geometry = new THREE.BoxGeometry()
+        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
+        var cube = new THREE.Mesh( geometry, material )
+        this.threeRenderer.scene.add( cube )
+
+        this.threeRenderer.camera.position.z = 3
+
+        this.animate = function () {
+            requestAnimationFrame( this.animate.bind(this) )
+            this.threeRenderer.renderer.render( this.threeRenderer.scene, this.threeRenderer.camera )
+
+            cube.rotation.x += 0.01
+            cube.rotation.y += 0.01
+        }
+        this.animate()
+    }
+
+    renderThreeDiv(){
+        return div().a(
+            Button("Animate", this.animateThree.bind(this)),
+            this.threeRenderer = ThreeRenderer()
         )
     }
 
@@ -2612,6 +2639,7 @@ class App extends SmartDomElement{
             Tab({id: "multiPGN", caption: "Multi PGN", content: this.multiPGNDiv}),
             Tab({id: "fen", caption: "FEN", content: this.fenDiv}),
             Tab({id: "study", caption: "Studies", content: this.studyDiv}),
+            Tab({id: "three", caption: "Three", content: this.threeDiv}),
             Tab({id: "smartdom", caption: "Smartdom", content: this.smartdomDiv}),
             Tab({id: "tourney", caption: "Tourney", content: this.tourneyDiv}),
         ])

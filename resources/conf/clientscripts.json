@@ -1,5 +1,6 @@
 {
     "dev": [        
+        "resources/client/cdn/three.js",
         "resources/client/cdn/Chart.js",
         "resources/client/cdn/showdown.min.js",
         "resources/client/cdn/jszip.js",
@@ -13,6 +14,7 @@
         "resources/client/js/indexeddb.js"
     ],
     "prod": [
+        "resources/client/cdn/three.min.js",
         "resources/client/cdn/Chart.min.js",
         "resources/client/cdn/showdown.min.js",
         "resources/client/cdn/jszip.min.js",

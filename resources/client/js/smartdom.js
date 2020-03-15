@@ -1995,3 +1995,31 @@ class a_ extends SmartDomElement{
     }
 }
 function a(props){return new a_(props)}
+
+class ThreeRenderer_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.RENDERER_WIDTH = this.props.RENDERER_WIDTH || 600
+        this.RENDERER_HEIGHT = this.props.RENDERER_HEIGHT || 400
+        this.ASPECT_RATIO = this.RENDERER_WIDTH / this.RENDERER_HEIGHT
+        this.FIELD_OF_VIEW = this.props.FIELD_OF_VIEW || 75
+        this.NEAR_CLIPPING_PANE = this.props.NEAR_CLIPPING_PANE || 0.1
+        this.FAR_CLIPPING_PANE = this.props.FAR_CLIPPING_PANE || 1000
+
+        this.scene = new THREE.Scene()
+
+        this.camera = new THREE.PerspectiveCamera(
+            this.FIELD_OF_VIEW,
+            this.ASPECT_RATIO,
+            this.NEAR_CLIPPING_PANE,
+            this.FAR_CLIPPING_PANE
+        )
+
+        this.renderer = new THREE.WebGLRenderer()
+        this.renderer.setSize(this.RENDERER_WIDTH, this.RENDERER_HEIGHT)
+
+        this.e.appendChild(this.renderer.domElement)
+    }
+}
+function ThreeRenderer(props){return new ThreeRenderer_(props)}
