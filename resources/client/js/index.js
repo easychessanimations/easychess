@@ -653,6 +653,12 @@ class App extends SmartDomElement{
             this.threeQueen.material = new THREE.MeshLambertMaterial({color: 0xffffff})                                
             this.threeQueen.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
             this.threeRenderer.scene.add(this.threeQueen)
+
+            this.threeQueenOther = this.threeQueen.clone()
+            this.threeQueenOther.material = new THREE.MeshLambertMaterial({color: 0x77ff77})                                
+            this.threeQueenOther.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeQueenOther.position.set(2.5 * BOARD_GRID_WIDTH, 3.5 * BOARD_GRID_HEIGHT, 0)
+            this.threeRenderer.scene.add(this.threeQueenOther)
         }
 
         if(this.threeRook){
