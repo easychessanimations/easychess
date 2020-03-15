@@ -613,19 +613,45 @@ class App extends SmartDomElement{
     }
 
     animateThree(){
+        this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: 200, RENDERER_HEIGHT: 200})
+
+        this.threeRendererHook.x().a(this.threeRenderer)
+
         var geometry = new THREE.BoxGeometry()
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
         var cube = new THREE.Mesh( geometry, material )
         this.threeRenderer.scene.add( cube )
 
-        this.threeRenderer.camera.position.z = 3
+        this.threeRenderer.camera.position.z = 2
+
+        this.animI = 0
+        
+        this.gif = new GIF({
+            workers: 2,
+            quality: 10
+        })
+    
+        this.gif.on('finished', function(blob) {
+            window.open(URL.createObjectURL(blob))
+        })
 
         this.animate = function () {
-            requestAnimationFrame( this.animate.bind(this) )
+            //requestAnimationFrame( this.animate.bind(this) )
             this.threeRenderer.renderer.render( this.threeRenderer.scene, this.threeRenderer.camera )
 
-            cube.rotation.x += 0.01
-            cube.rotation.y += 0.01
+            cube.rotation.x += Math.PI / 20
+            cube.rotation.y += Math.PI / 20
+
+            this.animInfoDiv.html(`${1 + this.animI++}`)
+
+            let canvas = Canvas({width: 200, height: 200})
+
+            canvas.ctx.drawImage(this.threeRenderer.renderer.domElement, 0, 0)
+
+            this.gif.addFrame(canvas.e, {delay: 100})
+
+            if(this.animI < 20) setTimeout(this.animate.bind(this), 100)
+            else this.gif.render()
         }
         this.animate()
     }
@@ -633,7 +659,10 @@ class App extends SmartDomElement{
     renderThreeDiv(){
         return div().a(
             Button("Animate", this.animateThree.bind(this)),
-            this.threeRenderer = ThreeRenderer()
+            div().a(
+                this.animInfoDiv = div().dib().w(100)
+            ),
+            this.threeRendererHook = div()
         )
     }
 
