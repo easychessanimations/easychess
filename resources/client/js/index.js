@@ -613,52 +613,114 @@ class App extends SmartDomElement{
     }
 
     animateThree(){
-        this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: 200, RENDERER_HEIGHT: 200})
+        this.THREE_WIDTH = 400
+        this.THREE_HEIGHT = 400
+
+        this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: this.THREE_WIDTH, RENDERER_HEIGHT: this.THREE_HEIGHT})
 
         this.threeRendererHook.x().a(this.threeRenderer)
 
-        var geometry = new THREE.BoxGeometry()
-        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
-        var cube = new THREE.Mesh( geometry, material )
-        this.threeRenderer.scene.add( cube )
+        let boardTexture = new THREE.ImageUtils.loadTexture("resources/client/texture/board/board-pattern.png")
+        boardTexture.repeat.set(4,4)
+        boardTexture.wrapS = THREE.RepeatWrapping
+        boardTexture.wrapT = THREE.RepeatWrapping
+
+        let boardMaterials = [
+
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({color: 0x555555}),
+            new THREE.MeshLambertMaterial({ map: boardTexture }),
+            new THREE.MeshLambertMaterial({color: 0x555555})
+
+        ]
+
+        let geometry = new THREE.BoxGeometry(
+            this.THREE_WIDTH / 250,
+            this.THREE_HEIGHT / 250,
+            ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000
+        )
+        let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
+        this.threeRenderer.scene.add(threeBoard)
+
+        let BOARD_GRID_WIDTH = this.THREE_WIDTH / 2000
+        let BOARD_GRID_HEIGHT = this.THREE_HEIGHT / 2000
+
+        let PIECE_SCALE = ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 70000
+
+        if(this.threeQueen){
+            this.threeQueen.material = new THREE.MeshLambertMaterial({color: 0xffffff})                                
+            this.threeQueen.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeRenderer.scene.add(this.threeQueen)
+        }
+
+        if(this.threeRook){
+            this.threeRook.material = new THREE.MeshLambertMaterial({color: 0x777777})                    
+            this.threeRook.position.set(1.5 * BOARD_GRID_WIDTH, 2.5 * BOARD_GRID_HEIGHT, 0)
+            this.threeRook.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeRenderer.scene.add(this.threeRook)
+        }
 
         this.threeRenderer.camera.position.z = 2
 
         this.animI = 0
         
-        this.gif = new GIF({
+        this.threeGif = new GIF({
             workers: 2,
             quality: 10
         })
     
-        this.gif.on('finished', function(blob) {
+        this.threeGif.on('finished', function(blob) {
             window.open(URL.createObjectURL(blob))
         })
 
-        this.animate = function () {
-            //requestAnimationFrame( this.animate.bind(this) )
-            this.threeRenderer.renderer.render( this.threeRenderer.scene, this.threeRenderer.camera )
+        let steps = 20
 
-            cube.rotation.x += Math.PI / 20
-            cube.rotation.y += Math.PI / 20
+        this.animate = function () {            
+            this.threeQueen.position.set((0.5 - 4*this.animI/steps)* BOARD_GRID_WIDTH, (0.5 - 4*this.animI/steps) * BOARD_GRID_HEIGHT, 0)
 
-            this.animInfoDiv.html(`${1 + this.animI++}`)
+            this.threeRenderer.render()
 
-            let canvas = Canvas({width: 200, height: 200})
+            this.animInfoDiv.html(`${this.animI++}`)
+
+            let canvas = Canvas({width: this.THREE_WIDTH, height: this.THREE_HEIGHT})
 
             canvas.ctx.drawImage(this.threeRenderer.renderer.domElement, 0, 0)
 
-            this.gif.addFrame(canvas.e, {delay: 100})
+            this.threeGif.addFrame(canvas.e, {delay: 100})
 
-            if(this.animI < 20) setTimeout(this.animate.bind(this), 100)
-            else this.gif.render()
+            this.threeRenderer.scene.rotation.x += Math.PI / steps
+            this.threeRenderer.scene.rotation.y += Math.PI / steps
+
+            if(this.animI <= steps) setTimeout(this.animate.bind(this), 100)
         }
         this.animate()
     }
 
+    renderThree(){
+        if(this.threeGif) this.threeGif.render()
+        else this.alert("No gif to render.")
+    }
+
     renderThreeDiv(){
+        this.objLoader = new THREE.OBJLoader()
+
+        for(let threePieceKind of ["Queen", "Rook"])
+        this.objLoader.load("/resources/client/model/piece/" + threePieceKind + ".obj", object => {
+            object.traverse( child => {        
+                if (child instanceof THREE.Mesh) {                                        
+                    child.rotation.z = -.1
+                    child.rotation.x = 1.6
+                    child.rotation.y = 1.7
+                    this["three" + threePieceKind ] = child
+                }
+            })
+        })
+
         return div().a(
             Button("Animate", this.animateThree.bind(this)),
+            Button("Render", this.renderThree.bind(this)),
             div().a(
                 this.animInfoDiv = div().dib().w(100)
             ),

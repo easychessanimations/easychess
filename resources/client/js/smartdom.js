@@ -1997,17 +1997,44 @@ class a_ extends SmartDomElement{
 function a(props){return new a_(props)}
 
 class ThreeRenderer_ extends SmartDomElement{
+    render(){
+        this.renderer.render(this.scene, this.camera)
+    }
+
     constructor(props){
         super("div", props)
 
-        this.RENDERER_WIDTH = this.props.RENDERER_WIDTH || 600
-        this.RENDERER_HEIGHT = this.props.RENDERER_HEIGHT || 400
-        this.ASPECT_RATIO = this.RENDERER_WIDTH / this.RENDERER_HEIGHT
-        this.FIELD_OF_VIEW = this.props.FIELD_OF_VIEW || 75
+        this.RENDERER_WIDTH     = this.props.RENDERER_WIDTH     || 600
+        this.RENDERER_HEIGHT    = this.props.RENDERER_HEIGHT    || 400        
+        this.FIELD_OF_VIEW      = this.props.FIELD_OF_VIEW      || 75
         this.NEAR_CLIPPING_PANE = this.props.NEAR_CLIPPING_PANE || 0.1
-        this.FAR_CLIPPING_PANE = this.props.FAR_CLIPPING_PANE || 1000
+        this.FAR_CLIPPING_PANE  = this.props.FAR_CLIPPING_PANE  || 1000
+
+        this.ASPECT_RATIO       = this.RENDERER_WIDTH / this.RENDERER_HEIGHT
 
         this.scene = new THREE.Scene()
+
+        this.ambientLight = new THREE.AmbientLight( this.props.AMBIENT_LIGHT_COLOR || 0x555555 )
+        this.scene.add(this.ambientLight)
+
+        this.spotLight = new THREE.SpotLight( this.props.SPOT_LIGHT_COLOR || 0xffffff )
+        this.spotLight.position.set(
+            this.props.SPOTLIGHT_X || 50,
+            this.props.SPOTLIGHT_Y || 100,
+            this.props.SPOTLOGHT_Z || 50
+        )
+
+        this.spotLight.castShadow = (typeof this.props.SPOTLIGHT_CAST_SHADOW != "undefined") ?
+            this.props.SPOTLIGHT_CAST_SHADOW : true
+
+        this.spotLight.shadowMapWidth   = this.props.SPOTLIGHT_SHADOW_MAP_WIDTH     || 1024
+        this.spotLight.shadowMapHeight  = this.props.SPOTLIGHT_SHADOW_MAP_HEIGHT    || 1024
+
+        this.spotLight.shadowCameraNear = this.props.SPOTLIGHT_SHADOW_CAMERA_NEAR   || 500
+        this.spotLight.shadowCameraFar  = this.props.SPOTLIGHT_SHADOW_CAMERA_FAR    || 4000
+        this.spotLight.shadowCameraFov  = this.props.SPOTLIGHT_SHADOW_CAMERA_FOV    || 30
+
+        this.scene.add(this.spotLight)
 
         this.camera = new THREE.PerspectiveCamera(
             this.FIELD_OF_VIEW,
