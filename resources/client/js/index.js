@@ -77,6 +77,7 @@ const DELETE_MOVE_WARN_LIMIT        = 50
 
 const DEFAULT_REDUCE_THINKING_TIME  = 1
 const DEFAULT_THREE_ANIMATION_DELAY = 250
+const ALL_THREE_PIECES              = ["Queen", "Rook"]
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -368,6 +369,8 @@ class App extends SmartDomElement{
             this.doLater("botStartUp", BOT_STARTUP_DELAY)
         }
 
+        this.doLater("initThreeRenderer", 1000)
+
         this.buildStudies()
 
         this.setInfoBar("Welcome to easychess.")
@@ -614,37 +617,9 @@ class App extends SmartDomElement{
     }
 
     animateThree(){
-        this.threeRendererHook.x().a(this.threeRenderer)
-
-        let BOARD_GRID_WIDTH = this.THREE_WIDTH / 2000
-        let BOARD_GRID_HEIGHT = this.THREE_HEIGHT / 2000
-
-        let PIECE_SCALE = ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 70000
-
-        if(this.threeQueen){
-            this.threeQueen.material = new THREE.MeshLambertMaterial({color: 0xffffff})                                
-            this.threeQueen.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
-            this.threeRenderer.scene.add(this.threeQueen)
-
-            this.threeQueenOther = this.threeQueen.clone()
-            this.threeQueenOther.material = new THREE.MeshLambertMaterial({color: 0x77ff77})                                
-            this.threeQueenOther.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
-            this.threeQueenOther.position.set(2.5 * BOARD_GRID_WIDTH, 3.5 * BOARD_GRID_HEIGHT, 0)
-            this.threeRenderer.scene.add(this.threeQueenOther)
-        }
-
-        if(this.threeRook){
-            this.threeRook.material = new THREE.MeshLambertMaterial({color: 0x777777})                    
-            this.threeRook.position.set(1.5 * BOARD_GRID_WIDTH, 2.5 * BOARD_GRID_HEIGHT, 0)
-            this.threeRook.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
-            this.threeRenderer.scene.add(this.threeRook)
-        }
-
-        this.threeRenderer.camera.position.z = 2
-
         this.animI = 0
 
-        let threeAnimationDelay = parseInt(this.settings.threeAnimationDelayCombo.selected)
+        this.threeAnimationDelay = parseInt(this.settings.threeAnimationDelayCombo.selected)
         
         this.threeGif = new GIF({
             workers: 2,
@@ -655,27 +630,35 @@ class App extends SmartDomElement{
             window.open(URL.createObjectURL(blob))
         })
 
-        let steps = 20
+        this.steps = 20
 
-        this.animate = function () {            
-            this.threeQueen.position.set((0.5 - 1*this.animI/steps)* BOARD_GRID_WIDTH, (0.5 - 1*this.animI/steps) * BOARD_GRID_HEIGHT, 0)
-
-            this.threeRenderer.render()
-
-            this.animInfoDiv.html(`${this.animI++}`)
-
-            let canvas = Canvas({width: this.THREE_WIDTH, height: this.THREE_HEIGHT})
-
-            canvas.ctx.drawImage(this.threeRenderer.renderer.domElement, 0, 0)
-
-            this.threeGif.addFrame(canvas.e, {delay: threeAnimationDelay})
-
-            this.threeRenderer.scene.rotation.x += Math.PI / steps
-            this.threeRenderer.scene.rotation.y += Math.PI / steps
-
-            if(this.animI <= steps) setTimeout(this.animate.bind(this), threeAnimationDelay)
+        this.animate = function () {                        
+            this.renderThreeAnimFrame()         
+            this.animI++   
+            if(this.animI <= this.steps) setTimeout(this.animate.bind(this), this.threeAnimationDelay)
         }
         this.animate()
+    }
+
+    renderThreeAnimFrame(){
+        this.threeQueen.position.set(
+            (0.5 - 2*this.animI/this.steps)* this.BOARD_GRID_WIDTH,
+            (0.5 - 2*this.animI/this.steps) * this.BOARD_GRID_HEIGHT,
+            0
+        )
+
+        this.threeRenderer.scene.rotation.x = this.animI * Math.PI / this.steps
+        this.threeRenderer.scene.rotation.y = this.animI * Math.PI / this.steps        
+
+        this.threeRenderer.render()
+
+        this.animInfoDiv.html(`Frame # ${this.animI}`)
+
+        let canvas = Canvas({width: this.THREE_WIDTH, height: this.THREE_HEIGHT})
+
+        canvas.ctx.drawImage(this.threeRenderer.renderer.domElement, 0, 0)
+
+        this.threeGif.addFrame(canvas.e, {delay: this.threeAnimationDelay})
     }
 
     renderThree(){
@@ -683,15 +666,45 @@ class App extends SmartDomElement{
         else this.alert("No gif to render.")
     }
 
-    renderThreeDiv(){
+    initThreePieces(){
+        let PIECE_SCALE = ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 70000
+
+        if(this.threeQueen){
+            this.threeQueen.material = new THREE.MeshLambertMaterial({color: 0xffffff})                                
+            this.threeQueen.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeRenderer.scene.add(this.threeQueen)
+
+            this.threeQueenOther = this.threeQueen.clone()
+            this.threeQueenOther.material = new THREE.MeshLambertMaterial({color: 0x77ff77})                                
+            this.threeQueenOther.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeQueenOther.position.set(2.5 * this.BOARD_GRID_WIDTH, 3.5 * this.BOARD_GRID_HEIGHT, 0)
+            this.threeRenderer.scene.add(this.threeQueenOther)
+        }
+
+        if(this.threeRook){
+            this.threeRook.material = new THREE.MeshLambertMaterial({color: 0x777777})                    
+            this.threeRook.position.set(1.5 * this.BOARD_GRID_WIDTH, 2.5 * this.BOARD_GRID_HEIGHT, 0)
+            this.threeRook.scale.set(PIECE_SCALE, PIECE_SCALE, PIECE_SCALE)
+            this.threeRenderer.scene.add(this.threeRook)
+        }
+    }
+
+    initThreeRenderer(){
         this.THREE_WIDTH = 400
         this.THREE_HEIGHT = 400
 
         this.threeRenderer = ThreeRenderer({RENDERER_WIDTH: this.THREE_WIDTH, RENDERER_HEIGHT: this.THREE_HEIGHT})
+
+        this.threeRenderer.camera.position.z = 2
+
+        this.BOARD_GRID_WIDTH = this.THREE_WIDTH / 2000
+        this.BOARD_GRID_HEIGHT = this.THREE_HEIGHT / 2000
         
         this.objLoader = new THREE.OBJLoader()
 
-        for(let threePieceKind of ["Queen", "Rook"])
+        let loadedPieces = 0
+
+        for(let threePieceKind of ALL_THREE_PIECES)
         this.objLoader.load("/resources/client/model/piece/" + threePieceKind + ".obj", object => {
             object.traverse( child => {        
                 if (child instanceof THREE.Mesh) {                                        
@@ -699,6 +712,17 @@ class App extends SmartDomElement{
                     child.rotation.x = 1.6
                     child.rotation.y = 1.7
                     this["three" + threePieceKind ] = child
+                    loadedPieces++
+                    if(loadedPieces == ALL_THREE_PIECES.length){
+                        this.initThreePieces()
+
+                        this.threeControlDiv.disp("initial")
+                        this.animInfoDiv.html("Resources loaded ok .")                        
+
+                        this.threeRendererHook.x().a(this.threeRenderer)                        
+
+                        this.threeRenderer.render()
+                    }
                 }
             })
         })
@@ -724,23 +748,30 @@ class App extends SmartDomElement{
             this.THREE_HEIGHT / 250,
             ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000
         )
+
         let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
+
         this.threeRenderer.scene.add(threeBoard)
 
+        this.threeRenderer.render()
+    }
+
+    renderThreeDiv(){
         return div().a(
-            Button("Animate", this.animateThree.bind(this)),
-            Button("Render", this.renderThree.bind(this)),
-            Labeled("Delay" , this.threeAnimationDelayCombo = Combo({                    
-                id: "threeAnimationDelayCombo",                    
-                display: "Perf",                                        
-                options: Array(41).fill(0).map((_, i) => ({value: i*50, display: i*50})),
-                selected: DEFAULT_THREE_ANIMATION_DELAY,
-                settings: this.settings
-            })),
+            this.threeControlDiv = div().disp("none").a(
+                Button("Animate", this.animateThree.bind(this)),
+                Button("Render", this.renderThree.bind(this)),
+                Labeled("Delay" , this.threeAnimationDelayCombo = Combo({                    
+                    id: "threeAnimationDelayCombo",                    
+                    display: "Perf",                                        
+                    options: Array(41).fill(0).map((_, i) => ({value: i*50, display: i*50})),
+                    selected: DEFAULT_THREE_ANIMATION_DELAY,
+                    settings: this.settings
+            }))),
             div().a(
-                this.animInfoDiv = div().dib().w(100)
+                this.animInfoDiv = div().marl(5).ffm().dib().html("Loading resources, please wait ...")
             ),
-            this.threeRendererHook = div()
+            this.threeRendererHook = div().mar(5)
         )
     }
 
