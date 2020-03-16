@@ -152,8 +152,8 @@ class ThreeBoard_ extends SmartDomElement{
     initRenderer(){
         this.html("ThreeBoard Initializing Renderer ...")
 
-        this.THREE_WIDTH = 500
-        this.THREE_HEIGHT = 500
+        this.THREE_WIDTH = 460
+        this.THREE_HEIGHT = 460
 
         this.PIECE_SCALE = ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 70000 * this.scale
 

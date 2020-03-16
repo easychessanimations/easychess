@@ -2386,14 +2386,18 @@ class App extends SmartDomElement{
         canvas.fillStyle("#FFFFFF")
         canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
         
-        canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
-        canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
-        canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
-        canvas.ctx.globalAlpha = 1
-        if(this.settings.highlightanimationmovesCheckbox.checked)
-            canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
-        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
-        canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+        if(this.settings.animate3dCheckbox.checked){
+            canvas.ctx.drawImage(this.threeBoard.threeRenderer.renderer.domElement, 0, 0)
+        }else{
+            canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
+            canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
+            canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
+            canvas.ctx.globalAlpha = 1
+            if(this.settings.highlightanimationmovesCheckbox.checked)
+                canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
+            canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+            canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+        }        
 
         let finalizefunc = _ => {
             canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
@@ -3134,6 +3138,11 @@ class App extends SmartDomElement{
                     display: "Threads",                    
                     options: Array(4).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
                     selected: DEFAULT_THREADS,
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "animate3dCheckbox",                    
+                    display: "Animate 3d",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
