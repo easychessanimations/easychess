@@ -1898,7 +1898,8 @@ class App extends SmartDomElement{
         this.doLater("showFilterBook", 2 * POSITION_CHANGED_DELAY)
         this.doLater("showChart", POSITION_CHANGED_DELAY)
         this.doLater("storeDefault", STORE_DEFAULT_DELAY)
-        this.doLater("render3d", POSITION_CHANGED_DELAY)
+        if(this.settings.animate3dCheckbox.checked) this.render3d()
+        else this.doLater("render3d", POSITION_CHANGED_DELAY)
 
         if(this.trainMode == this.b.reverseTurnVerbal){
             let childs = this.getcurrentnode().sortedchilds()
