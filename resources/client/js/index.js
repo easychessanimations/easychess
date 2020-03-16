@@ -385,7 +385,7 @@ class App extends SmartDomElement{
     renderThreeBoardDiv(){
         return div().a(
             div().mar(5).a(
-                this.threeBoard = ThreeBoard()
+                this.threeBoard = ThreeBoard({id: "mainthreeboard"})
             )
         )
     }
@@ -835,7 +835,11 @@ class App extends SmartDomElement{
     }
 
     exportBoard(){
-        let boardcanvas = this.exportedBoardCanvas()
+        let boardcanvas = this.exportedBoardCanvas()        
+        if(this.settings.animate3dCheckbox.checked){
+            boardcanvas = Canvas({width: this.threeBoard.THREE_WIDTH, height: this.threeBoard.THREE_HEIGHT})
+            boardcanvas.ctx.drawImage(this.threeBoard.threeRenderer.renderer.domElement, 0, 0)
+        }
         this.exportLink.href(boardcanvas.downloadHref("board", "png"))
     }
 
@@ -1915,7 +1919,7 @@ class App extends SmartDomElement{
     }
 
     render3d(){
-        if(this.threeBoard.ready) this.threeBoard.setFromFen(this.fen, this.variant)
+        if(this.threeBoard.ready) this.threeBoard.setFromGame(this.g)
         else this.doLater("render3d", 1000)
     }
 

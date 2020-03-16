@@ -123,12 +123,17 @@ class ThreeBoard_ extends SmartDomElement{
         }
     }
 
+    intDegToRad(deg){
+        return parseInt(deg) / 180 * Math.PI
+    }
+
     draw(){
         this.clearPieces()
 
         this.drawPieces()
 
-        this.threeRenderer.scene.rotation.x = -0.5
+        this.threeRenderer.scene.rotation.x = -0.5 * this.intDegToRad(this.settings.rotXCombo.selected)        
+        this.threeRenderer.scene.rotation.z = ( this.flip ? Math.PI : 0 ) + this.intDegToRad(this.settings.rotZCombo.selected)        
 
         this.threeRenderer.render()
 
@@ -139,6 +144,12 @@ class ThreeBoard_ extends SmartDomElement{
         this.board.setfromfen(fen, variant)
 
         this.draw()
+    }
+
+    setFromGame(game){
+        this.flip = game.flip
+
+        this.setFromFen(game.fen(), game.variant)
     }
 
     init(){
@@ -199,8 +210,26 @@ class ThreeBoard_ extends SmartDomElement{
 
                 this.threeRenderer.scene.add(threeBoard)
 
-                this.x().a(
-                    this.canvasHook = div()
+                this.x().por().ame(
+                    this.canvasHook = div().poa(),
+                    div().bc("#ccc").pad(1).mar(1).poa().a(
+                        Labeled("&nbsp;Rot X (deg) ", Combo({                    
+                            id: "rotXCombo",                    
+                            display: "Rot X (deg)",                                        
+                            options: Array(19).fill(null).map((_, i) => ({value: i*5, display: i*5})),
+                            selected: 50,
+                            settings: this.settings,
+                            changeCallback: this.draw.bind(this)
+                        })).bc("#eee"),
+                        Labeled("&nbsp;Rot Z (deg) ", Combo({                    
+                            id: "rotZCombo",                    
+                            display: "Rot Z (deg)",                                        
+                            options: Array(19).fill(null).map((_, i) => ({value: (i-9)*5, display: (i-9)*5})),
+                            selected: 0,
+                            settings: this.settings,
+                            changeCallback: this.draw.bind(this)
+                        })).bc("#eee").marl(3)
+                    )
                 )
 
                 this.canvasHook.e.appendChild(this.threeRenderer.renderer.domElement)
