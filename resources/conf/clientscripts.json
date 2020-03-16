@@ -12,6 +12,7 @@
         "resources/client/js/lichess.js",        
         "resources/client/js/smartdom.js",
         "resources/client/js/board.js",
+        "resources/client/js/threeboard.js",
         "resources/client/js/indexeddb.js"
     ],
     "prod": [
@@ -27,6 +28,7 @@
         "resources/client/js/lichess.js",        
         "resources/client/js/smartdom.js",
         "resources/client/js/board.js",
+        "resources/client/js/threeboard.js",
         "resources/client/js/indexeddb.js"
     ]
 }

@@ -276,6 +276,8 @@ class App extends SmartDomElement{
 
         this.movesDiv = div()
 
+        this.threeBoardDiv = this.renderThreeBoardDiv()
+
         this.movesDiv.resize = this.positionchanged.bind(this)
 
         this.transpositionsDiv = div()
@@ -378,6 +380,14 @@ class App extends SmartDomElement{
         setTimeout(this.smartdomChanged.bind(this, !DO_ALERT), 1000)
 
         setTimeout(this.selectQueryTab.bind(this), 500)
+    }
+
+    renderThreeBoardDiv(){
+        return div().a(
+            div().mar(5).a(
+                this.threeBoard = ThreeBoard()
+            )
+        )
     }
 
     selectQueryTab(){
@@ -690,6 +700,8 @@ class App extends SmartDomElement{
     }
 
     initThreeRenderer(){
+        if(IS_DEV()) return
+        
         this.THREE_WIDTH = 400
         this.THREE_HEIGHT = 400
 
@@ -757,6 +769,8 @@ class App extends SmartDomElement{
     }
 
     renderThreeDiv(){
+        if(IS_DEV()) return div().html("Production only.")
+
         return div().a(
             this.threeControlDiv = div().disp("none").a(
                 Button("Animate", this.animateThree.bind(this)),
@@ -1884,6 +1898,7 @@ class App extends SmartDomElement{
         this.doLater("showFilterBook", 2 * POSITION_CHANGED_DELAY)
         this.doLater("showChart", POSITION_CHANGED_DELAY)
         this.doLater("storeDefault", STORE_DEFAULT_DELAY)
+        this.doLater("render3d", POSITION_CHANGED_DELAY)
 
         if(this.trainMode == this.b.reverseTurnVerbal){
             let childs = this.getcurrentnode().sortedchilds()
@@ -1896,6 +1911,11 @@ class App extends SmartDomElement{
             let move = this.b.santomove(selsan)
             this.board.makeMove(move)
         }
+    }
+
+    render3d(){
+        if(this.threeBoard.ready) this.threeBoard.setFromFen(this.fen, this.variant)
+        else this.doLater("render3d", 1000)
     }
 
     transpositionClicked(transp){
@@ -2702,6 +2722,8 @@ class App extends SmartDomElement{
     }
 
     renderAboutDiv(){
+        if(IS_DEV()) return div().html("Production only .")
+
         let aboutDiv = div()
 
         try{
@@ -2785,6 +2807,8 @@ class App extends SmartDomElement{
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv})
                 .toolTip({msg: "Moves, analysis, comments"}),            
+            Tab({id: "three", caption: "3D", content: this.threeBoardDiv})
+                .toolTip({msg: "3D Board"}),            
             this.transpositionsTab = 
             Tab({id: "transpositions", caption: "Transp", content: this.transpositionsDiv})
                 .toolTip({msg: "Transpositions"}),            
