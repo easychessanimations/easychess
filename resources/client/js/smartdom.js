@@ -2018,6 +2018,30 @@ class ThreeRenderer_ extends SmartDomElement{
         this.renderer.render(this.scene, this.camera)
     }
 
+    getGroup(name){
+        if(!this.groups) this.groups = {}
+        if(!this.groups[name]) this.groups[name] = []
+        return this.groups[name]
+    }
+
+    addToGroup(name, object){
+        this.getGroup(name)
+        this.groups[name].push(object)
+        this.scene.add(object)
+    }
+
+    clearGroup(name){
+        this.getGroup(name)
+        this.groups[name] = []
+    }
+
+    removeGroup(name){        
+        for(let object of this.getGroup(name)){
+            this.scene.remove(object)
+        }
+        this.clearGroup(name)
+    }
+
     constructor(props){
         super("div", props)
 

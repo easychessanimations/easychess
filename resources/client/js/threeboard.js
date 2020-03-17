@@ -73,9 +73,7 @@ class ThreeBoard_ extends SmartDomElement{
 
         if(piece.color) threePiece.rotation.y += Math.PI
 
-        this.pieceStore.push(threePiece)
-
-        this.threeRenderer.scene.add(threePiece)
+        this.threeRenderer.addToGroup("pieces", threePiece)
 
         return threePiece
     }
@@ -92,7 +90,7 @@ class ThreeBoard_ extends SmartDomElement{
 
     placePieceAtSquare(piece, sq, dx, dy, dz){
         let sqmcs = this.squareMiddleCoords(sq)
-        piece.position.set(sqmcs.x + (dx || 0), sqmcs.y + (dy || 0), dz || 0)
+        piece.position.set(sqmcs.x + (dx || 0), sqmcs.y + (dy || 0), dz || this.BOARD_THICKNESS/2)
     }
 
     drawPieces(){
@@ -119,43 +117,46 @@ class ThreeBoard_ extends SmartDomElement{
         }
     }
 
-    clearPieces(){
-        for(let object of this.pieceStore){
-            this.threeRenderer.scene.remove(object)
-        }
-        this.pieceStore = []
-    }
-
-    clearDrawings(){
-        for(let object of this.drawingsStore){
-            this.threeRenderer.scene.remove(object)
-        }
-        this.drawingsStore = []
-    }
-
     intDegToRad(deg){
         return parseInt(deg) / 180 * Math.PI
     }
 
-    drawMoveArrow(move){        
+    highlightSquare(sq, group){
+        let highlightsquaregeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE*0.85, this.BOARD_THICKNESS/5)
+        let highlightsquarematerial = new THREE.MeshBasicMaterial( {color: 0x00ffff} )
+        highlightsquarematerial.transparent = true
+        highlightsquarematerial.opacity = 0.5
+
+        let highlightsquare = new THREE.Mesh(highlightsquaregeometry, highlightsquarematerial)        
+
+        let sqmcs = this.squareMiddleCoords(sq)
+
+        highlightsquare.position.x = sqmcs.x
+        highlightsquare.position.y = sqmcs.y
+        highlightsquare.position.z = this.BOARD_THICKNESS/2
+
+        this.threeRenderer.addToGroup(group, highlightsquare)
+    }
+
+    drawMoveArrow(move, group){        
         let scmsfrom = this.squareMiddleCoords(move.fromsq)
         let scmsto = this.squareMiddleCoords(move.tosq)
-        let vfrom = new THREE.Vector3(scmsfrom.x, scmsfrom.y, this.BOARD_GRID_SIZE/5)
-        let vto = new THREE.Vector3(scmsto.x, scmsto.y, this.BOARD_GRID_SIZE/5)
+        let vfrom = new THREE.Vector3(scmsfrom.x, scmsfrom.y, this.BOARD_THICKNESS/2)
+        let vto = new THREE.Vector3(scmsto.x, scmsto.y, this.BOARD_THICKNESS/2)
         let vdiff = vto.clone().addScaledVector(vfrom, -1)
         let vdiffnorm = vdiff.clone().normalize()
         vdiff.addScaledVector(vdiffnorm, -this.BOARD_GRID_SIZE/2)
         let middle = vfrom.addScaledVector(vdiff, 0.5)
         let origdir = new THREE.Vector3(0,  vdiff.length(), 0)            
 
-        let arrowbodygeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE / 2, vdiff.length(), this.BOARD_GRID_SIZE/5)
+        let arrowbodygeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE / 2, vdiff.length(), this.BOARD_THICKNESS/5)
         let arrowbodymaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} )
         arrowbodymaterial.transparent = true
         arrowbodymaterial.opacity = 0.5
 
         let arrowbody = new THREE.Mesh(arrowbodygeometry, arrowbodymaterial)
 
-        let arrowheadgeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE/5)
+        let arrowheadgeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE*0.85, this.BOARD_THICKNESS/5)
         let arrowheadmaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} )
         arrowheadmaterial.transparent = true
         arrowheadmaterial.opacity = 0.5
@@ -170,11 +171,8 @@ class ThreeBoard_ extends SmartDomElement{
         arrowhead.position.copy(vto)                
         arrowhead.rotation.z = ( scmsfrom.x - scmsto.x ) > 0 ? angle : -angle
 
-        this.drawingsStore.push(arrowbody)
-        this.drawingsStore.push(arrowhead)
-
-        this.threeRenderer.scene.add(arrowbody)
-        this.threeRenderer.scene.add(arrowhead)
+        this.threeRenderer.addToGroup(group, arrowbody)
+        this.threeRenderer.addToGroup(group, arrowhead)
     }
 
     highlightLastMove(){        
@@ -183,7 +181,7 @@ class ThreeBoard_ extends SmartDomElement{
                 let testboard = ChessBoard().setfromfen(this.gameNode.getparent().fen, this.board.variant)
                 let move = testboard.santomove(this.gameNode.gensan)
                 if(move){
-                    this.drawMoveArrow(move)
+                    this.drawMoveArrow(move, "highlightlastmove")
                 }
             }
         }
@@ -191,10 +189,10 @@ class ThreeBoard_ extends SmartDomElement{
 
     draw(){
         try{
-            this.clearDrawings()
+            this.threeRenderer.removeGroup("highlightlastmove")
             this.highlightLastMove()
 
-            this.clearPieces()
+            this.threeRenderer.removeGroup("pieces")
             this.drawPieces()            
 
             this.threeRenderer.scene.rotation.x = -0.5 * this.intDegToRad(this.settings.rotXCombo.selected)        
@@ -228,6 +226,40 @@ class ThreeBoard_ extends SmartDomElement{
 
     get scale(){
         return this.props.scale || 1
+    }
+
+    handleMouseMove(ev){
+        let bcr = this.mouseHandlerDiv.e.getBoundingClientRect()
+        let npv = Vect(
+            (ev.clientX - bcr.x)/this.threeRenderer.RENDERER_WIDTH*2-1,
+            -((ev.clientY - bcr.y)/this.threeRenderer.RENDERER_HEIGHT*2-1)
+        )
+        let mindiff = null
+        let selsq = null
+        for(let sq of ALL_SQUARES){
+            let v = this.squareMiddleCoords(sq)
+            let v3 = new THREE.Vector3(v.x, v.y, this.BOARD_THICKNESS)
+            let rot = this.threeRenderer.scene.rotation
+            v3.applyAxisAngle(new THREE.Vector3(1, 0, 0), -rot.x)
+            v3.applyAxisAngle(new THREE.Vector3(0, 0, 1), rot.z)
+            v3.project(this.threeRenderer.camera)            
+            let vsq = Vect(v3.x, v3.y)
+            let diff = vsq.m(npv).l()
+            if(mindiff === null){
+                mindiff = diff
+                selsq = sq
+            }
+            if(diff < mindiff){
+                mindiff = diff
+                selsq = sq
+            }
+        }
+        if(!selsq.equalto(this.prevselsq)){
+            this.threeRenderer.removeGroup("squarehighlight")
+            this.highlightSquare(selsq, "squarehighlight")
+            this.threeRenderer.render()        
+        }
+        this.prevselsq = selsq
     }
 
     initRenderer(){
@@ -269,10 +301,12 @@ class ThreeBoard_ extends SmartDomElement{
 
                 ]
 
+                this.BOARD_THICKNESS = ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000 * this.scale
+
                 let geometry = new THREE.BoxGeometry(
                     this.THREE_WIDTH / 250 * this.scale,
                     this.THREE_HEIGHT / 250 * this.scale,
-                    ( this.THREE_HEIGHT + this.THREE_WIDTH ) / 8000 * this.scale
+                    this.BOARD_THICKNESS
                 )
 
                 let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
@@ -281,6 +315,9 @@ class ThreeBoard_ extends SmartDomElement{
 
                 this.x().por().ame(
                     this.canvasHook = div().poa(),
+                    this.mouseHandlerDiv = div().poa()
+                        .w(this.threeRenderer.RENDERER_WIDTH).h(this.threeRenderer.RENDERER_HEIGHT)
+                        .ae("mousemove", this.handleMouseMove.bind(this)),
                     div().bc("#ccc").pad(1).mar(1).poa().easeOnOut().a(
                         Labeled("&nbsp;Rot X (deg) ", Combo({                    
                             id: "rotXCombo",                    
@@ -298,7 +335,7 @@ class ThreeBoard_ extends SmartDomElement{
                             settings: this.settings,
                             changeCallback: this.draw.bind(this)
                         })).bc("#eee").marl(3)
-                    )
+                    ),                    
                 )
 
                 this.canvasHook.e.appendChild(this.threeRenderer.renderer.domElement)
