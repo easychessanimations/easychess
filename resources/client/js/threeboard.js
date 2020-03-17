@@ -128,16 +128,20 @@ class ThreeBoard_ extends SmartDomElement{
     }
 
     draw(){
-        this.clearPieces()
+        try{
+            this.clearPieces()
 
-        this.drawPieces()
+            this.drawPieces()
 
-        this.threeRenderer.scene.rotation.x = -0.5 * this.intDegToRad(this.settings.rotXCombo.selected)        
-        this.threeRenderer.scene.rotation.z = ( this.flip ? Math.PI : 0 ) + this.intDegToRad(this.settings.rotZCombo.selected)        
+            this.threeRenderer.scene.rotation.x = -0.5 * this.intDegToRad(this.settings.rotXCombo.selected)        
+            this.threeRenderer.scene.rotation.z = ( this.flip ? Math.PI : 0 ) + this.intDegToRad(this.settings.rotZCombo.selected)        
 
-        this.threeRenderer.render()
+            this.threeRenderer.render()
 
-        this.ready = true
+            this.ready = true
+
+            if(this.props.drawOkCallback) this.props.drawOkCallback()
+        }catch(err){console.log("draw 3d error", err)}
     }
 
     setFromFen(fen, variant){
@@ -212,7 +216,7 @@ class ThreeBoard_ extends SmartDomElement{
 
                 this.x().por().ame(
                     this.canvasHook = div().poa(),
-                    div().bc("#ccc").pad(1).mar(1).poa().a(
+                    div().bc("#ccc").pad(1).mar(1).poa().easeOnOut().a(
                         Labeled("&nbsp;Rot X (deg) ", Combo({                    
                             id: "rotXCombo",                    
                             display: "Rot X (deg)",                                        

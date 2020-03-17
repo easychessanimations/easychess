@@ -21,6 +21,23 @@ class SmartDomEvent{
 }
 
 class SmartDomElement{
+    easeOnOut(opOpt){
+        this.easeOnOutOp = opOpt || 0.3
+        this.ae("mouseover mousein", this.handleEeasIn.bind(this))
+        this.ae("mouseout", this.ease.bind(this))
+        return this.ease()
+    }
+
+    ease(){
+        this.op(this.easeOnOutOp)
+        return this
+    }
+
+    handleEeasIn(){
+        this.op(1)
+        this.doLater("ease", this.props.easeDelay || 10000)
+    }
+
     showToolTip(){
         if(!toolTipElementHook){
             let de = document.documentElement

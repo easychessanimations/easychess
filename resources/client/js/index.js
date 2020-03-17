@@ -385,9 +385,16 @@ class App extends SmartDomElement{
     renderThreeBoardDiv(){
         return div().a(
             div().mar(5).a(
-                this.threeBoard = ThreeBoard({id: "mainthreeboard"})
+                this.threeBoard = ThreeBoard({
+                    id: "mainthreeboard",
+                    drawOkCallback: this.threeBoardDrawOkCallback.bind(this)
+                })
             )
         )
+    }
+
+    threeBoardDrawOkCallback(){
+        this.boardExportPreviewCanvasHook.x()
     }
 
     selectQueryTab(){
@@ -817,11 +824,16 @@ class App extends SmartDomElement{
             ),
             Button("Reduce Line", this.reduceLine.bind(this)).mar(5).bc(RED_BUTTON_COLOR),
             Button("Reduce", this.reduce.bind(this)).mar(5).bc(RED_BUTTON_COLOR),
-            div().mar(10).fs(20).a(
-                this.exportLink = a().href("#").html("Export")
+            div().mar(10).a(
+                Button("Export preview", this.createBoardExportPreview.bind(this)).fs(18).bc(GREEN_BUTTON_COLOR),
+                this.exportLink = a().marl(10).href("#").html("Export")
                     .download("board.png")
                     .ae("click", this.exportBoard.bind(this))
+                    .fs(20)
                     .toolTip({msg: "Export board screenshot"})
+            ),
+            div().mar(5).a(
+                this.boardExportPreviewCanvasHook = div()
             ),
             FormTable({
                 options: EXPORTED_CANVAS_NAMES.map(name => CheckBoxInput({
@@ -834,13 +846,21 @@ class App extends SmartDomElement{
         )
     }
 
-    exportBoard(){
-        let boardcanvas = this.exportedBoardCanvas()        
+    createBoardExportPreview(){        
+        this.boardExportPreviewCanvasHook.x()        
         if(this.settings.animate3dCheckbox.checked){
-            boardcanvas = Canvas({width: this.threeBoard.THREE_WIDTH, height: this.threeBoard.THREE_HEIGHT})
-            boardcanvas.ctx.drawImage(this.threeBoard.threeRenderer.renderer.domElement, 0, 0)
+            this.threeBoard.draw()
+            this.boardExportPreviewCanvas = Canvas({width: this.threeBoard.THREE_WIDTH, height: this.threeBoard.THREE_HEIGHT})
+            this.boardExportPreviewCanvas.ctx.drawImage(this.threeBoard.threeRenderer.renderer.domElement, 0, 0)
+        }else{
+            this.boardExportPreviewCanvas = this.exportedBoardCanvas()        
         }
-        this.exportLink.href(boardcanvas.downloadHref("board", "png"))
+        this.boardExportPreviewCanvasHook.a(this.boardExportPreviewCanvas)
+    }
+
+    exportBoard(){
+        this.createBoardExportPreview()
+        this.exportLink.href(this.boardExportPreviewCanvas.downloadHref("board", "png"))
     }
 
     reduceLine(){
@@ -1904,6 +1924,8 @@ class App extends SmartDomElement{
         this.doLater("storeDefault", STORE_DEFAULT_DELAY)
         if(this.settings.animate3dCheckbox.checked) this.render3d()
         else this.doLater("render3d", POSITION_CHANGED_DELAY)
+
+        this.boardExportPreviewCanvasHook.x()
 
         if(this.trainMode == this.b.reverseTurnVerbal){
             let childs = this.getcurrentnode().sortedchilds()
