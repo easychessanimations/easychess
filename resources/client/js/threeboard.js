@@ -24,6 +24,8 @@ class ThreeBoard_ extends SmartDomElement{
         
         this.pieceStore = []
 
+        this.drawingsStore = []
+
         this.ready = false
 
         this.mar(2).pad(2).ffm().html("ThreeBoard Loading Pieces ...")
@@ -80,12 +82,12 @@ class ThreeBoard_ extends SmartDomElement{
 
     squareCoords(sq){
         return Vect(
-            (sq.file - (NUM_SQUARES / 2)) * this.BOARD_GRID_WIDTH,
-            ((LAST_SQUARE - sq.rank) - (NUM_SQUARES / 2)) * this.BOARD_GRID_HEIGHT)
+            (sq.file - (NUM_SQUARES / 2)) * this.BOARD_GRID_SIZE,
+            ((LAST_SQUARE - sq.rank) - (NUM_SQUARES / 2)) * this.BOARD_GRID_SIZE)
     }
 
     squareMiddleCoords(sq){
-        return this.squareCoords(sq).p(Vect(this.BOARD_GRID_WIDTH / 2, this.BOARD_GRID_HEIGHT / 2))
+        return this.squareCoords(sq).p(Vect(this.BOARD_GRID_SIZE / 2, this.BOARD_GRID_SIZE / 2))
     }
 
     placePieceAtSquare(piece, sq, dx, dy, dz){
@@ -101,14 +103,14 @@ class ThreeBoard_ extends SmartDomElement{
 
                 if((p.kind == "e") || (p.kind == "h")){
                     this.placePieceAtSquare(piece, sq,
-                        -this.BOARD_GRID_WIDTH*0.2,
-                        -this.BOARD_GRID_HEIGHT*0.15 * ( p.color ? 1 : -1 )
+                        -this.BOARD_GRID_SIZE*0.2,
+                        -this.BOARD_GRID_SIZE*0.15 * ( p.color ? 1 : -1 )
                     )
 
                     let plusKnight = this.createPiece(Piece("n", p.color))                    
                     this.placePieceAtSquare(plusKnight, sq,
-                        this.BOARD_GRID_WIDTH*0.25,
-                        this.BOARD_GRID_HEIGHT*0.15 * ( p.color ? 1 : -1 )
+                        this.BOARD_GRID_SIZE*0.25,
+                        this.BOARD_GRID_SIZE*0.15 * ( p.color ? 1 : -1 )
                     )
                 }else{
                     this.placePieceAtSquare(piece, sq)
@@ -121,17 +123,79 @@ class ThreeBoard_ extends SmartDomElement{
         for(let object of this.pieceStore){
             this.threeRenderer.scene.remove(object)
         }
+        this.pieceStore = []
+    }
+
+    clearDrawings(){
+        for(let object of this.drawingsStore){
+            this.threeRenderer.scene.remove(object)
+        }
+        this.drawingsStore = []
     }
 
     intDegToRad(deg){
         return parseInt(deg) / 180 * Math.PI
     }
 
+    drawMoveArrow(move){        
+        let scmsfrom = this.squareMiddleCoords(move.fromsq)
+        let scmsto = this.squareMiddleCoords(move.tosq)
+        let vfrom = new THREE.Vector3(scmsfrom.x, scmsfrom.y, this.BOARD_GRID_SIZE/5)
+        let vto = new THREE.Vector3(scmsto.x, scmsto.y, this.BOARD_GRID_SIZE/5)
+        let vdiff = vto.clone().addScaledVector(vfrom, -1)
+        let vdiffnorm = vdiff.clone().normalize()
+        vdiff.addScaledVector(vdiffnorm, -this.BOARD_GRID_SIZE/2)
+        let middle = vfrom.addScaledVector(vdiff, 0.5)
+        let origdir = new THREE.Vector3(0,  vdiff.length(), 0)            
+
+        let arrowbodygeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE / 2, vdiff.length(), this.BOARD_GRID_SIZE/5)
+        let arrowbodymaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} )
+        arrowbodymaterial.transparent = true
+        arrowbodymaterial.opacity = 0.5
+
+        let arrowbody = new THREE.Mesh(arrowbodygeometry, arrowbodymaterial)
+
+        let arrowheadgeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE/5)
+        let arrowheadmaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} )
+        arrowheadmaterial.transparent = true
+        arrowheadmaterial.opacity = 0.5
+
+        let arrowhead = new THREE.Mesh(arrowheadgeometry, arrowheadmaterial)        
+
+        let angle = origdir.angleTo(vdiff)
+        
+        arrowbody.position.copy(middle)                
+        arrowbody.rotation.z = ( scmsfrom.x - scmsto.x ) > 0 ? angle : -angle
+
+        arrowhead.position.copy(vto)                
+        arrowhead.rotation.z = ( scmsfrom.x - scmsto.x ) > 0 ? angle : -angle
+
+        this.drawingsStore.push(arrowbody)
+        this.drawingsStore.push(arrowhead)
+
+        this.threeRenderer.scene.add(arrowbody)
+        this.threeRenderer.scene.add(arrowhead)
+    }
+
+    highlightLastMove(){        
+        if(this.gameNode){            
+            if(this.gameNode.gensan){                                
+                let testboard = ChessBoard().setfromfen(this.gameNode.getparent().fen, this.board.variant)
+                let move = testboard.santomove(this.gameNode.gensan)
+                if(move){
+                    this.drawMoveArrow(move)
+                }
+            }
+        }
+    }
+
     draw(){
         try{
-            this.clearPieces()
+            this.clearDrawings()
+            this.highlightLastMove()
 
-            this.drawPieces()
+            this.clearPieces()
+            this.drawPieces()            
 
             this.threeRenderer.scene.rotation.x = -0.5 * this.intDegToRad(this.settings.rotXCombo.selected)        
             this.threeRenderer.scene.rotation.z = ( this.flip ? Math.PI : 0 ) + this.intDegToRad(this.settings.rotZCombo.selected)        
@@ -152,6 +216,8 @@ class ThreeBoard_ extends SmartDomElement{
 
     setFromGame(game){
         this.flip = game.flip
+
+        this.gameNode = game.getcurrentnode()
 
         this.setFromFen(game.fen(), game.variant)
     }
@@ -179,8 +245,7 @@ class ThreeBoard_ extends SmartDomElement{
 
         this.threeRenderer.camera.position.z = 2
 
-        this.BOARD_GRID_WIDTH = this.THREE_WIDTH / 2000 * this.scale
-        this.BOARD_GRID_HEIGHT = this.THREE_HEIGHT / 2000 * this.scale
+        this.BOARD_GRID_SIZE = ( this.THREE_WIDTH + this.THREE_HEIGHT ) / 4000 * this.scale
         
         this.textureLoader = new THREE.TextureLoader()
 
