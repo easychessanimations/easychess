@@ -189,6 +189,8 @@ class ThreeBoard_ extends SmartDomElement{
 
     draw(){
         try{
+            this.threeRenderer.removeGroup("squarehighlight")
+            
             this.threeRenderer.removeGroup("highlightlastmove")
             this.highlightLastMove()
 
