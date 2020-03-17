@@ -187,10 +187,19 @@ class ThreeBoard_ extends SmartDomElement{
         }
     }
 
+    clearSquareHighlight(){
+        this.threeRenderer.removeGroup("squarehighlight")        
+    }
+
+    clearSquareHighlightRender(){
+        this.clearSquareHighlight()
+        this.threeRenderer.render()
+    }
+
     draw(){
         try{
-            this.threeRenderer.removeGroup("squarehighlight")
-            
+            this.clearSquareHighlight()
+
             this.threeRenderer.removeGroup("highlightlastmove")
             this.highlightLastMove()
 
@@ -257,7 +266,7 @@ class ThreeBoard_ extends SmartDomElement{
             }
         }
         if(!selsq.equalto(this.prevselsq)){
-            this.threeRenderer.removeGroup("squarehighlight")
+            this.clearSquareHighlight()
             this.highlightSquare(selsq, "squarehighlight")
             this.threeRenderer.render()        
         }
@@ -319,7 +328,8 @@ class ThreeBoard_ extends SmartDomElement{
                     this.canvasHook = div().poa(),
                     this.mouseHandlerDiv = div().poa()
                         .w(this.threeRenderer.RENDERER_WIDTH).h(this.threeRenderer.RENDERER_HEIGHT)
-                        .ae("mousemove", this.handleMouseMove.bind(this)),
+                        .ae("mousemove", this.handleMouseMove.bind(this))
+                        .ae("mouseout", this.clearSquareHighlightRender.bind(this)),
                     div().bc("#ccc").pad(1).mar(1).poa().easeOnOut().a(
                         Labeled("&nbsp;Rot X (deg) ", Combo({                    
                             id: "rotXCombo",                    
