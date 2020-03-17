@@ -387,7 +387,8 @@ class App extends SmartDomElement{
             div().mar(5).a(
                 this.threeBoard = ThreeBoard({
                     id: "mainthreeboard",
-                    drawOkCallback: this.threeBoardDrawOkCallback.bind(this)
+                    drawOkCallback: this.threeBoardDrawOkCallback.bind(this),
+                    moveCallback: this.board.makeMove.bind(this.board)
                 })
             )
         )

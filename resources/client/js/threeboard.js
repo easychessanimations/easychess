@@ -121,9 +121,9 @@ class ThreeBoard_ extends SmartDomElement{
         return parseInt(deg) / 180 * Math.PI
     }
 
-    highlightSquare(sq, group){
+    highlightSquare(sq, group, colorOpt){
         let highlightsquaregeometry = new THREE.BoxGeometry(this.BOARD_GRID_SIZE*0.85, this.BOARD_GRID_SIZE*0.85, this.BOARD_THICKNESS/5)
-        let highlightsquarematerial = new THREE.MeshBasicMaterial( {color: 0x00ffff} )
+        let highlightsquarematerial = new THREE.MeshBasicMaterial( {color: colorOpt || 0x00ffff} )
         highlightsquarematerial.transparent = true
         highlightsquarematerial.opacity = 0.5
 
@@ -188,17 +188,29 @@ class ThreeBoard_ extends SmartDomElement{
     }
 
     clearSquareHighlight(){
-        this.threeRenderer.removeGroup("squarehighlight")        
+        this.threeRenderer.removeGroup("squarehighlight")                
+    }
+
+    clearInitialSquareHighlight(){
+        this.threeRenderer.removeGroup("initialsquarehighlight")        
+        this.initialSquare = null
+    }
+
+    clearInitialSquareHighlightRender(){
+        this.clearInitialSquareHighlight()
+        this.threeRenderer.render()
     }
 
     clearSquareHighlightRender(){
-        this.clearSquareHighlight()
+        this.clearSquareHighlight()        
+        this.clearInitialSquareHighlight()
         this.threeRenderer.render()
     }
 
     draw(){
         try{
             this.clearSquareHighlight()
+            this.clearInitialSquareHighlight()
 
             this.threeRenderer.removeGroup("highlightlastmove")
             this.highlightLastMove()
@@ -239,7 +251,7 @@ class ThreeBoard_ extends SmartDomElement{
         return this.props.scale || 1
     }
 
-    handleMouseMove(ev){
+    handleMouseMove(ev){        
         let bcr = this.mouseHandlerDiv.e.getBoundingClientRect()
         let npv = Vect(
             (ev.clientX - bcr.x)/this.threeRenderer.RENDERER_WIDTH*2-1,
@@ -251,7 +263,7 @@ class ThreeBoard_ extends SmartDomElement{
             let v = this.squareMiddleCoords(sq)
             let v3 = new THREE.Vector3(v.x, v.y, this.BOARD_THICKNESS)
             let rot = this.threeRenderer.scene.rotation
-            v3.applyAxisAngle(new THREE.Vector3(1, 0, 0), -rot.x)
+            v3.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.flip ? -rot.x : rot.x)
             v3.applyAxisAngle(new THREE.Vector3(0, 0, 1), rot.z)
             v3.project(this.threeRenderer.camera)            
             let vsq = Vect(v3.x, v3.y)
@@ -271,6 +283,24 @@ class ThreeBoard_ extends SmartDomElement{
             this.threeRenderer.render()        
         }
         this.prevselsq = selsq
+        if(ev.type == "click"){
+            if(this.initialSquare){
+                let move = Move(this.initialSquare, selsq)
+                this.clearInitialSquareHighlightRender()
+                if(selsq.equalto(this.initialSquare)){
+                    this.clearInitialSquareHighlightRender()
+                }else{
+                    let lms = this.board.legalmovesforallpieces()                    
+                    let valid = lms.find((testmove) => testmove.roughlyequalto(move))                    
+                    if(valid) if(this.props.moveCallback) this.props.moveCallback(move)
+                }
+            }else{                
+                this.clearSquareHighlight()
+                this.initialSquare = selsq
+                this.highlightSquare(this.initialSquare, "initialsquarehighlight", 0xff00ff0)
+                this.threeRenderer.render()        
+            }
+        }
     }
 
     initRenderer(){
@@ -328,7 +358,7 @@ class ThreeBoard_ extends SmartDomElement{
                     this.canvasHook = div().poa(),
                     this.mouseHandlerDiv = div().poa()
                         .w(this.threeRenderer.RENDERER_WIDTH).h(this.threeRenderer.RENDERER_HEIGHT)
-                        .ae("mousemove", this.handleMouseMove.bind(this))
+                        .ae("mousemove click", this.handleMouseMove.bind(this))
                         .ae("mouseout", this.clearSquareHighlightRender.bind(this)),
                     div().bc("#ccc").pad(1).mar(1).poa().easeOnOut().a(
                         Labeled("&nbsp;Rot X (deg) ", Combo({                    
