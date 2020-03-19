@@ -9,6 +9,7 @@ const OBJECT_STORES = [
     {name: "image", keyPath: "name"},
     {name: "lichessgame", keyPath: "id"},
     {name: "user", keyPath: "id"},
+    {name: "three", keyPath: "url"},
 ]
 
 const DATABASE_VERSION = OBJECT_STORES.length
@@ -136,6 +137,28 @@ class IndexedDB{
                 }})                
             }
         })    
+    }
+
+    loadThreeObject(url){
+        let objLoader = new THREE.OBJLoader()
+        return P(resolve => {
+            IDB.get("three", url).then(result => {
+                if(result.hasContent){
+                    console.log("three object found in database", url)
+                    let object = objLoader.parse(result.content.text)
+                    resolve(object)
+                }else{
+                    objLoader.load(url, (object, text) => {
+                        console.log("storing three object in database", url)
+                        IDB.put("three", {
+                            url: url,
+                            text: text
+                        })
+                        resolve(object)
+                    })
+                }
+            })
+        })
     }
 
     constructor(databaseName, databaseVersion){

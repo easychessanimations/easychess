@@ -400,12 +400,10 @@ class ThreeBoard_ extends SmartDomElement{
 
         if(numMissingPieces){
             // load missing pieces
-            this.objLoader = new THREE.OBJLoader()
-
             let numLoadedPieces = 0
 
             for(let threePieceKind of missingPieces)
-            this.objLoader.load(THREE_PIECE_MODELS_PATH + "/" + threePieceKind + ".obj", object => {
+            IDB.loadThreeObject(THREE_PIECE_MODELS_PATH + "/" + threePieceKind + ".obj").then(object => {
                 object.traverse( child => {        
                     if (child instanceof THREE.Mesh) {                       
                         child.rotation.x = DEFAULT_PIECE_ROTATION_X

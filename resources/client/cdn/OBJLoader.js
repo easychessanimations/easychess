@@ -20,7 +20,7 @@ THREE.OBJLoader.prototype = {
 		loader.setCrossOrigin( this.crossOrigin );
 		loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( text ) );
+			onLoad( scope.parse( text ), text );
 
 		}, onProgress, onError );
 
