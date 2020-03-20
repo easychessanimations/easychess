@@ -1,4 +1,4 @@
-const THREE_PIECE_MODELS_PATH = "/resources/client/model/piece"
+const THREE_PIECE_MODELS_PATH = "https://unpkg.com/@aestheticbookshelf/threejs3dchesspieces/lib"
 const DEFAULT_BOARD_PATTERN_PATH = "resources/client/texture/board/board-pattern.png"
 
 const DEFAULT_PIECE_ROTATION_X = 1.6
