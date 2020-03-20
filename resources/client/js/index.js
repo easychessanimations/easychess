@@ -2989,7 +2989,7 @@ class App extends SmartDomElement{
         )
 
         if(PROPS.USER){
-            if(PROPS.USER._json) if(PROPS.USER._json.perfs instanceof Array) authDiv.a(
+            if(PROPS.USER._json) if(PROPS.USER._json.perfs instanceof Object) authDiv.a(
                 table().marl(15).sa("cellpadding", 10).sa("border", 1).a(
                     Object.entries(PROPS.USER._json.perfs).map(perf => tr().a(
                         td().html(perf[0]).c("#00f"),
