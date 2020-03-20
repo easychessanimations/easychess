@@ -29,7 +29,8 @@ if(process.env.BOT_TOKEN && (!process.env.SKIP_BOT)){
 
 const express = require('express')
 var passport = require('passport');
-var Strategy = require('passport-lichess').Strategy;
+var LichessStrategy = require('passport-lichess').Strategy;
+var DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path')
 const spawn = require('child_process').spawn
 const fs = require('fs')
@@ -47,7 +48,7 @@ var firestore = null
 if(process.env.SKIP_OAUTH){
     console.log("skip oauth")
 }else{
-    passport.use(new Strategy({
+    passport.use(new LichessStrategy({
         clientID: process.env.LICHESS_CLIENT_ID,
         clientSecret: process.env.LICHESS_CLIENT_SECRET,
         callbackURL: IS_DEV() ?
@@ -62,7 +63,23 @@ if(process.env.SKIP_OAUTH){
     }
     ))
 
-    passport.use('lichess-bot', new Strategy({
+    passport.use("discord", new DiscordStrategy({
+        clientID: process.env.DISCORD_CLIENT_ID,
+        clientSecret: process.env.DISCORD_CLIENT_SECRET,
+        scope: "identify",
+        callbackURL: IS_DEV() ?
+            'http://localhost:3000/auth/discord/callback'
+        :
+            `https://${SITE_HOST}/auth/discord/callback`
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
+        profile.accessToken = accessToken
+        return cb(null, profile)
+    }
+    ))
+
+    passport.use('lichess-bot', new LichessStrategy({
         clientID: process.env.LICHESS_BOT_CLIENT_ID,
         clientSecret: process.env.LICHESS_BOT_CLIENT_SECRET,
         scope: "challenge:read challenge:write bot:play",
@@ -184,6 +201,19 @@ if(!process.env.SKIP_OAUTH){
 
     app.get('/auth/lichess/callback', 
         passport.authenticate('lichess', { failureRedirect: '/?login=failed' }),
+            function(req, res) {
+                res.redirect(IS_DEV() ?
+                    'http://localhost:3000/?login=ok'
+                :
+                    `https://${SITE_HOST}/?login=ok`)
+            }
+    )
+
+    app.get('/auth/discord',
+    passport.authenticate('discord'))
+
+    app.get('/auth/discord/callback', 
+        passport.authenticate('discord', { failureRedirect: '/?login=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
                     'http://localhost:3000/?login=ok'
