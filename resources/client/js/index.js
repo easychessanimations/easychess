@@ -2,6 +2,7 @@
 // config
 
 const DISCORD_LOGIN_URL         = "auth/discord"
+const GITHUB_LOGIN_URL          = "auth/github"
 
 const urlParams                 = new URLSearchParams(window.location.search)
 
@@ -2537,6 +2538,10 @@ class App extends SmartDomElement{
         document.location.href = DISCORD_LOGIN_URL
     }
 
+    loginWithGitHub(){
+        document.location.href = GITHUB_LOGIN_URL
+    }
+
     loginWithLichessBot(){
         document.location.href = LICHESS_BOT_LOGIN_URL
     }
@@ -2982,6 +2987,7 @@ class App extends SmartDomElement{
             div().dfc().mar(5).a(                
                 Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(GREEN_BUTTON_COLOR),
                 Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(BLUE_BUTTON_COLOR),
+                Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(RED_BUTTON_COLOR),
                 Button("Login with lichess-bot", this.loginWithLichessBot.bind(this)).fs(20).mar(5).pad(5).bc(YELLOW_BUTTON_COLOR),                
                 Button("Set Password", this.setPassword.bind(this)).mar(5).marl(10).bc(BLUE_BUTTON_COLOR),
                 Button("Clear Password", this.clearPassword.bind(this)).mar(5).bc(RED_BUTTON_COLOR),                

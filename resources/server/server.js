@@ -31,6 +31,7 @@ const express = require('express')
 var passport = require('passport');
 var LichessStrategy = require('passport-lichess').Strategy;
 var DiscordStrategy = require('passport-discord').Strategy;
+var GitHubStrategy = require('passport-github').Strategy;
 const path = require('path')
 const spawn = require('child_process').spawn
 const fs = require('fs')
@@ -71,6 +72,22 @@ if(process.env.SKIP_OAUTH){
             'http://localhost:3000/auth/discord/callback'
         :
             `https://${SITE_HOST}/auth/discord/callback`
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
+        profile.accessToken = accessToken
+        return cb(null, profile)
+    }
+    ))
+
+    passport.use("github", new GitHubStrategy({
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        scope: "",
+        callbackURL: IS_DEV() ?
+            'http://localhost:3000/auth/github/callback'
+        :
+            `https://${SITE_HOST}/auth/github/callback`
     },
     function(accessToken, refreshToken, profile, cb) {
         clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
@@ -214,6 +231,19 @@ if(!process.env.SKIP_OAUTH){
 
     app.get('/auth/discord/callback', 
         passport.authenticate('discord', { failureRedirect: '/?login=failed' }),
+            function(req, res) {
+                res.redirect(IS_DEV() ?
+                    'http://localhost:3000/?login=ok'
+                :
+                    `https://${SITE_HOST}/?login=ok`)
+            }
+    )
+
+    app.get('/auth/github',
+    passport.authenticate('github'))
+
+    app.get('/auth/github/callback', 
+        passport.authenticate('github', { failureRedirect: '/?login=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
                     'http://localhost:3000/?login=ok'
