@@ -377,15 +377,15 @@ class Board_ extends SmartDomElement{
                 div()
                     .pad(1).w(80)
                     .html(item.san).fs(26).fwb().cp()
-                    .ae("mousedown", this.parentApp().moveClicked.bind(this.parentApp(), item.detailedmove)),
+                    .ae("mousedown", this.parentApp.moveClicked.bind(this.parentApp, item.detailedmove)),
                 div()
                     .pad(1).w(100).cp()                    
                     .html(`${item.scorenumerical}`).fs(22).fwb()
-                    .ae("mousedown", this.parentApp().addLegalMove.bind(this.parentApp(), item.detailedmove, 0)),
+                    .ae("mousedown", this.parentApp.addLegalMove.bind(this.parentApp, item.detailedmove, 0)),
                 div()
                     .c("#00a").fwb().cp()
                     .html(`${lastcompleteddepth}`)
-                    .ae("mousedown", this.parentApp().addLegalMove.bind(this.parentApp(), item.detailedmove, 1)),
+                    .ae("mousedown", this.parentApp.addLegalMove.bind(this.parentApp, item.detailedmove, 1)),
             )
     }
 
@@ -463,7 +463,7 @@ class Board_ extends SmartDomElement{
             .a(                
                 this.createAnalysisInfoSummary(richanalysisinfo),
                 richanalysisinfo.isLive ? div() :
-                    Button("Delete", this.parentApp().deleteAnalysis.bind(this.parentApp()))
+                    Button("Delete", this.parentApp.deleteAnalysis.bind(this.parentApp))
                         .mart(20).marl(180).bc(RED_BUTTON_COLOR),
             )
         }
