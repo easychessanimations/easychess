@@ -2062,6 +2062,66 @@ class a_ extends SmartDomElement{
 }
 function a(props){return new a_(props)}
 
+class ThreeAssemblyItem{
+    constructor(object, delta){
+        this.object = object
+        this.delta = delta || new THREE.Vector3(0, 0, 0)
+    }
+}
+
+class ThreeAssembly{
+    constructor(){
+        this.origo = new THREE.Vector3(0, 0, 0)
+        this.items = []
+    }
+
+    rotateOnAxis(v3, angle){
+        for(let item of this.items){
+            item.object.rotateOnAxis(v3, angle)
+        }
+        return this
+    }
+
+    applyAxisAngle(v3, angle){
+        for(let item of this.items){
+            item.delta.applyAxisAngle(v3, angle)
+        }
+        return this.calculate()
+    }
+
+    calculate(){
+        for(let item of this.items){
+            let pv = this.origo.clone().add(item.delta)
+            item.object.position.x = pv.x
+            item.object.position.y = pv.y
+            item.object.position.z = pv.z
+        }
+        return this
+    }
+
+    setOrigo(o){
+        this.origo = o
+        return this.calculate()
+    }
+
+    add(item){
+        this.items.push(item)
+        return this
+    }
+
+    addToScene(scene){
+        for(let item of this.items){
+            scene.add(item.object)
+        }
+    }
+
+    removeFromScene(scene){
+        for(let item of this.items){
+            scene.remove(item.object)
+        }
+    }
+}
+
 class ThreeRenderer_ extends SmartDomElement{
     render(){
         this.renderer.render(this.scene, this.camera)
@@ -2073,10 +2133,11 @@ class ThreeRenderer_ extends SmartDomElement{
         return this.groups[name]
     }
 
-    addToGroup(name, object){
+    addToGroup(name, tha){
         this.getGroup(name)
-        this.groups[name].push(object)
-        this.scene.add(object)
+        this.groups[name].push(tha)
+        if(tha instanceof ThreeAssembly) tha.addToScene(this.scene)
+        else this.scene.add(tha)
     }
 
     clearGroup(name){
@@ -2085,8 +2146,9 @@ class ThreeRenderer_ extends SmartDomElement{
     }
 
     removeGroup(name){        
-        for(let object of this.getGroup(name)){
-            this.scene.remove(object)
+        for(let tha of this.getGroup(name)){
+            if(tha instanceof ThreeAssembly) tha.removeFromScene(this.scene)
+            else this.scene.remove(tha)
         }
         this.clearGroup(name)
     }

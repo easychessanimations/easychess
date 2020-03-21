@@ -1,9 +1,9 @@
 const THREE_PIECE_MODELS_PATH = "https://unpkg.com/@aestheticbookshelf/threejs3dchesspieces/lib"
 const DEFAULT_BOARD_PATTERN_PATH = "resources/client/texture/board/board-pattern.png"
 
-const DEFAULT_PIECE_ROTATION_X = 1.6
-const DEFAULT_PIECE_ROTATION_Y = 1.7
-const DEFAULT_PIECE_ROTATION_Z = -.1
+const DEFAULT_PIECE_ROTATION_X = Math.PI / 2
+const DEFAULT_PIECE_ROTATION_Y = Math.PI / 2
+const DEFAULT_PIECE_ROTATION_Z = 0
 
 const THREE_BOARD_PIECE_NAMES = [
     "Pawn",
@@ -32,50 +32,87 @@ class ThreeBoard_ extends SmartDomElement{
     }
 
     createPiece(piece){
-        let threePiece
+        let threePiece, plusKnight
+
+        let tha = new ThreeAssembly()
 
         switch(piece.kind){
             case "p":
                 threePiece = THREE_PIECE_CACHE["Pawn"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "n":
                 threePiece = THREE_PIECE_CACHE["Knight"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "b":
                 threePiece = THREE_PIECE_CACHE["Bishop"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "r":
                 threePiece = THREE_PIECE_CACHE["Rook"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "q":
                 threePiece = THREE_PIECE_CACHE["Queen"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "k":
                 threePiece = THREE_PIECE_CACHE["King"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
                 break
             case "e":
                 threePiece = THREE_PIECE_CACHE["Rook"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece, new THREE.Vector3(
+                    -this.BOARD_GRID_SIZE*0.25,
+                    -this.BOARD_GRID_SIZE*0.25,
+                    0
+                )))
+                plusKnight = THREE_PIECE_CACHE["Knight"].clone()
+                plusKnight.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(plusKnight, new THREE.Vector3(
+                    this.BOARD_GRID_SIZE*0.25,
+                    this.BOARD_GRID_SIZE*0.25,
+                    0
+                )))
                 break
             case "h":
                 threePiece = THREE_PIECE_CACHE["Bishop"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece, new THREE.Vector3(
+                    -this.BOARD_GRID_SIZE*0.25,
+                    -this.BOARD_GRID_SIZE*0.25,
+                    0
+                )))
+                plusKnight = THREE_PIECE_CACHE["Knight"].clone()
+                plusKnight.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(plusKnight, new THREE.Vector3(
+                    this.BOARD_GRID_SIZE*0.25,
+                    this.BOARD_GRID_SIZE*0.25,
+                    0
+                )))
                 break
         }        
 
         threePiece.material = new THREE.MeshLambertMaterial({color: piece.color ? 0xffffff : 0x00ff00})                                
+        if(plusKnight) plusKnight.material = new THREE.MeshLambertMaterial({color: piece.color ? 0xffffff : 0x00ff00})                                
 
-        if(piece.color) threePiece.rotation.y += Math.PI
+        if(piece.color){
+            tha.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI)            
+        }else{
+            tha.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)            
+        }
 
-        this.threeRenderer.addToGroup("pieces", threePiece)
+        this.threeRenderer.addToGroup("pieces", tha)
 
-        return threePiece
+        return tha
     }
 
     squareCoords(sq){
@@ -90,29 +127,20 @@ class ThreeBoard_ extends SmartDomElement{
 
     placePieceAtSquare(piece, sq, dx, dy, dz){
         let sqmcs = this.squareMiddleCoords(sq)
-        piece.position.set(sqmcs.x + (dx || 0), sqmcs.y + (dy || 0), dz || this.BOARD_THICKNESS/2)
+        piece.setOrigo(new THREE.Vector3(
+            sqmcs.x + (dx || 0),
+            sqmcs.y + (dy || 0),
+            dz || this.BOARD_THICKNESS/2
+        ))
     }
 
     drawPieces(){
         for(let sq of ALL_SQUARES){
             let p = this.board.pieceatsquare(sq)
             if(!p.isempty()){                
-                let piece = this.createPiece(p)                
-
-                if((p.kind == "e") || (p.kind == "h")){
-                    this.placePieceAtSquare(piece, sq,
-                        -this.BOARD_GRID_SIZE*0.2,
-                        -this.BOARD_GRID_SIZE*0.15 * ( p.color ? 1 : -1 )
-                    )
-
-                    let plusKnight = this.createPiece(Piece("n", p.color))                    
-                    this.placePieceAtSquare(plusKnight, sq,
-                        this.BOARD_GRID_SIZE*0.25,
-                        this.BOARD_GRID_SIZE*0.15 * ( p.color ? 1 : -1 )
-                    )
-                }else{
-                    this.placePieceAtSquare(piece, sq)
-                }
+                let piece = this.createPiece(p)
+                
+                this.placePieceAtSquare(piece, sq)
             }
         }
     }
