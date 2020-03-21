@@ -1,6 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const MOVESDIV_HEIGHT_CORRECTION    = 36
+const PGN_TEXT_AREA_HEIGHT          = 123
+
 const DISCORD_LOGIN_URL         = "auth/discord"
 const GITHUB_LOGIN_URL          = "auth/github"
 
@@ -26,7 +29,7 @@ const LOAD_LICHESS_USERS_DELAY  = 5000
 
 const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
-const GAME_TEXT_AREA_HEIGHT     = 130
+const GAME_TEXT_AREA_HEIGHT     = 95
 const GAME_TEXT_AREA_WIDTH      = 882
 const COMMENT_TEXT_AREA_WIDTH   = 310
 
@@ -35,6 +38,7 @@ const THUMB_SIZE                = 150
 const GREEN_BUTTON_COLOR        = "#afa"
 const BLUE_BUTTON_COLOR         = "#aaf"
 const CYAN_BUTTON_COLOR         = "#aff"
+const MAGENTA_BUTTON_COLOR      = "#faf"
 const RED_BUTTON_COLOR          = "#faa"
 const YELLOW_BUTTON_COLOR       = "#ffa"
 const IDLE_BUTTON_COLOR         = "#eee"
@@ -402,6 +406,10 @@ class App extends SmartDomElement{
     }
 
     selectQueryTab(){
+        let ubertab = urlParams.get("ubertab")
+        if(ubertab){
+            this.ubertabs.selectTab(ubertab)
+        }
         let tab = urlParams.get("tab")
         if(tab){
             let parts = tab.split("/")        
@@ -1771,7 +1779,7 @@ class App extends SmartDomElement{
         lms.sort((a,b) => (b.sortweight - a.sortweight))
 
         this.movesDiv.x().ame(
-            div().hh(this.board.boardsize() - 5).df().a(
+            div().hh(this.board.boardsize() - MOVESDIV_HEIGHT_CORRECTION).df().a(
                 div().ovfys().a(
                     lms.map(lm => this.createNodeForLegalMove(lm))
                 ),
@@ -1788,7 +1796,7 @@ class App extends SmartDomElement{
                 ),
             ),
             this.pgnText = TextAreaInput()
-                .mart(4).w(GAME_TEXT_AREA_WIDTH).h(GAME_TEXT_AREA_HEIGHT - 3)
+                .mart(4).w(GAME_TEXT_AREA_WIDTH).hh(PGN_TEXT_AREA_HEIGHT)
                 .ae("paste", this.pgnPasted.bind(this))
                 .ae("dblclick", this.pgnClicked.bind(this)),
             )
@@ -2815,7 +2823,7 @@ class App extends SmartDomElement{
     }
 
     createTabPanes(){
-        let username = PROPS.USER ? PROPS.USER.username : "_ Auth _"
+        let username = PROPS.USER ? USER_QUALIFIED_NAME() : "_ LOGIN _"
 
         this.gamesTabPane = TabPane({id: "gamestabpane"}).setTabs([
             Tab({id: "games", caption: "Fresh games", content: this.gamesDiv}),
@@ -2866,20 +2874,14 @@ class App extends SmartDomElement{
             Tab({id: "anims", caption: "Anims", content: this.animsTabPane})
                 .toolTip({msg: "Animations"}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv})
-                .toolTip({msg: "Backup application state"}),            
-            Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
-                .toolTip({msg: "Settings"}),
+                .toolTip({msg: "Backup application state"}),                        
             Tab({id: "users", caption: "Users", content: this.lichessUsersDiv})
                 .toolTip({msg: "Lichess users"}),
             Tab({id: "tools", caption: "Tools", content: this.toolsTabPane})
-                .toolTip({msg: "Tools ( FEN, PGN, Study )"}),
-            Tab({id: "about", caption: "About", content: this.aboutDiv})
-                .toolTip({msg: "About easychess, ReadMe"}),
-            Tab({id: "auth", caption: username, content: this.authDiv})
-                .toolTip({msg: "User login"}),            
+                .toolTip({msg: "Tools ( FEN, PGN, Study )"})
         ])
 
-        this.containerPane = SplitPane({            
+        this.containerPane = SplitPane({                        
             row: true,            
             headsize: this.board.boardsize(),
             headSelectable: true,
@@ -2893,9 +2895,25 @@ class App extends SmartDomElement{
                 .h(GAME_TEXT_AREA_HEIGHT + scrollBarSize())
         ))
 
+        this.containerDiv = div().a(this.containerPane)
+
+        this.containerDiv.resize = (width, height) => this.containerPane.resize(width, height)
+        this.containerDiv.noScroll = true
+
+        this.ubertabs = TabPane({id: "ubertabpane"}).setTabs([            
+            Tab({id: "analyze", caption: "Analyze", content: this.containerDiv})
+                .toolTip({msg: "Analyze"}),            
+            Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
+                .toolTip({msg: "Settings"}),            
+            Tab({id: "about", caption: "About", content: this.aboutDiv})
+                .toolTip({msg: "About easychess, ReadMe"}),
+            Tab({id: "auth", caption: username, content: this.authDiv})
+                .toolTip({msg: "User login"}),            
+        ])
+
         this.containerPane.setContent(this.tabs)
 
-        this.mainPane.setContent(this.containerPane)
+        this.mainPane.setContent(this.ubertabs)
 
         this.mainPane.headDiv.ffm().jc("initial").bc("#eee").c("#00f")
 
@@ -2984,13 +3002,17 @@ class App extends SmartDomElement{
 
     renderAuthDiv(){
         let authDiv = div().a(
-            div().dfc().mar(5).a(                
-                Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(GREEN_BUTTON_COLOR),
-                Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(BLUE_BUTTON_COLOR),
-                Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(RED_BUTTON_COLOR),
-                Button("Login with lichess-bot", this.loginWithLichessBot.bind(this)).fs(20).mar(5).pad(5).bc(YELLOW_BUTTON_COLOR),                
-                Button("Set Password", this.setPassword.bind(this)).mar(5).marl(10).bc(BLUE_BUTTON_COLOR),
-                Button("Clear Password", this.clearPassword.bind(this)).mar(5).bc(RED_BUTTON_COLOR),                
+            div().bc("#777").pad(10).mar(5).a(                
+                div().tac().bdr("solid", 5, "#fff", 20).bc("#000").pad(10).a(
+                    Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(GREEN_BUTTON_COLOR),
+                    Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(CYAN_BUTTON_COLOR),
+                    Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(MAGENTA_BUTTON_COLOR),
+                    Button("Login with lichess-bot", this.loginWithLichessBot.bind(this)).fs(20).mar(5).pad(5).bc(YELLOW_BUTTON_COLOR),                
+                ),
+                div().tac().op(0.3).mart(10).a(
+                    Button("Set Password", this.setPassword.bind(this)).mar(5).marl(10).bc(BLUE_BUTTON_COLOR),
+                    Button("Clear Password", this.clearPassword.bind(this)).mar(5).bc(RED_BUTTON_COLOR),                
+                )
             )            
         )
 

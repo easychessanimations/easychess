@@ -1,5 +1,40 @@
 const P = p => new Promise(p)
 
+function GET_USER(){    
+    if(typeof PROPS == "object"){
+        return PROPS.USER
+    }else{
+        return {}
+    }
+}
+
+function PROVIDER(){
+    return GET_USER().provider
+}
+
+function IS_PROVIDER(provider){
+    return PROVIDER() == provider
+}
+
+function IS_LICHESS_PROVIDER(){
+    return IS_PROVIDER("lichess")
+}
+
+function IS_DISCORD_PROVIDER(){
+    return IS_PROVIDER("discord")
+}
+
+function IS_GITHUB_PROVIDER(){
+    return IS_PROVIDER("github")
+}
+
+function USER_QUALIFIED_NAME(){
+    let USER = GET_USER()
+    let qn = USER.username || "Anonymous"
+    if(USER.provider) qn += ` ( ${USER.provider} )`
+    return qn
+}
+
 const RP = value => P(resolve => {
     resolve(value)
 })

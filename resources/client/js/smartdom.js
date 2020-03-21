@@ -273,6 +273,7 @@ class SmartDomElement{
     ai(x){return this.addStyle("alignItems", x)}    
     jc(x){return this.addStyle("justifyContent", x)}    
     dfc(){return this.df().ai("center")}
+    dfco(){return this.df().fd("column")}
     dfcc(){return this.df().fd("column").ai("center")}
     dfca(){return this.dfc().jc("space-around")}
     flw(x){return this.addStyle("flexWrap", x)}    
@@ -1764,7 +1765,12 @@ class TabPane_ extends SplitPane_{
             return tab.content.show(tab == this.selected)
         }))        
         if(this.selected){            
-            if(!(this.selected.content instanceof TabPane_)) this.bodyDiv.ovf("scroll")
+            if(
+                (!(this.selected.content instanceof TabPane_))
+                &&
+                (!(this.selected.content.noScroll))
+            )
+                this.bodyDiv.ovf("scroll")
             try{                                
                 this.selected.content.resize(this.bodyWidth, this.bodyHeight)                
             }catch(err){}            
