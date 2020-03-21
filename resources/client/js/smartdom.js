@@ -1758,10 +1758,14 @@ class Tab_ extends SmartDomElement{
 
     build(){
         this.x()
-        .bc(this.isSelected ? "#fff" : "#ccc")
+        .bc(this.isSelected ?
+            this.props.selBackgroundColor || "#fff"
+        :
+            this.props.backgroundColor || "#ccc"
+        )
         .a(div().dfc().a(
-            div().html(this.props.caption),
-            div().fwb().marl(5).html(this.props.alert ? this.props.alert : "").c("#00f"),
+            div().html(this.props.caption).marl(3),
+            div().fwb().marl(3).html(this.props.alert ? this.props.alert : "").c("#00f"),
         ))
         return this
     }

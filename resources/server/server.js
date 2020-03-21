@@ -494,6 +494,11 @@ setInterval(function(){
     ssesend({kind: "tick"})
 }, QUERY_INTERVAL)
 
+app.get('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/')
+})
+
 app.get('/', (req, res) => res.send(`
 <!DOCTYPE html>
 <html lang="en">

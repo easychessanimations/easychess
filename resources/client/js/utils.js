@@ -1,7 +1,16 @@
 const P = p => new Promise(p)
 
+function HAS_PROPS(){
+    return typeof PROPS == "object"
+}
+
+function HAS_USER(){
+    if(!HAS_PROPS()) return false
+    return typeof PROPS.USER == "object"
+}
+
 function GET_USER(){    
-    if(typeof PROPS == "object"){
+    if(HAS_PROPS()){
         return PROPS.USER || {}
     }else{
         return {}

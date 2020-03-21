@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const MAKE_THREE_DELAY              = 1000
+
 const MOVESDIV_HEIGHT_CORRECTION    = 36
 const PGN_TEXT_AREA_HEIGHT          = 120
 
@@ -49,6 +51,11 @@ const PROVIDER_BACKGROUND_COLORS = {
     "github": MAGENTA_BUTTON_COLOR
 }
 
+function getProviderBackgroundColor(){
+    let provider = PROVIDER()
+    if(!provider) return "#fff"
+    return PROVIDER_BACKGROUND_COLORS[provider] || "#777"
+}
 
 const TREE_SEED                 = 10
 
@@ -394,12 +401,16 @@ class App extends SmartDomElement{
 
         setTimeout(this.selectQueryTab.bind(this), 500)
 
-        this.doLater("makeThreeAnimationDiv", 3000)
-        this.doLater("makeThreeBoardDiv", 2000)
+        this.doLater("makeThreeAnimationDiv", MAKE_THREE_DELAY * 2)
+        this.doLater("makeThreeBoardDiv", MAKE_THREE_DELAY)
     }
 
     makeThreeBoardDiv(){
-        this.threeBoardDiv.x().am(this.renderThreeBoardDiv())
+        if(this.settings.disable3dBoardCheckbox.checked){
+            this.threeBoardDiv.x().a(this.renderMissingContent("disabled"))
+        }else{
+            this.threeBoardDiv.x().am(this.renderThreeBoardDiv())
+        }        
     }
 
     renderMissingContent(info){
@@ -1986,6 +1997,8 @@ class App extends SmartDomElement{
     }
 
     render3d(){
+        if(this.settings.disable3dBoardCheckbox.checked) return
+
         if(this.threeBoard.ready) this.threeBoard.setFromGame(this.g)
         else this.doLater("render3d", 1000)
     }
@@ -2856,7 +2869,7 @@ class App extends SmartDomElement{
     }
 
     createTabPanes(){
-        let username = PROPS.USER ? USER_QUALIFIED_NAME() : "_ LOGIN _"
+        let username = PROPS.USER ? USER_QUALIFIED_NAME() : "LOGIN"
 
         this.gamesTabPane = TabPane({id: "gamestabpane"}).setTabs([
             Tab({id: "games", caption: "Fresh games", content: this.gamesDiv}),
@@ -2940,7 +2953,15 @@ class App extends SmartDomElement{
                 .toolTip({msg: "Settings"}),            
             Tab({id: "about", caption: "About", content: this.aboutDiv})
                 .toolTip({msg: "About easychess, ReadMe"}),
-            Tab({id: "auth", caption: username, content: this.authDiv})
+            Tab({
+                id: "auth",
+                caption: username,
+                content: this.authDiv,
+                backgroundColor: getProviderBackgroundColor(),
+                selBackgroundColor: getProviderBackgroundColor(),                
+            })                
+                .ac(HAS_USER() ? "hasuser" : "blink_me")
+                .bdr("solid", HAS_USER() ? 0 : 2, HAS_USER() ? "#777" : "#0f0")
                 .toolTip({msg: "User login"}),            
         ])
 
@@ -3033,6 +3054,10 @@ class App extends SmartDomElement{
         localStorage.removeItem(PASSWORD_KEY)
     }
 
+    logOut(){
+        document.location.href = "/logout"
+    }
+
     renderAuthDiv(){
         let authDiv = div().a(
             div().bc("#777").pad(10).mar(5).a(                
@@ -3041,6 +3066,7 @@ class App extends SmartDomElement{
                     Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["discord"]),
                     Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["github"]),
                     Button("Login with lichess-bot", this.loginWithLichessBot.bind(this)).fs(20).mar(5).pad(5).bc(YELLOW_BUTTON_COLOR),                
+                    HAS_USER() ? Button("Log out", this.logOut.bind(this)).fs(20).mar(5).pad(5).bc("#f00").marl(50) : div(),                
                 ),
                 div().tac().op(0.3).mart(10).a(
                     Button("Set Password", this.setPassword.bind(this)).mar(5).marl(10).bc(BLUE_BUTTON_COLOR),
@@ -3217,6 +3243,11 @@ class App extends SmartDomElement{
                     display: "Variant",                                        
                     options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
                     selected: DEFAULT_VARIANT,
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "disable3dBoardCheckbox",                    
+                    display: "Disable 3d board",
                     settings: this.settings
                 }),
                 CheckBoxInput({
