@@ -701,9 +701,23 @@ class Combo_ extends SmartDomElement{
         if(this.props.changeCallback) this.props.changeCallback(this.value())
     }
 
-    init(){        
-        this.ae("change", this.change.bind(this))              
-        if(typeof this.state.selected == "undefined") this.state.selected = this.props.selected
+    getSelIndex(){
+        return this.props.options.findIndex(opt => opt.value == this.state.selected)        
+    }
+
+    step(delta){
+        let index = this.getSelIndex()
+        if(index >= 0){
+            index += delta
+            if(index >= this.props.options.length) index = this.props.options.length - 1
+            if(index < 0) index = 0
+            this.state.selected = this.props.options[index].value
+            this.buildAndStoreState()
+            if(this.props.changeCallback) this.props.changeCallback(this.value())
+        }
+    }
+
+    buildAndStoreState(){
         this.x().ame(
             this.props.options.map(option => (
                 ComboOption({value: option.value, display: option.display, selected: option.value == this.state.selected})
@@ -711,8 +725,33 @@ class Combo_ extends SmartDomElement{
         )
         this.storeState()
     }
+
+    init(){        
+        this.ae("change", this.change.bind(this))              
+        if(typeof this.state.selected == "undefined") this.state.selected = this.props.selected
+        this.buildAndStoreState()
+    }
 }
 function Combo(props){return new Combo_(props)}
+
+class IncCombo_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)        
+    }
+
+    step(delta){
+        this.combo.step(delta)
+    }
+
+    init(){        
+        this.dfc().ame(
+            Button("-", this.step.bind(this, -1)),
+            this.combo = Combo(this.props),
+            Button("+", this.step.bind(this, 1))
+        )
+    }
+}
+function IncCombo(props){return new IncCombo_(props)}
 
 class OptionElement_ extends SmartDomElement{
     constructor(props){

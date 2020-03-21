@@ -361,7 +361,7 @@ class ThreeBoard_ extends SmartDomElement{
                         .ae("mousemove click", this.handleMouseMove.bind(this))
                         .ae("mouseout", this.clearSquareHighlightRender.bind(this)),
                     div().bc("#ccc").pad(1).mar(1).poa().easeOnOut().a(
-                        Labeled("&nbsp;Rot X (deg) ", Combo({                    
+                        Labeled("&nbsp;Rot X (deg) ", IncCombo({                    
                             id: "rotXCombo",                    
                             display: "Rot X (deg)",                                        
                             options: Array(19).fill(null).map((_, i) => ({value: i*5, display: i*5})),
@@ -369,7 +369,7 @@ class ThreeBoard_ extends SmartDomElement{
                             settings: this.settings,
                             changeCallback: this.draw.bind(this)
                         })).bc("#eee"),
-                        Labeled("&nbsp;Rot Z (deg) ", Combo({                    
+                        Labeled("&nbsp;Rot Z (deg) ", IncCombo({                    
                             id: "rotZCombo",                    
                             display: "Rot Z (deg)",                                        
                             options: Array(19).fill(null).map((_, i) => ({value: (i-9)*5, display: (i-9)*5})),
