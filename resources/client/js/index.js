@@ -290,7 +290,8 @@ class App extends SmartDomElement{
 
         this.movesDiv = div()
 
-        this.threeBoardDiv = this.renderThreeBoardDiv()
+        this.threeBoard = {}
+        this.threeBoardDiv = div()
 
         this.movesDiv.resize = this.positionchanged.bind(this)
 
@@ -332,7 +333,7 @@ class App extends SmartDomElement{
 
         this.smartdomDiv = this.renderSmartdomDiv()
 
-        this.threeDiv = this.renderThreeDiv()
+        this.threeAnimationDiv = div()
 
         this.tourneyDiv = this.renderTourneyDiv()
 
@@ -385,8 +386,6 @@ class App extends SmartDomElement{
             this.doLater("botStartUp", BOT_STARTUP_DELAY)
         }
 
-        this.doLater("initThreeRenderer", 1000)
-
         this.buildStudies()
 
         this.setInfoBar("Welcome to easychess.")
@@ -394,9 +393,36 @@ class App extends SmartDomElement{
         setTimeout(this.smartdomChanged.bind(this, !DO_ALERT), 1000)
 
         setTimeout(this.selectQueryTab.bind(this), 500)
+
+        this.doLater("makeThreeAnimationDiv", 3000)
+        this.doLater("makeThreeBoardDiv", 2000)
     }
 
-    renderThreeBoardDiv(){
+    makeThreeBoardDiv(){
+        this.threeBoardDiv.x().am(this.renderThreeBoardDiv())
+    }
+
+    renderMissingContent(info){
+        return div().a(
+            div(),
+            div()
+                .mar(5).pad(5).bc("#faa").fs(20).fwb()
+                .html(`Content missing. Reason : ${info} .`)
+        )
+    }
+
+    makeThreeAnimationDiv(){
+        if(!this.settings.allowThreeAnimationCheckbox.checked){
+            this.threeAnimationDiv.x().a(this.renderMissingContent("disabled"))
+            return
+        }
+
+        this.threeAnimationDiv.x().am(this.renderThreeAnimationDiv())
+
+        this.initThreeRenderer()
+    }
+
+    renderThreeBoardDiv(){        
         return div().a(
             div().mar(5).a(
                 this.threeBoard = ThreeBoard({
@@ -726,9 +752,7 @@ class App extends SmartDomElement{
         }
     }
 
-    initThreeRenderer(){
-        if(IS_DEV()) return
-        
+    initThreeRenderer(){        
         this.THREE_WIDTH = 400
         this.THREE_HEIGHT = 400
 
@@ -795,9 +819,7 @@ class App extends SmartDomElement{
         this.threeRenderer.render()
     }
 
-    renderThreeDiv(){
-        if(IS_DEV()) return div().html("Production only.")
-
+    renderThreeAnimationDiv(){
         return div().a(
             this.threeControlDiv = div().disp("none").a(
                 Button("Animate", this.animateThree.bind(this)),
@@ -2784,7 +2806,7 @@ class App extends SmartDomElement{
     }
 
     renderAboutDiv(){
-        if(IS_DEV()) return div().html("Production only .")
+        if(IS_DEV()) return this.renderMissingContent("production only")
 
         let aboutDiv = div()
 
@@ -2861,7 +2883,7 @@ class App extends SmartDomElement{
             Tab({id: "multiPGN", caption: "Multi PGN", content: this.multiPGNDiv}),
             Tab({id: "fen", caption: "FEN", content: this.fenDiv}),
             Tab({id: "study", caption: "Studies", content: this.studyDiv}),
-            Tab({id: "three", caption: "Three", content: this.threeDiv}),
+            Tab({id: "threeanimation", caption: "Three Animation", content: this.threeAnimationDiv}),
             Tab({id: "smartdom", caption: "Smartdom", content: this.smartdomDiv}),
             Tab({id: "tourney", caption: "Tourney", content: this.tourneyDiv}),
         ])
@@ -3307,6 +3329,11 @@ class App extends SmartDomElement{
                 CheckBoxInput({
                     id: "showAnalysisInBoardCheckbox",                    
                     display: "Show analysis in board",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowThreeAnimationCheckbox",                    
+                    display: "Allow three animation",                                        
                     settings: this.settings
                 }),
             ]
