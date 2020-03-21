@@ -265,7 +265,7 @@ class Board_ extends SmartDomElement{
     drawSquares(){        
         let backgroundcanvas = this.getCanvasByName("background")
 
-        backgroundcanvas.loadBackgroundImage(`resources/client/img/backgrounds/${getLocal("app/maintabpane/boardBackgroundCombo", {selected: DEFAULT_BOARD_BACKGROUND}).selected}`, Vect(this.boardsize(), this.boardsize()))
+        backgroundcanvas.loadBackgroundImage(`resources/client/img/backgrounds/${getLocal("app/ubertabpane/boardBackgroundCombo", {selected: DEFAULT_BOARD_BACKGROUND}).selected}`, Vect(this.boardsize(), this.boardsize()))
 
         let squarecanvas = this.getCanvasByName("square").op(this.squareopacity)
         

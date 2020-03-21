@@ -28,7 +28,7 @@ THREE.OBJLoader.prototype = {
 
 	parse: function ( text ) {
 
-		console.time( 'OBJLoader' );
+		//console.time( 'OBJLoader' );
 
 		var object, objects = [];
 		var geometry, material;
@@ -343,14 +343,14 @@ THREE.OBJLoader.prototype = {
 
 			var buffergeometry = new THREE.BufferGeometry();
 
-			buffergeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geometry.vertices ), 3 ) );
+			buffergeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geometry.vertices ), 3 ) );
 
 			if ( geometry.normals.length > 0 ) {
-				buffergeometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geometry.normals ), 3 ) );
+				buffergeometry.setAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geometry.normals ), 3 ) );
 			}
 
 			if ( geometry.uvs.length > 0 ) {
-				buffergeometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
+				buffergeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
 			}
 
 			material = new THREE.MeshLambertMaterial();
@@ -363,7 +363,7 @@ THREE.OBJLoader.prototype = {
 
 		}
 
-		console.timeEnd( 'OBJLoader' );
+		//console.timeEnd( 'OBJLoader' );
 
 		return container;
 

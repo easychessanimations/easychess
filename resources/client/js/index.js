@@ -2,7 +2,7 @@
 // config
 
 const MOVESDIV_HEIGHT_CORRECTION    = 36
-const PGN_TEXT_AREA_HEIGHT          = 123
+const PGN_TEXT_AREA_HEIGHT          = 120
 
 const DISCORD_LOGIN_URL         = "auth/discord"
 const GITHUB_LOGIN_URL          = "auth/github"
@@ -42,6 +42,13 @@ const MAGENTA_BUTTON_COLOR      = "#faf"
 const RED_BUTTON_COLOR          = "#faa"
 const YELLOW_BUTTON_COLOR       = "#ffa"
 const IDLE_BUTTON_COLOR         = "#eee"
+
+const PROVIDER_BACKGROUND_COLORS = {
+    "lichess": GREEN_BUTTON_COLOR,
+    "discord": CYAN_BUTTON_COLOR,
+    "github": MAGENTA_BUTTON_COLOR
+}
+
 
 const TREE_SEED                 = 10
 
@@ -423,7 +430,8 @@ class App extends SmartDomElement{
     }
 
     loadGamesConditional(){
-        if(this.settings.skipGameArchiveCheckbox.checked) return
+        if(!IS_LICHESS_PROVIDER()) return
+        if(!this.settings.allowGameArchiveCheckbox.checked) return
         this.loadGames()
     }
 
@@ -1645,6 +1653,9 @@ class App extends SmartDomElement{
     }
 
     fetchGames(){
+        if(!IS_LICHESS_PROVIDER()) return
+        if(!this.settings.allowFreshGamesCheckbox.checked) return
+
         return P(resolve => {
             this.games = []
             this.gamesLoadTime = null
@@ -1655,7 +1666,7 @@ class App extends SmartDomElement{
             getLichessGames(
                 this.username(),
                 {
-                    max: parseInt(this.settings.fetchMaxGamesCombo.selected)
+                    max: parseInt(this.settings.fetchMaxFreshGamesCombo.selected)
                 },
                 this.USER().accessToken
             ).then(result => {
@@ -1924,7 +1935,7 @@ class App extends SmartDomElement{
             })
         }
 
-        if(!this.settings.disableLichessBookCheckbox.checked) this.requestLichessBook()
+        if(this.settings.allowLichessBookCheckbox.checked) this.requestLichessBook()
         else this.decorate = null
 
         this.doLater("buildMoves", POSITION_CHANGED_DELAY)
@@ -2118,7 +2129,7 @@ class App extends SmartDomElement{
     }
 
     setupsourceFunc(){
-        this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
+        //this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
 
         this.source = new EventSource('/stream')
 
@@ -2132,12 +2143,12 @@ class App extends SmartDomElement{
         }, false)
 
         this.source.addEventListener('open', _ => {            
-            this.clog("connection opened")
+            //this.clog("connection opened")
         }, false)
 
         this.source.addEventListener('error', e => {
             if (e.readyState == EventSource.CLOSED) {                
-                this.clog("connection closed")
+                //this.clog("connection closed")
             }
         }, false)
 
@@ -2794,7 +2805,7 @@ class App extends SmartDomElement{
         return Board({
             id: "mainboard",            
             parentApp: this,
-            squaresize: parseInt(getLocal("app/maintabpane/squaresizeCombo", {selected: DEFAULT_SQUARESIZE}).selected),
+            squaresize: parseInt(getLocal("app/ubertabpane/squaresizeCombo", {selected: DEFAULT_SQUARESIZE}).selected),
             positionchangedcallback: this.positionchanged.bind(this)
         })
     }
@@ -3004,9 +3015,9 @@ class App extends SmartDomElement{
         let authDiv = div().a(
             div().bc("#777").pad(10).mar(5).a(                
                 div().tac().bdr("solid", 5, "#fff", 20).bc("#000").pad(10).a(
-                    Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(GREEN_BUTTON_COLOR),
-                    Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(CYAN_BUTTON_COLOR),
-                    Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(MAGENTA_BUTTON_COLOR),
+                    Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["lichess"]),
+                    Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["discord"]),
+                    Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["github"]),
                     Button("Login with lichess-bot", this.loginWithLichessBot.bind(this)).fs(20).mar(5).pad(5).bc(YELLOW_BUTTON_COLOR),                
                 ),
                 div().tac().op(0.3).mart(10).a(
@@ -3017,15 +3028,22 @@ class App extends SmartDomElement{
         )
 
         if(PROPS.USER){
-            if(PROPS.USER._json) if(PROPS.USER._json.perfs instanceof Object) authDiv.a(
-                table().marl(15).sa("cellpadding", 10).sa("border", 1).a(
-                    Object.entries(PROPS.USER._json.perfs).map(perf => tr().a(
-                        td().html(perf[0]).c("#00f"),
-                        td().html(perf[1].games).c("#707").fwb(),
-                        td().html(perf[1].rating).c("#070").fwb(),
-                        td().html(perf[1].rd).c("#770").fwb()
-                )))
+            authDiv.a(
+                div().pad(10).bc(PROVIDER_BACKGROUND_COLORS[PROVIDER()])
+                .tac().mar(5).fs(20)
+                .html("logged in with " + PROVIDER())
             )
+            if(IS_LICHESS_PROVIDER()){
+                if(PROPS.USER._json) if(PROPS.USER._json.perfs instanceof Object) authDiv.a(                    
+                    table().marl(5).sa("cellpadding", 10).sa("border", 1).a(
+                        Object.entries(PROPS.USER._json.perfs).map(perf => tr().a(
+                            td().html(perf[0]).c("#00f"),
+                            td().html(perf[1].games).c("#707").fwb(),
+                            td().html(perf[1].rating).c("#070").fwb(),
+                            td().html(perf[1].rd).c("#770").fwb()
+                    )))
+                )
+            }            
         }
 
         return authDiv
@@ -3178,10 +3196,27 @@ class App extends SmartDomElement{
                     options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
                     selected: DEFAULT_VARIANT,
                     settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowLichessBookCheckbox",                    
+                    display: "Allow lichess book",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowFreshGamesCheckbox",                    
+                    display: "Allow fresh games",                                        
+                    settings: this.settings
+                }),                
+                Combo({                    
+                    id: "fetchMaxFreshGamesCombo",                    
+                    display: "Fetch max fresh games",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1)*10, display: (i+1)*10})),
+                    selected: DEFAULT_MAX_GAMES,
+                    settings: this.settings
                 }),                
                 CheckBoxInput({
-                    id: "skipGameArchiveCheckbox",                    
-                    display: "Skip game archive",                                        
+                    id: "allowGameArchiveCheckbox",                    
+                    display: "Allow game archive",                                        
                     settings: this.settings
                 }),                
                 CheckBoxInput({
@@ -3240,12 +3275,7 @@ class App extends SmartDomElement{
                     options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
                     selected: TREE_BACKWARD_DEPTH,
                     settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "disableLichessBookCheckbox",                    
-                    display: "Disable lichess book",                                        
-                    settings: this.settings
-                }),
+                }),                
                 Combo({                    
                     id: "lichessBookMaxMoves",                    
                     display: "Lichess book max moves",                    
@@ -3273,14 +3303,7 @@ class App extends SmartDomElement{
                     hideAddButton: true,
                     settings: this.settings,
                     changeCallback: this.positionchanged.bind(this)
-                }),
-                Combo({                    
-                    id: "fetchMaxGamesCombo",                    
-                    display: "Fetch max games",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: (i+1)*10, display: (i+1)*10})),
-                    selected: DEFAULT_MAX_GAMES,
-                    settings: this.settings
-                }),
+                }),                
                 CheckBoxInput({
                     id: "showAnalysisInBoardCheckbox",                    
                     display: "Show analysis in board",                                        
@@ -3509,8 +3532,8 @@ initDb().then(
 
         document.getElementById('root').appendChild(app.e)
 
-        app.clog(app)
-        app.clog(PROPS)
+        //app.clog(app)
+        //app.clog(PROPS)
     },
     err => {
         console.log(err.content)

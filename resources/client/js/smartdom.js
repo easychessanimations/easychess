@@ -2074,12 +2074,12 @@ class ThreeRenderer_ extends SmartDomElement{
         this.spotLight.castShadow = (typeof this.props.SPOTLIGHT_CAST_SHADOW != "undefined") ?
             this.props.SPOTLIGHT_CAST_SHADOW : true
 
-        this.spotLight.shadowMapWidth   = this.props.SPOTLIGHT_SHADOW_MAP_WIDTH     || 1024
-        this.spotLight.shadowMapHeight  = this.props.SPOTLIGHT_SHADOW_MAP_HEIGHT    || 1024
+        this.spotLight.shadow.mapSize.width   = this.props.SPOTLIGHT_SHADOW_MAP_WIDTH     || 1024
+        this.spotLight.shadow.mapSize.height  = this.props.SPOTLIGHT_SHADOW_MAP_HEIGHT    || 1024
 
-        this.spotLight.shadowCameraNear = this.props.SPOTLIGHT_SHADOW_CAMERA_NEAR   || 500
-        this.spotLight.shadowCameraFar  = this.props.SPOTLIGHT_SHADOW_CAMERA_FAR    || 4000
-        this.spotLight.shadowCameraFov  = this.props.SPOTLIGHT_SHADOW_CAMERA_FOV    || 30
+        this.spotLight.shadow.camera.near = this.props.SPOTLIGHT_SHADOW_CAMERA_NEAR   || 500
+        this.spotLight.shadow.camera.far  = this.props.SPOTLIGHT_SHADOW_CAMERA_FAR    || 4000
+        this.spotLight.shadow.camera.fov  = this.props.SPOTLIGHT_SHADOW_CAMERA_FOV    || 30
 
         this.scene.add(this.spotLight)
 

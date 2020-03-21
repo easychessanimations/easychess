@@ -350,7 +350,7 @@ class ThreeBoard_ extends SmartDomElement{
                     this.BOARD_THICKNESS
                 )
 
-                let threeBoard = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(boardMaterials))
+                let threeBoard = new THREE.Mesh(geometry, boardMaterials)
 
                 this.threeRenderer.scene.add(threeBoard)
 

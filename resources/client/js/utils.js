@@ -2,7 +2,7 @@ const P = p => new Promise(p)
 
 function GET_USER(){    
     if(typeof PROPS == "object"){
-        return PROPS.USER
+        return PROPS.USER || {}
     }else{
         return {}
     }
