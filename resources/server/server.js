@@ -3,6 +3,7 @@ const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
 if((!process.env.SKIP_FIREBASE) && (!process.env.SKIP_TOURNEYWATCH)) require('./tourneywatch')
 else console.log("skip tourneywatch")
+if(!process.env.SKIP_DISCORD_BOT) require('./discordbot')
 
 const SSE_STARTUP_DELAY = 5000
 
