@@ -33,7 +33,33 @@ class Table_ extends SmartDomElement{
         this.chatHeight = this.board.boardsize() - 29
     }
 
-    init(){
+    chatMessageEntered(msg){
+        api("play:postChatMessage", {
+            chatMessage: ChatMessage({
+                author: {
+                    username: USERNAME(),
+                    provider: PROVIDER()
+                },
+                msg: msg
+            })
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    processApi(topic, payload){
+        switch(topic){
+            case "updatechat":
+                console.log(payload)
+                let chat = Chat(payload.chat)
+                this.chatText.setValue(chat.asText())
+                break
+        }
+    }
+
+    init(){        
+        this.parentApp = this.props.parentApp
+
         this.board = Board({...this.props, ...{
             id: "board",
             parentApp: this
@@ -47,7 +73,10 @@ class Table_ extends SmartDomElement{
 
         this.chatContainer = div().dfcc().a(
             this.chatText = TextAreaInput().w(this.chatWidth).h(this.chatHeight),
-            this.chatInput = TextInput().w(this.chatWidth).mart(2)
+            this.chatInput = TextInput({
+                enterCallback: this.chatMessageEntered.bind(this)
+            })
+                .w(this.chatWidth).mart(2)                
         )
 
         this.playerPanels = [

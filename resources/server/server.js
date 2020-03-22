@@ -1,7 +1,10 @@
+const play = require('./play')
 const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
 if((!process.env.SKIP_FIREBASE) && (!process.env.SKIP_TOURNEYWATCH)) require('./tourneywatch')
 else console.log("skip tourneywatch")
+
+const SSE_STARTUP_DELAY = 5000
 
 const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
 
@@ -288,6 +291,9 @@ app.use(sse)
 app.get('/stream', function(req, res) {  
     res.sseSetup()  
     sseconnections.push(res)
+    setTimeout(_ => {
+        res.sseSend(play.sendChatBlob())
+    }, SSE_STARTUP_DELAY)
     while(sseconnections.length > MAX_SSE_CONNECTIONS) sseconnections.shift()
     clog(`new stream ${req.hostname} conns ${sseconnections.length}`)
 })
@@ -432,6 +438,19 @@ app.post('/api', (req, res) => {
             clog("not authorized")
             return
         }
+    }
+
+    let m = topic.match(/^play:(.+)$/)
+
+    if(m){
+        try{
+            play.api(m[1], payload, res)
+        }catch(err){
+            console.log("play api error", err)
+            apisend({}, "Error: Play API error.", res)
+        }
+
+        return
     }
   
     try{
@@ -586,5 +605,7 @@ if(process.env.KEEPALIVE){
 }
 
 if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
+
+play.init(apisend, ssesend)
 
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))

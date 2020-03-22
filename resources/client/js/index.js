@@ -2205,8 +2205,11 @@ class App extends SmartDomElement{
 
         this.source.addEventListener('message', e => {
             let analysisinfo = JSON.parse(e.data)            
+            let m
             if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()
+            }else if(m = analysisinfo.kind.match(/^play:(.+)$/)){
+                this.table.processApi(m[1], analysisinfo)
             }else{
                 this.processanalysisinfo(analysisinfo)
             }            

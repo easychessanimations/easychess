@@ -498,9 +498,19 @@ class TextInput_ extends input_{
         super({...{type: "text"}, ...props})
     }
 
+    handleKeyUp(ev){
+        if(ev.keyCode == 13){
+            if(this.props.enterCallback){
+                this.props.enterCallback(this.value())                
+                this.state.text = ""
+                this.setFromState()
+            }
+        }
+    }
+
     init(){        
-        this.ae("keyup", this.textChanged.bind(this))
-        this.ae("change", this.textChanged.bind(this))
+        this.ae("input", this.textChanged.bind(this))
+        this.ae("keyup", this.handleKeyUp.bind(this))
         this.setFromState()
     }
 

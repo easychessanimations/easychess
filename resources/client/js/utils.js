@@ -17,6 +17,10 @@ function GET_USER(){
     }
 }
 
+function USERNAME(){
+    return GET_USER().username
+}
+
 function PROVIDER(){
     return GET_USER().provider
 }

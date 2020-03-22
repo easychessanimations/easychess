@@ -1144,7 +1144,7 @@ class Player_{
 
     qualifiedDisplayName(showRating){
         let qdn = this.displayName()
-        if(this.provider) qdn += `( ${this.provider} )`
+        if(this.provider) qdn += ` ( ${this.provider} )`
         if(showRating) qdn += ` ${this.glicko.rating}`
         return qdn
     }
@@ -1167,6 +1167,62 @@ class Player_{
 }
 function Player(props){return new Player_(props)}
 
+class ChatMessage_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.author = Player(props.author)
+        this.msg = props.msg || "Chat message."
+        return this
+    }
+
+    serialize(){
+        return {
+            author: this.author.serialize(),
+            msg: this.msg
+        }
+    }
+
+    asText(){
+        return `${this.author.qualifiedDisplayName()} : ${this.msg}`
+    }
+}
+function ChatMessage(props){return new ChatMessage_(props)}
+
+class Chat_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    postMessage(chatMessamge){
+        this.messages.unshift(chatMessamge)
+
+        while(this.messages.length > this.capacity) this.messages.pop()
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.capacity = props.capacity || 100
+        this.messages = (props.messages || []).map(blob => ChatMessage(blob))
+        return this
+    }
+
+    serialize(){
+        return {
+            capacity: this.capacity,
+            messages: this.messages.map(message => message.serialize())
+        }
+    }
+
+    asText(){
+        return this.messages.map(message => message.asText()).join("\n")
+    }
+}
+function Chat(props){return new Chat_(props)}
+
 const MAX_NUM_PLAYERS       = 2
 
 class Players_{
@@ -1186,9 +1242,13 @@ class Players_{
         return this
     }
 
+    getByIndex(index){
+        return this.players[index]
+    }
+
     getByColor(color){
-        if(color) return this.players[0]
-        return this.players[1]
+        if(color) return this.getByIndex(0)
+        return this.getByIndex(1)
     }
 
     serialize(){
@@ -2350,6 +2410,16 @@ class RichAnalysisInfo{
 }
 
 if(typeof module != "undefined") if(typeof module.exports != "undefined"){
-    module.exports.AbstractEngine = AbstractEngine
-    module.exports.VARIANT_TO_ENGINE = VARIANT_TO_ENGINE
+    module.exports = {
+        AbstractEngine: AbstractEngine,
+        VARIANT_TO_ENGINE: VARIANT_TO_ENGINE,
+        ChessBoard: ChessBoard,
+        Glicko: Glicko,
+        Player: Player,
+        Players: Players,
+        Game: GameNode,
+        Game: Game,    
+        ChatMessage: ChatMessage,    
+        Chat: Chat,
+    }
 }
