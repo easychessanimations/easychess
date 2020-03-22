@@ -2046,13 +2046,18 @@ class Logger_ extends SmartDomElement{
 }
 function Logger(props){return new Logger_(props)}
 
+const TARGET_BLANK = true
 class a_ extends SmartDomElement{
     constructor(props){
         super("a", props)
     }
 
-    href(href){
+    href(href, blank){
         this.sa("href", href)
+        if(blank){
+            this.sa("rel", "noopener noreferrer")
+            this.sa("target", "blank")
+        }
         return this
     }
 

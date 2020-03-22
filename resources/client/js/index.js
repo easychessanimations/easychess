@@ -359,6 +359,8 @@ class App extends SmartDomElement{
 
         this.playDiv = div()
 
+        this.feedbackDiv = this.renderFeedbackDiv()
+
         this.createTabPanes()
 
         this.alertDiv = this.renderAlertDiv()
@@ -408,6 +410,21 @@ class App extends SmartDomElement{
         this.doLater("makeThreeBoardDiv", MAKE_THREE_DELAY)
 
         this.doLater("makePlayDiv", MAKE_PLAY_DIV_DELAY)
+    }
+
+    renderFeedbackDiv(){
+        return div().a(
+            div().dfcc().mar(5).a(
+                div().addStyle("width", "90%").mart(20).pad(20).bdr("solid", 10, "#aaa", 20).tac().bc("#ff0").a(
+                    a().fs(30).fwb().href("https://discord.gg/RKJDzJj", TARGET_BLANK)
+                        .html("Join easychess on Discord")
+                ),
+                div().addStyle("width", "50%").mart(40).pad(10).bdr("solid", 5, "#aaa", 10).tac().bc("#ff0").a(
+                    a().fs(20).fwb().href("https://github.com/easychessanimations/easychess/issues", TARGET_BLANK)
+                        .html("Open an issue on GitHub")
+                )
+            )
+        )
     }
 
     makePlayDiv(){
@@ -2969,6 +2986,8 @@ class App extends SmartDomElement{
                 .toolTip({msg: "Analyze"}),            
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
+            Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
+                .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
                 .toolTip({msg: "Settings"}),            
             Tab({id: "about", caption: "About", content: this.aboutDiv})
