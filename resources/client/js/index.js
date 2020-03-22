@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const MAKE_PLAY_DIV_DELAY           = 1000
 const MAKE_THREE_DELAY              = 1000
 
 const MOVESDIV_HEIGHT_CORRECTION    = 36
@@ -356,6 +357,8 @@ class App extends SmartDomElement{
 
         this.chartDiv = div()
 
+        this.playDiv = div()
+
         this.createTabPanes()
 
         this.alertDiv = this.renderAlertDiv()
@@ -403,6 +406,21 @@ class App extends SmartDomElement{
 
         this.doLater("makeThreeAnimationDiv", MAKE_THREE_DELAY * 2)
         this.doLater("makeThreeBoardDiv", MAKE_THREE_DELAY)
+
+        this.doLater("makePlayDiv", MAKE_PLAY_DIV_DELAY)
+    }
+
+    makePlayDiv(){
+        this.playDiv.x().am(this.renderPlayDiv())
+    }
+
+    renderPlayDiv(){
+        return div().a(
+            this.table = Table({
+                id: "maintable",
+                parentApp: this
+            })
+        )
     }
 
     makeThreeBoardDiv(){
@@ -2949,6 +2967,8 @@ class App extends SmartDomElement{
         this.ubertabs = TabPane({id: "ubertabpane"}).setTabs([            
             Tab({id: "analyze", caption: "Analyze", content: this.containerDiv})
                 .toolTip({msg: "Analyze"}),            
+            Tab({id: "play", caption: "Play", content: this.playDiv})
+                .toolTip({msg: "Play"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
                 .toolTip({msg: "Settings"}),            
             Tab({id: "about", caption: "About", content: this.aboutDiv})

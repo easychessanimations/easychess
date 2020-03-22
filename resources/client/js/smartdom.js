@@ -329,6 +329,7 @@ class SmartDomElement{
     ta(x){return this.addStyle("textAlign", x)}
     tac(){return this.ta("center")}
     siv(x){this.e.scrollIntoView(x); return this}
+    bimg(x){return this.addStyle("backgroundImage", x)}
 
     html(x){this.e.innerHTML = x; return this}
 

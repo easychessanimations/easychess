@@ -1106,6 +1106,123 @@ function parseProps(comment){
 
 const EXCLUDE_THIS = true
 
+const GLICKO_INITIAL_RATING         = 1500
+const GLICKO_INITIAL_RD             = 250
+
+class Glicko_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.rating = props.rating || GLICKO_INITIAL_RATING
+        this.rd = props.rd || GLICKO_INITIAL_RD
+        return this
+    }
+
+    serialize(){
+        return {
+            rating: this.rating,
+            rd: this.rd
+        }
+    }
+}
+function Glicko(props){return new Glicko_(props)}
+
+const ANONYMOUS_USERNAME        = "@nonymous"
+const SHOW_RATING               = true
+
+class Player_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    displayName(){
+        return this.username || ANONYMOUS_USERNAME
+    }
+
+    qualifiedDisplayName(showRating){
+        let qdn = this.displayName()
+        if(this.provider) qdn += `( ${this.provider} )`
+        if(showRating) qdn += ` ${this.glicko.rating}`
+        return qdn
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.username = props.username
+        this.provider = props.provider
+        this.glicko = Glicko(props.glicko)
+        return this
+    }
+
+    serialize(){
+        return {
+            username: this.username,
+            provider: this.provider,
+            glicko: this.glicko.serialize()
+        }
+    }
+}
+function Player(props){return new Player_(props)}
+
+const MAX_NUM_PLAYERS       = 2
+
+class Players_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.players = []
+        let repo = props.players || []
+        for(let i=0; i < MAX_NUM_PLAYERS; i++){
+            let blob = repo.length ? repo.pop() : null
+            let player = Player(blob)
+            this.players.unshift(player)
+        }
+        return this
+    }
+
+    getByColor(color){
+        if(color) return this.players[0]
+        return this.players[1]
+    }
+
+    serialize(){
+        return {
+            players: this.players.map(player => player.serialize())
+        }
+    }
+}
+function Players(props){return new Players_(props)}
+
+const DEFAULT_INITIAL_CLOCK = 300
+const DEFAULT_INCREMENT     = 3
+
+class Timecontrol_{
+    constructor(props){
+        this.fromBlob(props)
+    }
+
+    fromBlob(propsOpt){
+        let props = propsOpt || {}
+        this.initial = props.initial || DEFAULT_INITIAL_CLOCK
+        this.increment = props.increment || DEFAULT_INCREMENT
+        return this
+    }
+
+    serialize(){
+        return {
+            initial: this.initial,
+            increment: this.increment
+        }
+    }
+}
+function Timecontrol(props){return new Timecontrol_(props)}
+
 class GameNode_{
     constructor(){        
     }
@@ -1563,6 +1680,8 @@ class Game_{
         this.pgnHeaders = OrderedHash(blob.pgnHeaders)
         this.pgnBody = blob.pgnBody || "*"
         this.setDefaultPgnHeaders()
+        this.timecontrol = Timecontrol(blob.timecontrol)
+        this.players = Players(blob.players)
         return this
     }
 
@@ -1848,7 +1967,9 @@ class Game_{
             selectedAnimation: this.selectedAnimation,
             animationDescriptors: this.animationDescriptors,
             pgnHeaders: this.pgnHeaders.blob,
-            pgnBody: this.pgnBody
+            pgnBody: this.pgnBody,
+            timecontrol: this.timecontrol.serialize(),
+            players: this.players.serialize()
         }
     }
 
