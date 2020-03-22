@@ -217,12 +217,12 @@ if(!process.env.SKIP_OAUTH){
     passport.authenticate('lichess'))
 
     app.get('/auth/lichess/callback', 
-        passport.authenticate('lichess', { failureRedirect: '/?login=failed' }),
+        passport.authenticate('lichess', { failureRedirect: '/?login-lichess=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
-                    'http://localhost:3000/?login=ok'
+                    'http://localhost:3000/?login-lichess=ok'
                 :
-                    `https://${SITE_HOST}/?login=ok`)
+                    `https://${SITE_HOST}/?login-lichess=ok`)
             }
     )
 
@@ -230,12 +230,12 @@ if(!process.env.SKIP_OAUTH){
     passport.authenticate('discord'))
 
     app.get('/auth/discord/callback', 
-        passport.authenticate('discord', { failureRedirect: '/?login=failed' }),
+        passport.authenticate('discord', { failureRedirect: '/?login-discord=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
-                    'http://localhost:3000/?login=ok'
+                    'http://localhost:3000/?login-discord=ok'
                 :
-                    `https://${SITE_HOST}/?login=ok`)
+                    `https://${SITE_HOST}/?login-discord=ok`)
             }
     )
 
@@ -243,12 +243,12 @@ if(!process.env.SKIP_OAUTH){
     passport.authenticate('github'))
 
     app.get('/auth/github/callback', 
-        passport.authenticate('github', { failureRedirect: '/?login=failed' }),
+        passport.authenticate('github', { failureRedirect: '/?login-github=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
-                    'http://localhost:3000/?login=ok'
+                    'http://localhost:3000/?login-github=ok'
                 :
-                    `https://${SITE_HOST}/?login=ok`)
+                    `https://${SITE_HOST}/?login-github=ok`)
             }
     )
 
@@ -256,12 +256,12 @@ if(!process.env.SKIP_OAUTH){
     passport.authenticate('lichess-bot'))
 
     app.get('/auth/lichess/bot/callback', 
-        passport.authenticate('lichess-bot', { failureRedirect: '/?login=failed' }),
+        passport.authenticate('lichess-bot', { failureRedirect: '/?login-lichess-bot=failed' }),
             function(req, res) {
                 res.redirect(IS_DEV() ?
-                    'http://localhost:3000/?login-bot=ok'
+                    'http://localhost:3000/?login-lichess-bot=ok'
                 :
-                    `https://${SITE_HOST}/?login-bot=ok`)
+                    `https://${SITE_HOST}/?login-lichess-bot=ok`)
             }
     )
 }
