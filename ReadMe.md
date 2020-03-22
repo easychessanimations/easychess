@@ -1,4 +1,8 @@
+![](/resources/client/logo.png?raw=true)
+
 # easychess
+
+Chess interface.
 
 ## About easychess
 
