@@ -28,7 +28,7 @@ class PlayerPanel_ extends SmartDomElement{
     }
 
     build(){
-        this.x().h(25)
+        this.x().h(20)
 
         if(this.player.seated){
             this.a(
@@ -55,6 +55,8 @@ function PlayerPanel(props){return new PlayerPanel_(props)}
 class Table_ extends SmartDomElement{
     constructor(props){
         super("div", props)
+
+        this.settings = {}
     }
 
     get g(){return this.board.game}
@@ -76,24 +78,116 @@ class Table_ extends SmartDomElement{
         })
     }
 
-    cancelEditTimecotrol(){
+    cancelEditTimecotrol(){        
         this.timecontrolFormHook.x()
+        this.editTimeControlOn = false
     }
 
     editTimeControl(){
-        this.timecontrolFormHook.x().a(
-            div().mar(5).tac().pad(5).bc("#aff").a(
-                div().html("TODO : EDIT TIME CONTROL"),
-                Button("Cancel", this.cancelEditTimecotrol.bind(this)).mart(5)
+        this.timecontrolFormHook.x()
+        this.editTimeControlOn = !this.editTimeControlOn
+        if(this.editTimeControlOn) this.timecontrolFormHook.am(
+            div().dfcc().bdr("solid", 5, "#aaa").mar(5).tac().pad(5).bc("#aff").a(
+                FormTable({
+                    options: [
+                        Combo({                    
+                            id: "variantCombo",                    
+                            display: "Variant",                                        
+                            options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
+                            selected: this.g.variant,
+                            settings: this.settings
+                        }),
+                        Combo({                    
+                            id: "initialClockCombo",                    
+                            display: "Initial Clock",                                        
+                            options: Array(30).fill(0).map((_, i) => ({value: i, display: i})),
+                            selected: 3,
+                            settings: this.settings
+                        }),
+                        Combo({                    
+                            id: "incrementCombo",                    
+                            display: "Increment",                                        
+                            options: Array(30).fill(0).map((_, i) => ({value: i, display: i})),
+                            selected: 2,
+                            settings: this.settings
+                        })
+                    ]
+                })
+                    .marl(10),
+                div().a(
+                    Button("Set", this.setTimecotrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),
+                    Button("Set and Store", this.setAndStoreTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),                    
+                    Button("Cancel", this.cancelEditTimecotrol.bind(this)).bc(YELLOW_BUTTON_COLOR).mart(5),
+                ),
+                div().a(
+                    div().mart(5).ffm().fs(12).html("Presets:"),
+                    this.presets = EditableList({
+                        id: "presets",
+                        disableEditOption: true,
+                        customAddButton:{
+                            caption: "Set",
+                            callback: this.setTimecontrolFromPreset.bind(this),
+                            backgroundColor: GREEN_BUTTON_COLOR
+                        },
+                        optionLabelWidthScale: -0.21
+                    }).mart(5)
+                )
             )
         )
+    }
+
+    requestSetTimecontrol(blob){
+        api("play:setTimecontrol", {            
+            variant: blob.variant,
+            timecontrol: blob.timecontrol
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    setTimecontrolFromPreset(){
+        let preset = this.presets.state.selected.value
+        let parts = preset.split("|")
+        this.requestSetTimecontrol({
+            variant: parts[0],
+            timecontrol: {
+                initial: parseInt(parts[1]),
+                increment: parseInt(parts[2])
+            }
+        })
+    }
+
+    calcTimecontrolBlob(){
+        return {
+            variant: this.settings.variantCombo.selected,
+            timecontrol:{
+                initial: parseInt(this.settings.initialClockCombo.selected),
+                increment: parseInt(this.settings.incrementCombo.selected)
+            }            
+        }
+    }
+
+    setTimecotrol(){
+        this.requestSetTimecontrol(this.calcTimecontrolBlob())
+    }
+
+    setAndStoreTimecontrol(){
+        let blob = this.calcTimecontrolBlob()
+
+        this.presets.addOption(
+            `${blob.variant}|${blob.timecontrol.initial}|${blob.timecontrol.increment}`,
+            `${displayNameForVariant(blob.variant)} ${blob.timecontrol.initial} + ${blob.timecontrol.increment}`
+        )
+
+        this.requestSetTimecontrol(blob)
     }
 
     build(){
         this.chatText.setValue(this.g.chat.asText())        
         this.players.forEach(player => this.playerPanels[player.index].setPlayer(player))
         this.timecontrolDiv.x().a(
-            TimecontrolLabel({timecontrol: this.g.timecontrol}),
+            VariantLabel(this.g),
+            TimecontrolLabel(this.g).marl(5),
             Button("Edit", this.editTimeControl.bind(this)).marl(5)
         )
     }

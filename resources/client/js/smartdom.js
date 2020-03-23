@@ -1044,7 +1044,7 @@ class OptionElement_ extends SmartDomElement{
         this.x().ame(
             div().dfc().a(
                 this.dragBox,
-                this.editOptionButton,                
+                ip.props.disableEditOption ? div() : this.editOptionButton,                
                 this.enableCheckBox,
                 this.elementDiv.a(
                     this.elementForOption(),
@@ -1257,7 +1257,7 @@ class EditableList_ extends SmartDomElement{
         this.containerBackgroundColor       = "#eee"
         this.optionsDivTop                  = this.height + 2 * ( this.containerPadding + this.selectedPadding )        
         
-        this.optionLabelWidth               = this.height * 9
+        this.optionLabelWidth               = this.height * 9 * ( this.props.optionLabelWidthScale || 1)
         this.optionsLeftControlWidth        = 35 + this.height * 0.85
         this.optionsRightControlWidth       = 35 + this.height * 0.8
         this.optionControlsWidth            = this.optionsLeftControlWidth + this.optionsRightControlWidth
@@ -1287,11 +1287,20 @@ class EditableList_ extends SmartDomElement{
             .bc(this.optionsDivBakcgroundColor)
         
         this.container = div().por().dfc().pad(this.containerPadding)
+
+        let addButton = Button("+", this.addOption.bind(this)).marl(this.containerButtonMargin)            
+
+        if(this.props.customAddButton){
+            addButton = Button(
+                this.props.customAddButton.caption,
+                this.props.customAddButton.callback
+            ).bc(this.props.customAddButton.backgroundColor || "#eee")
+        }
         
         this.container.a(
             this.selectedDiv,
             Button(">", this.switchRoll.bind(this)).marl(this.containerButtonMargin),
-            Button("+", this.addOption.bind(this)).marl(this.containerButtonMargin),            
+            addButton,
             this.optionsDiv
         )
         
@@ -1415,9 +1424,12 @@ class EditableList_ extends SmartDomElement{
         return this.state.options.find(option => option.value == value)
     }
 
-    addOption(){
+    addOption(valueOpt, displayOpt){
         let value, display
-        if(this.props.addOptionCallback){
+        if(valueOpt && displayOpt){
+            value = valueOpt
+            display = displayOpt
+        }else if(this.props.addOptionCallback){
             [ value, display ] = this.props.addOptionCallback()
         }else{
             value = window.prompt("Option Value :")
@@ -2244,3 +2256,14 @@ class TimecontrolLabel_ extends SmartDomElement{
     }
 }
 function TimecontrolLabel(props){return new TimecontrolLabel_(props)}
+
+class VariantLabel_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.dib().a(div().padl(5).padr(5).dfc().bc("#ffc").a(            
+            div().c("#700").padl(5).padr(5).html(displayNameForVariant(this.props.variant))
+        ))
+    }
+}
+function VariantLabel(props){return new VariantLabel_(props)}

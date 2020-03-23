@@ -1858,6 +1858,16 @@ class Game_{
         }))
     }
 
+    setTimecontrol(player, blob){
+        if(this.players.hasPlayer(player)){
+            this.variant = blob.variant
+            this.timecontrol = Timecontrol(blob.timecontrol)
+            return true
+        }else{
+            return `Only seated players can set time control.`
+        }
+    }
+
     sitPlayer(player, UNSEAT){
         let pl = this.players.getByIndex(player.index)
         if(pl.seated && (pl.id != player.id)){

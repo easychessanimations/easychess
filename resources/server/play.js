@@ -27,6 +27,28 @@ function api(topic, payload, req, res){
             apisend(`playapi:chatMessagePosted`, null, res)
             ssesend(sendGameBlob())
             break
+        case "setTimecontrol":            
+            if(!req.user){
+                apisend({
+                    alert: `Log in to set time control.`,
+                    alertKind: "error"
+                }, null, res)
+                return
+            }
+            if(game.inProgress){
+                apisend({}, `Error: Cannot set time control for game in progress.`)
+                return
+            }
+            result = game.setTimecontrol(player, payload)
+            if(result === true){
+                apisend(`playapi:timecontrolSet`, null, res)                
+                ssesend(sendGameBlob())
+            }
+            else apisend({
+                alert: result,
+                alertKind: "error"
+            }, null, res)
+            break
         case "unseatPlayer":            
             if(!req.user){
                 apisend({
