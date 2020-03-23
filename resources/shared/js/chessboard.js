@@ -1138,6 +1138,10 @@ class Player_{
         this.fromBlob(props)
     }
 
+    equalTo(player){
+        return ( this.id == player.id ) && ( this.provider == player.provider )
+    }
+
     displayName(){
         return this.username || ANONYMOUS_USERNAME
     }
@@ -1248,7 +1252,7 @@ class Players_{
     }
 
     hasPlayer(player){
-        return this.players.find(pl => pl.id == player.id)
+        return this.players.find(pl => pl.equalTo(player))
     }
 
     fromBlob(propsOpt){
@@ -1272,8 +1276,8 @@ class Players_{
     }
 
     getByColor(color){
-        if(color) return this.getByIndex(0)
-        return this.getByIndex(1)
+        if(color) return this.getByIndex(1)
+        return this.getByIndex(0)
     }
 
     serialize(){
@@ -1606,6 +1610,14 @@ class Game_{
         this.fromblob(props)
     }
 
+    turnPlayer(){
+        return this.players.getByColor(this.board.turn)
+    }
+
+    canMakeMove(player){        
+        return this.turnPlayer().equalTo(player)
+    }
+
     makeSanMove(sanOpt){        
         let m = sanOpt.match(/[0-9\.]*(.*)/)
 
@@ -1868,6 +1880,21 @@ class Game_{
         }
     }
 
+    hasAllPlayers(){
+        return this.players.getByColor(WHITE).seated && this.players.getByColor(BLACK).seated
+    }
+
+    resignPlayer(player){
+        if(!this.inProgress) return `You can only resign an ongoing game.`
+        if(this.players.hasPlayer(player)){
+            this.sitPlayer(player, UNSEAT)
+            this.inProgress = false
+            return true
+        }else{
+            return `You can only resign your own game.`
+        }
+    }
+
     sitPlayer(player, UNSEAT){
         let pl = this.players.getByIndex(player.index)
         if(pl.seated && (pl.id != player.id)){
@@ -1882,6 +1909,10 @@ class Game_{
             player.seatedAt = new Date().getTime()
         }        
         this.players.setPlayer(player)
+        if(this.hasAllPlayers()){
+            this.inProgress = true
+            this.setfromfen(null, this.variant)
+        }
         return true
     }
 
@@ -1911,6 +1942,7 @@ class Game_{
         this.timecontrol = Timecontrol(blob.timecontrol)
         this.players = Players(blob.players)
         this.inProgress = !!blob.inProgress
+        this.startedAt = blob.startedAt || null
         this.chat = Chat(blob.chat)
         return this
     }
@@ -2202,6 +2234,7 @@ class Game_{
             timecontrol: this.timecontrol.serialize(),
             players: this.players.serialize(),
             inProgress: this.inProgress,
+            startedAt: this.startedAt,
             chat: this.chat.serialize()
         }
     }

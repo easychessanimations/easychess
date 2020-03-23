@@ -53,6 +53,10 @@ function IS_GITHUB_PROVIDER(){
     return IS_PROVIDER("github")
 }
 
+function IS_ME(blob){
+    return ( blob.id == USER_ID() ) && ( blob.provider == PROVIDER() )
+}
+
 function USER_QUALIFIED_NAME(){
     let USER = GET_USER()
     let qn = USER.username || "Anonymous"

@@ -27,10 +27,25 @@ class PlayerPanel_ extends SmartDomElement{
         })
     }
 
+    resign(){
+        api("play:resignPlayer", {            
+            index: this.player.index
+        }, response => {
+            //console.log(response)
+        })
+    }
+
     build(){
         this.x().h(20)
 
-        if(this.player.seated){
+        if(this.parentTable.g.inProgress){
+            this.a(
+                div().dfc().a(
+                    UserLabel(this.player),
+                    IS_ME(this.player) ? Button("Resign", this.resign.bind(this)) : div()
+                )                
+            )
+        }else if(this.player.seated){
             this.a(
                 div().dfc().a(
                     UserLabel(this.player),
@@ -183,8 +198,8 @@ class Table_ extends SmartDomElement{
     }
 
     build(){
-        this.chatText.setValue(this.g.chat.asText())        
-        this.players.forEach(player => this.playerPanels[player.index].setPlayer(player))
+        this.chatText.setValue(this.g.chat.asText())                                        
+        this.players.forEach(player => this.playerPanels[this.g.flip ? 1 - player.index : player.index].setPlayer(player))
         this.timecontrolDiv.x().a(
             VariantLabel(this.g),
             TimecontrolLabel(this.g).marl(5),
@@ -193,6 +208,8 @@ class Table_ extends SmartDomElement{
     }
 
     buildFromGame(game){
+        this.board.op(1)
+        game.flip = IS_ME(game.players.getByColor(BLACK))
         this.board.setgame(game)        
         this.build()
     }
@@ -206,12 +223,22 @@ class Table_ extends SmartDomElement{
         }
     }
 
+    moveMade(san){        
+        this.board.op(0.8)
+        api("play:makeMove", {            
+            san: san
+        }, response => {
+            //console.log(response)
+        })
+    }
+
     init(){        
         this.parentApp = this.props.parentApp
 
         this.board = Board({...this.props, ...{
             id: "board",
-            parentApp: this
+            parentApp: this,
+            makeMoveCallback: this.moveMade.bind(this)
         }})
 
         this.calcProps()
@@ -231,7 +258,10 @@ class Table_ extends SmartDomElement{
             )            
         )
 
-        this.playerPanels = [0,1].map(i => PlayerPanel({player: Player().setIndex(i)}))
+        this.playerPanels = [0,1].map(i => PlayerPanel({
+            parentTable: this,
+            player: Player().setIndex(i)
+        }))
 
         this.mainContainer = table().a(
             tr().a(

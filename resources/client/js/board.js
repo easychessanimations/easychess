@@ -106,8 +106,12 @@ class Board_ extends SmartDomElement{
     }
 
     makeMove(move){
+        let san = this.game.board.movetosan(move)
         this.game.makemove(move)
         this.positionchanged()
+        if(this.props.makeMoveCallback){
+            this.props.makeMoveCallback(san)
+        }
     }
 
     handleEvent(sev){

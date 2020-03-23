@@ -71,6 +71,59 @@ function api(topic, payload, req, res){
                 alertKind: "error"
             }, null, res)
             break
+        case "makeMove":            
+            if(!game.inProgress){
+                apisend({}, `Error: Cannot make move for a game not in progress.`, res)
+                ssesend(sendGameBlob())
+                return
+            }
+            if(!req.user){
+                apisend({
+                    alert: `Log in to make a move.`,
+                    alertKind: "error"
+                }, null, res)
+                ssesend(sendGameBlob())
+                return
+            }                 
+            if(!game.canMakeMove(player)){
+                apisend({
+                    alert: `Not allowed to make move for other side.`,
+                    alertKind: "error"
+                }, null, res)
+                ssesend(sendGameBlob())
+                return
+            }
+            if(game.makeSanMove(payload.san)){
+                apisend(`playapi:moveMade`, null, res)                                
+            }
+            else apisend({
+                alert: `Illegal move.`,
+                alertKind: "error"
+            }, null, res)
+            ssesend(sendGameBlob())
+            break
+        case "resignPlayer":            
+            if(!game.inProgress){
+                apisend({}, `Error: Cannot resign a game not in progress.`, res)
+                return
+            }
+            if(!req.user){
+                apisend({
+                    alert: `Log in to resign.`,
+                    alertKind: "error"
+                }, null, res)
+                return
+            }                        
+            result = game.resignPlayer(player)
+            if(result === true){
+                apisend(`playapi:playerResigned`, null, res)                
+                ssesend(sendGameBlob())
+            }
+            else apisend({
+                alert: result,
+                alertKind: "error"
+            }, null, res)
+            break
         case "sitPlayer":            
             if(!req.user){
                 apisend({
@@ -80,12 +133,12 @@ function api(topic, payload, req, res){
                 return
             }
             if(game.inProgress){
-                apisend({}, `Error: Cannot sit for game in progress.`)
+                apisend({}, `Error: Cannot sit for game in progress.`, res)
                 return
             }
             result = game.sitPlayer(player)
-            if(result === true){
-                apisend(`playapi:playerSeated`, null, res)                
+            if(result === true){                
+                apisend(`playapi:playerSeated`, null, res)                                
                 ssesend(sendGameBlob())
             }
             else apisend({
