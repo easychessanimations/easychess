@@ -4,8 +4,9 @@ const utils = require('../client/nodejs/utils')
 if((!process.env.SKIP_FIREBASE) && (!process.env.SKIP_TOURNEYWATCH)) require('./tourneywatch')
 else console.log("skip tourneywatch")
 if(!process.env.SKIP_DISCORD_BOT) require('./discordbot')
+else console.log("skip discord bot")
 
-const SSE_STARTUP_DELAY = 5000
+const SSE_STARTUP_DELAY = IS_DEV() ? 250 : 3000
 
 const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
 

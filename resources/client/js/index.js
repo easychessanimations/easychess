@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
-const MAKE_PLAY_DIV_DELAY           = 1000
 const MAKE_THREE_DELAY              = 1000
 
 const MOVESDIV_HEIGHT_CORRECTION    = 36
@@ -348,15 +347,6 @@ class App extends SmartDomElement{
         this.alertDiv = this.renderAlertDiv()
 
         this.mainPane.a(this.alertDiv)
-+ 
-        this.setupsource()        
-
-        this.checkSourceInterval = setInterval(this.checksource.bind(this), QUERY_INTERVAL)
-
-        this.lastApiTick = performance.now()
-
-        this.apiPingInterval = setInterval(this.apiPing.bind(this), 5 * QUERY_INTERVAL)
-        this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
 
         this.loadStudy("Default")
 
@@ -391,7 +381,16 @@ class App extends SmartDomElement{
         this.doLater("makeThreeAnimationDiv", MAKE_THREE_DELAY * 2)
         this.doLater("makeThreeBoardDiv", MAKE_THREE_DELAY)
 
-        this.doLater("makePlayDiv", MAKE_PLAY_DIV_DELAY)
+        this.makePlayDiv()
+
+        this.setupsource()        
+
+        this.checkSourceInterval = setInterval(this.checksource.bind(this), QUERY_INTERVAL)
+
+        this.lastApiTick = performance.now()
+
+        this.apiPingInterval = setInterval(this.apiPing.bind(this), 5 * QUERY_INTERVAL)
+        this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
     }
 
     renderFeedbackDiv(){

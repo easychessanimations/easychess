@@ -2231,3 +2231,16 @@ class UserLabel_ extends SmartDomElement{
     }
 }
 function UserLabel(props){return new UserLabel_(props)}
+
+class TimecontrolLabel_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.dib().a(div().padl(5).padr(5).dfc().bc("#ffc").a(
+            div().fwb().c("#007").html(this.props.timecontrol.initial),
+            div().c("#700").mar(3).html("+"),
+            div().fwb().c("#070").html(this.props.timecontrol.increment)
+        ))
+    }
+}
+function TimecontrolLabel(props){return new TimecontrolLabel_(props)}

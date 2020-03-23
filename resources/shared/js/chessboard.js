@@ -1284,8 +1284,8 @@ class Players_{
 }
 function Players(props){return new Players_(props)}
 
-const DEFAULT_INITIAL_CLOCK = 300
-const DEFAULT_INCREMENT     = 3
+const DEFAULT_INITIAL_CLOCK = 3
+const DEFAULT_INCREMENT     = 2
 
 class Timecontrol_{
     constructor(props){
@@ -1304,6 +1304,10 @@ class Timecontrol_{
             initial: this.initial,
             increment: this.increment
         }
+    }
+
+    toString(){
+        return `${this.initial} + ${this.increment}`
     }
 }
 function Timecontrol(props){return new Timecontrol_(props)}
