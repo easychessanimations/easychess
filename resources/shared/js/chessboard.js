@@ -228,6 +228,29 @@ class ChessBoard_{
         this.setfromfen()
     }
 
+    status(){
+        let lms = this.legalmovesforallpieces()
+
+        if(lms.length){
+            return {
+                terminated: false,
+                result: null
+            }
+        }
+
+        if(this.iskingincheck(this.turn)){
+            return {
+                terminated: true,
+                result: ( this.turn == WHITE ) ? 0 : 1
+            }
+        }
+
+        return {
+            terminated: true,
+            result: 0.5
+        }
+    }
+
     IS_ATOMIC(){
         return this.variant == "atomic"
     }
@@ -1255,6 +1278,12 @@ class Players_{
         return this.players.find(pl => pl.equalTo(player))
     }
 
+    hasSeatedPlayer(player){
+        let find = this.hasPlayer(player)
+        if(!find) return false
+        return find.seated
+    }
+
     fromBlob(propsOpt){
         let props = propsOpt || {}
         this.players = []
@@ -1618,6 +1647,17 @@ class Game_{
         return this.turnPlayer().equalTo(player)
     }
 
+    makeSanMoveResult(san){
+        if(this.makeSanMove(san)){
+            let status = this.board.status()
+            if(status.terminated){
+                this.terminate(status.result)
+            }
+            return true
+        }
+        return `Illegal move.`
+    }
+
     makeSanMove(sanOpt){        
         let m = sanOpt.match(/[0-9\.]*(.*)/)
 
@@ -1871,7 +1911,7 @@ class Game_{
     }
 
     setTimecontrol(player, blob){
-        if(this.players.hasPlayer(player)){
+        if(this.players.hasSeatedPlayer(player)){
             this.variant = blob.variant
             this.timecontrol = Timecontrol(blob.timecontrol)
             return true
@@ -1884,11 +1924,22 @@ class Game_{
         return this.players.getByColor(WHITE).seated && this.players.getByColor(BLACK).seated
     }
 
+    terminate(result){
+        this.inProgress = false
+        this.terminated = true
+        this.terminatedAt = new Date().getTime()
+        this.result = result
+        this.players.forEach(pl => {
+            pl.seated = false
+            pl.seatedAt = null
+        })
+    }
+
     resignPlayer(player){
         if(!this.inProgress) return `You can only resign an ongoing game.`
-        if(this.players.hasPlayer(player)){
-            this.sitPlayer(player, UNSEAT)
-            this.inProgress = false
+        if(this.players.hasPlayer(player)){            
+            if(player.index == 0) this.terminate(1)
+            else this.terminate(0)
             return true
         }else{
             return `You can only resign your own game.`
@@ -1904,16 +1955,22 @@ class Game_{
         if(UNSEAT){
             player = Player().setIndex(player.index)
         }else{            
-            if(this.players.hasPlayer(player)) return `Already seated.`
+            if(this.players.hasSeatedPlayer(player)) return `Already seated.`
             player.seated = true
             player.seatedAt = new Date().getTime()
         }        
         this.players.setPlayer(player)
         if(this.hasAllPlayers()){
-            this.inProgress = true
-            this.setfromfen(null, this.variant)
+            this.startGame()
         }
         return true
+    }
+
+    startGame(){
+        this.inProgress = true
+        this.terminated = false
+        this.result = null
+        this.setfromfen(null, this.variant)
     }
 
     // gbl
@@ -1942,9 +1999,22 @@ class Game_{
         this.timecontrol = Timecontrol(blob.timecontrol)
         this.players = Players(blob.players)
         this.inProgress = !!blob.inProgress
+        this.terminated = !!blob.terminated
+        this.result = blob.result
         this.startedAt = blob.startedAt || null
+        this.terminatedAt = blob.terminatedAt || null
         this.chat = Chat(blob.chat)
         return this
+    }
+
+    playersVerbal(){
+        return `${this.players.getByColor(WHITE).qualifiedDisplayName(SHOW_RATING)} - ${this.players.getByColor(BLACK).qualifiedDisplayName(SHOW_RATING)}`
+    }
+
+    resultVerbal(){
+        if(this.result == 1) return "1 - 0"
+        if(this.result == 0) return "0 - 1"
+        return "1/2 - 1/2"
     }
 
     setDefaultPgnHeaders(){
@@ -2234,7 +2304,10 @@ class Game_{
             timecontrol: this.timecontrol.serialize(),
             players: this.players.serialize(),
             inProgress: this.inProgress,
+            terminated: this.terminated,
+            result: this.result,
             startedAt: this.startedAt,
+            terminatedAt: this.terminatedAt,
             chat: this.chat.serialize()
         }
     }

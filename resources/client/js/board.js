@@ -56,6 +56,9 @@ class Board_ extends SmartDomElement{
         this.a(
             div().w(this.boardsize()).h(this.boardsize()).por().a(
                 this.canvases,
+                this.resultDiv = div()
+                    .op(0.8).poa().c("#00a").fwb()
+                    .w(this.boardsize()).h(this.boardsize()/2).dfcc().jcsa(),
                 div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb()
             )            
         )
@@ -119,6 +122,7 @@ class Board_ extends SmartDomElement{
             switch(sev.kind){
                 case "dragstart":
                     sev.ev.preventDefault()                        
+                    if(this.game.terminated) return
                     let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
                     this.piecedragorig = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)        
                     this.draggedsq = this.coordstosq(this.piecedragorig)        
@@ -552,6 +556,14 @@ class Board_ extends SmartDomElement{
         this.highlightDrawings()
 
         this.createCommentCanvas()
+
+        this.resultDiv.x()
+        if(this.game.terminated){
+            this.resultDiv.a(
+                div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.game.playersVerbal()),
+                div().pad(10).bc("#ffa").fs(this.squaresize).html(this.game.resultVerbal())
+            )
+        }
     }
 
     tobegin(){

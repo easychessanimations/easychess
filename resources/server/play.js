@@ -16,135 +16,122 @@ function sendGameBlob(){
     })
 }
 
+function sendGame(){
+    ssesend(sendGameBlob())
+}
+
+function assert(req, res, props){
+    if(props.login){
+        if(!req.user){
+            apisend({
+                alert: props.login,
+                alertKind: "error"
+            }, null, res)
+            sendGame()
+            return false
+        }
+    }
+    if(props.gameNotInProgess){
+        if(game.inProgress){
+            apisend({}, props.gameNotInProgess)
+            sendGame()
+            return false
+        }        
+    }
+    if(props.gameInProgess){
+        if(!game.inProgress){
+            apisend({}, props.gameInProgess)
+            sendGame()
+            return false
+        }        
+    }
+    if(props.canMakeMove){
+        if(!game.canMakeMove(props.player)){
+            apisend({
+                alert: props.canMakeMove,
+                alertKind: "error"
+            }, null, res)
+            sendGame()
+            return false
+        }        
+    }
+    return true
+}
+
+function handleGameOperationResult(result, res, apiOkMessage){
+    if(result === true){
+        apisend(apiOkMessage, null, res)                        
+    }
+    else{
+        apisend({
+            alert: result,
+            alertKind: "error"
+        }, null, res)
+    }
+    sendGame()
+}
+
 function api(topic, payload, req, res){
     let player = Player({...req.user, ...{index: payload.index}})
-    let result
 
     switch(topic){        
         case "postChatMessage":
             let chatMessage = ChatMessage(payload.chatMessage)
             game.chat.postMessage(chatMessage)
             apisend(`playapi:chatMessagePosted`, null, res)
-            ssesend(sendGameBlob())
+            sendGame()
             break
         case "setTimecontrol":            
-            if(!req.user){
-                apisend({
-                    alert: `Log in to set time control.`,
-                    alertKind: "error"
-                }, null, res)
-                return
-            }
-            if(game.inProgress){
-                apisend({}, `Error: Cannot set time control for game in progress.`)
-                return
-            }
-            result = game.setTimecontrol(player, payload)
-            if(result === true){
-                apisend(`playapi:timecontrolSet`, null, res)                
-                ssesend(sendGameBlob())
-            }
-            else apisend({
-                alert: result,
-                alertKind: "error"
-            }, null, res)
-            break
-        case "unseatPlayer":            
-            if(!req.user){
-                apisend({
-                    alert: `Log in to unseat.`,
-                    alertKind: "error"
-                }, null, res)
-                return
-            }
-            if(game.inProgress){
-                apisend({}, `Error: Cannot unseat for game in progress.`)
-                return
-            }
-            result = game.sitPlayer(player, UNSEAT)
-            if(result === true){
-                apisend(`playapi:playerUnseated`, null, res)                
-                ssesend(sendGameBlob())
-            }
-            else apisend({
-                alert: result,
-                alertKind: "error"
-            }, null, res)
-            break
-        case "makeMove":            
-            if(!game.inProgress){
-                apisend({}, `Error: Cannot make move for a game not in progress.`, res)
-                ssesend(sendGameBlob())
-                return
-            }
-            if(!req.user){
-                apisend({
-                    alert: `Log in to make a move.`,
-                    alertKind: "error"
-                }, null, res)
-                ssesend(sendGameBlob())
-                return
-            }                 
-            if(!game.canMakeMove(player)){
-                apisend({
-                    alert: `Not allowed to make move for other side.`,
-                    alertKind: "error"
-                }, null, res)
-                ssesend(sendGameBlob())
-                return
-            }
-            if(game.makeSanMove(payload.san)){
-                apisend(`playapi:moveMade`, null, res)                                
-            }
-            else apisend({
-                alert: `Illegal move.`,
-                alertKind: "error"
-            }, null, res)
-            ssesend(sendGameBlob())
-            break
-        case "resignPlayer":            
-            if(!game.inProgress){
-                apisend({}, `Error: Cannot resign a game not in progress.`, res)
-                return
-            }
-            if(!req.user){
-                apisend({
-                    alert: `Log in to resign.`,
-                    alertKind: "error"
-                }, null, res)
-                return
-            }                        
-            result = game.resignPlayer(player)
-            if(result === true){
-                apisend(`playapi:playerResigned`, null, res)                
-                ssesend(sendGameBlob())
-            }
-            else apisend({
-                alert: result,
-                alertKind: "error"
-            }, null, res)
+            if(!assert(req, res, {
+                login: `Log in to set time control.`,
+                gameNotInProgess: `Error: Cannot set time control for game in progress.`
+            })) return                        
+            handleGameOperationResult(
+                game.setTimecontrol(player, payload),
+                res, `playapi:timecontrolSet`
+            )
             break
         case "sitPlayer":            
-            if(!req.user){
-                apisend({
-                    alert: `Log in to sit.`,
-                    alertKind: "error"
-                }, null, res)
-                return
-            }
-            if(game.inProgress){
-                apisend({}, `Error: Cannot sit for game in progress.`, res)
-                return
-            }
-            result = game.sitPlayer(player)
-            if(result === true){                
-                apisend(`playapi:playerSeated`, null, res)                                
-                ssesend(sendGameBlob())
-            }
-            else apisend({
-                alert: result,
-                alertKind: "error"
-            }, null, res)
+            if(!assert(req, res, {
+                login: `Log in to sit.`,
+                gameNotInProgess: `Error: Cannot sit for game in progress.`
+            })) return                                    
+            handleGameOperationResult(
+                game.sitPlayer(player),
+                res, `playapi:playerSeated`
+            )                         
+            break
+        case "unseatPlayer":            
+            if(!assert(req, res, {
+                login: `Log in to unseat.`,
+                gameNotInProgess: `Error: Cannot unseat for game in progress.`
+            })) return                                    
+            handleGameOperationResult(
+                game.sitPlayer(player, UNSEAT),
+                res, `playapi:playerUnseated`
+            )            
+            break
+        case "makeMove":            
+            if(!assert(req, res, {
+                login: `Log in to make a move.`,
+                gameInProgess: `Error: Cannot make move for a game not in progress.`,
+                canMakeMove: `Not allowed to make move for other side.`,
+                player: player,                
+            })) return                                                            
+            handleGameOperationResult(
+                game.makeSanMoveResult(payload.san),
+                res, `playapi:moveMade`
+            )                        
+            break
+        case "resignPlayer":            
+            if(!assert(req, res, {
+                login: `Log in to resign.`,
+                gameInProgess: `Error: Cannot resign a game not in progress.`,                
+            })) return                                                            
+            handleGameOperationResult(
+                game.resignPlayer(player),
+                res, `playapi:playerResigned`
+            )                                    
             break
     }
 }

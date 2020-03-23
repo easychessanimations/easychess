@@ -54,7 +54,7 @@ class PlayerPanel_ extends SmartDomElement{
             )
         }else{
             this.a(
-                Button("Sit", this.sit.bind(this))
+                Button("Sit", this.sit.bind(this)).w(this.parentTable.board.boardsize() / 2).bc(GREEN_BUTTON_COLOR)
             )
         }
     }
@@ -208,6 +208,7 @@ class Table_ extends SmartDomElement{
     }
 
     buildFromGame(game){
+        //console.log(game)
         this.board.op(1)
         game.flip = IS_ME(game.players.getByColor(BLACK))
         this.board.setgame(game)        
