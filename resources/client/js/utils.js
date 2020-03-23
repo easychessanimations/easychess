@@ -17,12 +17,24 @@ function GET_USER(){
     }
 }
 
+function USER_ID(){
+    return GET_USER().id
+}
+
 function USERNAME(){
     return GET_USER().username
 }
 
 function PROVIDER(){
     return GET_USER().provider
+}
+
+function USER_BLOB(){
+    return {
+        id: USER_ID(),
+        username: USERNAME(),
+        provider: PROVIDER()
+    }
 }
 
 function IS_PROVIDER(provider){
@@ -48,42 +60,29 @@ function USER_QUALIFIED_NAME(){
     return qn
 }
 
+const GREEN_BUTTON_COLOR        = "#afa"
+const BLUE_BUTTON_COLOR         = "#aaf"
+const CYAN_BUTTON_COLOR         = "#aff"
+const MAGENTA_BUTTON_COLOR      = "#faf"
+const RED_BUTTON_COLOR          = "#faa"
+const YELLOW_BUTTON_COLOR       = "#ffa"
+const IDLE_BUTTON_COLOR         = "#eee"
+
+const PROVIDER_BACKGROUND_COLORS = {
+    "lichess": GREEN_BUTTON_COLOR,
+    "discord": CYAN_BUTTON_COLOR,
+    "github": MAGENTA_BUTTON_COLOR
+}
+
+function getProviderBackgroundColor(providerOpt){
+    let provider = providerOpt || PROVIDER()
+    if(!provider) return "#fff"
+    return PROVIDER_BACKGROUND_COLORS[provider] || "#777"
+}
+
 const RP = value => P(resolve => {
     resolve(value)
 })
-
-class OrderedHash_{
-    constructor(blob){
-        this.fromBlob(blob)
-    }
-
-    fromBlob(blobOpt){        
-        this.blob = blobOpt || []
-        return this
-    }
-
-    getKey(key){
-        return this.blob.find(entry => entry[0] == key)
-    }
-
-    get(key){
-        let entry = this.getKey(key)
-        if(entry) return entry[1]
-        return null
-    }
-
-    setKey(key, value){
-        let entry = this.getKey(key)
-
-        if(entry){
-            entry[1] = value
-            return
-        }
-
-        this.blob.push([key, value])
-    }
-}
-function OrderedHash(blobOpt){return new OrderedHash_(blobOpt)}
 
 Array.prototype.splitFilter =
     function(filterFunc){return [this.filter(filterFunc), this.filter(x => !filterFunc(x))]}
@@ -116,6 +115,10 @@ try{
 function IS_DEV(){
     if(typeof PROPS.IS_DEV != "undefined") return PROPS.IS_DEV
     return !!document.location.host.match(/localhost/)
+}
+
+function IS_PROD(){
+    return !IS_DEV()
 }
 
 Array.prototype.itoj = function(i, j){    
@@ -184,6 +187,8 @@ function simpleFetch(url, params, callback){
     )
 }
 
+var globalAlertFunc = null
+
 function api(topic, payload, callback){
     fetch('/api', {
         method: "POST",
@@ -199,7 +204,12 @@ function api(topic, payload, callback){
             text => {
                 try{                    
                     let response = JSON.parse(text)
-                    callback(response)
+                    if(response.alert){
+                        if(globalAlertFunc){
+                            globalAlertFunc(response.alert, response.alertKind)
+                        }
+                    }
+                    if(callback) callback(response)
                 }catch(err){
                     console.log("parse error", err)
                     callback({error: "Error: Could not parse response JSON."})
@@ -427,52 +437,6 @@ function movecolor(weights){
 
 function scrollBarSize(){
     return 14
-}
-
-function displayNameForVariantKey(variantKey){
-    return variantKey.substring(0,1).toUpperCase() + variantKey.substring(1)
-}
-
-function pgnVariantToVariantKey(pgnVariant){    
-    return pgnVariant.substring(0,1).toLowerCase() + pgnVariant.substring(1)
-}
-
-function parsePgnPartsFromLines(lines){
-    let parseHead = true
-    let parseBody = false
-    let headers = []
-    let bodyLines = []
-
-    // remove leading empty lines
-    while(lines.length && (!lines[0])) lines.shift()
-    
-    do{
-        let line = lines.shift()
-        let m
-        if(parseHead){
-            if(!line){
-                parseHead = false
-            }else if(m = line.match(/^\[([^ ]+) \"([^\"]+)/)){                
-                headers.push([m[1], m[2]])
-            }else{
-                parseHead = false
-                lines.unshift(line)
-            }
-        }else{
-            if(parseBody){
-                if(!line){
-                    return [lines, headers, bodyLines.join("\n")]
-                }else{
-                    bodyLines.push(line)
-                }
-            }else if(line){
-                parseBody = true
-                bodyLines.push(line)
-            }
-        }
-    }while(lines.length)
-    
-    return [lines, headers, bodyLines.join("\n")]
 }
 
 function confirm(msg, ack){

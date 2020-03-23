@@ -11,14 +11,43 @@ class PlayerPanel_ extends SmartDomElement{
         this.setPlayer(this.player)
     }
 
+    sit(){
+        api("play:sitPlayer", {            
+            index: this.player.index
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    unseat(){
+        api("play:unseatPlayer", {            
+            index: this.player.index
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    build(){
+        this.x().h(25)
+
+        if(this.player.seated){
+            this.a(
+                div().dfc().a(
+                    UserLabel(this.player),
+                    Button("Unseat", this.unseat.bind(this))
+                )                
+            )
+        }else{
+            this.a(
+                Button("Sit", this.sit.bind(this))
+            )
+        }
+    }
+
     setPlayer(player){
         this.player = player
 
-        this.x().a(
-            div().dfc().a(
-                div().bc("#eee").pad(2).html(this.player.qualifiedDisplayName(SHOW_RATING))
-            )
-        )
+        this.build()
     }
 }
 function PlayerPanel(props){return new PlayerPanel_(props)}
@@ -28,6 +57,9 @@ class Table_ extends SmartDomElement{
         super("div", props)
     }
 
+    get g(){return this.board.game}
+    get players(){return this.g.players}
+
     calcProps(){
         this.chatWidth = this.props.chatWidth || DEFAULT_CHAT_WIDTH
         this.chatHeight = this.board.boardsize() - 29
@@ -36,10 +68,7 @@ class Table_ extends SmartDomElement{
     chatMessageEntered(msg){
         api("play:postChatMessage", {
             chatMessage: ChatMessage({
-                author: {
-                    username: USERNAME(),
-                    provider: PROVIDER()
-                },
+                author: USER_BLOB(),
                 msg: msg
             })
         }, response => {
@@ -47,12 +76,21 @@ class Table_ extends SmartDomElement{
         })
     }
 
+    build(){
+        this.chatText.setValue(this.g.chat.asText())        
+        this.players.forEach(player => this.playerPanels[player.index].setPlayer(player))
+    }
+
+    buildFromGame(game){
+        this.board.setgame(game)        
+        this.build()
+    }
+
     processApi(topic, payload){
         switch(topic){
-            case "updatechat":
-                console.log(payload)
-                let chat = Chat(payload.chat)
-                this.chatText.setValue(chat.asText())
+            case "updategame":                
+                let game = Game(payload.game)
+                this.buildFromGame(game)
                 break
         }
     }
@@ -79,10 +117,7 @@ class Table_ extends SmartDomElement{
                 .w(this.chatWidth).mart(2)                
         )
 
-        this.playerPanels = [
-            PlayerPanel(),
-            PlayerPanel()
-        ]
+        this.playerPanels = [0,1].map(i => PlayerPanel({player: Player().setIndex(i)}))
 
         this.mainContainer = table().a(
             tr().a(

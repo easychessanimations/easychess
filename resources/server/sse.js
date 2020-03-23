@@ -8,7 +8,8 @@ module.exports = function (req, res, next) {
     }
 
     res.sseSend = function(data) {
-        res.write("data: " + JSON.stringify(data) + "\n\n");
+        let blob = "data: " + JSON.stringify(data) + "\n\n"        
+        res.write(blob);
     }
 
     next()

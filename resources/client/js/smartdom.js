@@ -2218,3 +2218,16 @@ class ThreeRenderer_ extends SmartDomElement{
     }
 }
 function ThreeRenderer(props){return new ThreeRenderer_(props)}
+
+class UserLabel_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        let name = this.props.id ? `${this.props.username} ( ${this.props.provider} )` : "@nonymous"
+
+        this.dib().mar(1).pad(2)
+            .bc(getProviderBackgroundColor(this.props.provider))
+            .html(name)
+    }
+}
+function UserLabel(props){return new UserLabel_(props)}

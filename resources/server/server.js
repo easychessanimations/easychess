@@ -157,6 +157,10 @@ function IS_DEV(){
     return !!process.env.EASYCHESS_DEV
 }
 
+function IS_PROD(){
+    return !IS_DEV()
+}
+
 function getVer(obj, field){
     if(!obj[field]) return ""
     return `?ver=${obj[field].mtime}`
@@ -292,14 +296,14 @@ app.use(sse)
 app.get('/stream', function(req, res) {  
     res.sseSetup()  
     sseconnections.push(res)
-    setTimeout(_ => {
-        res.sseSend(play.sendChatBlob())
+    setTimeout(_ => {        
+        res.sseSend(play.sendGameBlob())
     }, SSE_STARTUP_DELAY)
     while(sseconnections.length > MAX_SSE_CONNECTIONS) sseconnections.shift()
     clog(`new stream ${req.hostname} conns ${sseconnections.length}`)
 })
 
-function ssesend(obj){
+function ssesend(obj){    
     for(let i = 0; i < sseconnections.length; i++){
         sseconnections[i].sseSend(obj)
     }
@@ -445,7 +449,7 @@ app.post('/api', (req, res) => {
 
     if(m){
         try{
-            play.api(m[1], payload, res)
+            play.api(m[1], payload, req, res)
         }catch(err){
             console.log("play api error", err)
             apisend({}, "Error: Play API error.", res)
@@ -510,7 +514,7 @@ const engines = {
     fairy:  new ServerEngine(ssesend, FAIRY_PATH),
 }
 
-setInterval(function(){
+if(IS_PROD()) setInterval(function(){
     ssesend({kind: "tick"})
 }, QUERY_INTERVAL)
 

@@ -1,4 +1,4 @@
-const { Chat, ChatMessage } = require('../shared/js/chessboard')
+const { Chat, ChatMessage, Game, Player, UNSEAT } = require('../shared/js/chessboard')
 
 var apisend, ssesend
 
@@ -7,22 +7,69 @@ function init(setApisend, setSsesend){
     ssesend = setSsesend
 }
 
-let chat = Chat()
+let game = Game()
 
-function sendChatBlob(){
+function sendGameBlob(){    
     return({
-        kind: "play:updatechat",
-        chat: chat.serialize()
+        kind: "play:updategame",
+        game: game.serialize()
     })
 }
 
-function api(topic, payload, res){
-    switch(topic){
+function api(topic, payload, req, res){
+    let player = Player({...req.user, ...{index: payload.index}})
+    let result
+
+    switch(topic){        
         case "postChatMessage":
             let chatMessage = ChatMessage(payload.chatMessage)
-            chat.postMessage(chatMessage)
+            game.chat.postMessage(chatMessage)
             apisend(`playapi:chatMessagePosted`, null, res)
-            ssesend(sendChatBlob())
+            ssesend(sendGameBlob())
+            break
+        case "unseatPlayer":            
+            if(!req.user){
+                apisend({
+                    alert: `Log in to unseat.`,
+                    alertKind: "error"
+                }, null, res)
+                return
+            }
+            if(game.inProgress){
+                apisend({}, `Error: Cannot unseat for game in progress.`)
+                return
+            }
+            result = game.sitPlayer(player, UNSEAT)
+            if(result === true){
+                apisend(`playapi:playerUnseated`, null, res)                
+                ssesend(sendGameBlob())
+            }
+            else apisend({
+                alert: result,
+                alertKind: "error"
+            }, null, res)
+            break
+        case "sitPlayer":            
+            if(!req.user){
+                apisend({
+                    alert: `Log in to sit.`,
+                    alertKind: "error"
+                }, null, res)
+                return
+            }
+            if(game.inProgress){
+                apisend({}, `Error: Cannot sit for game in progress.`)
+                return
+            }
+            result = game.sitPlayer(player)
+            if(result === true){
+                apisend(`playapi:playerSeated`, null, res)                
+                ssesend(sendGameBlob())
+            }
+            else apisend({
+                alert: result,
+                alertKind: "error"
+            }, null, res)
             break
     }
 }
@@ -30,5 +77,5 @@ function api(topic, payload, res){
 module.exports = {
     init: init,
     api: api,
-    sendChatBlob: sendChatBlob
+    sendGameBlob: sendGameBlob
 }

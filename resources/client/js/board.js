@@ -241,7 +241,9 @@ class Board_ extends SmartDomElement{
     setgame(game){
         this.game = game        
         this.positionchanged()
-        this.parentApp.pgnHeadersEditableList.fromOrderedHash(this.game.pgnHeaders)
+        try{
+            this.parentApp.pgnHeadersEditableList.fromOrderedHash(this.game.pgnHeaders)
+        }catch(err){}        
         return this
     }
 

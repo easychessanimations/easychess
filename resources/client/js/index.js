@@ -38,26 +38,6 @@ const COMMENT_TEXT_AREA_WIDTH   = 310
 
 const THUMB_SIZE                = 150
 
-const GREEN_BUTTON_COLOR        = "#afa"
-const BLUE_BUTTON_COLOR         = "#aaf"
-const CYAN_BUTTON_COLOR         = "#aff"
-const MAGENTA_BUTTON_COLOR      = "#faf"
-const RED_BUTTON_COLOR          = "#faa"
-const YELLOW_BUTTON_COLOR       = "#ffa"
-const IDLE_BUTTON_COLOR         = "#eee"
-
-const PROVIDER_BACKGROUND_COLORS = {
-    "lichess": GREEN_BUTTON_COLOR,
-    "discord": CYAN_BUTTON_COLOR,
-    "github": MAGENTA_BUTTON_COLOR
-}
-
-function getProviderBackgroundColor(){
-    let provider = PROVIDER()
-    if(!provider) return "#fff"
-    return PROVIDER_BACKGROUND_COLORS[provider] || "#777"
-}
-
 const TREE_SEED                 = 10
 
 const TREE_BACKWARD_DEPTH       = 10
@@ -272,6 +252,8 @@ class App extends SmartDomElement{
 
     constructor(props){
         super("div", props)
+
+        globalAlertFunc = this.alert.bind(this)
 
         this.shouldGo = localStorage.getItem("shouldGo")
 
@@ -1449,7 +1431,7 @@ class App extends SmartDomElement{
     }
 
     checkApi(){
-        if(performance.now() - this.lastApiTick > 20 * QUERY_INTERVAL){
+        if(IS_PROD()) if(performance.now() - this.lastApiTick > 20 * QUERY_INTERVAL){
             this.alert("Server not responsive. Reloading page.", "error")
             setTimeout(() => this.reloadPage(), ALERT_DELAY)
         }
@@ -2181,8 +2163,8 @@ class App extends SmartDomElement{
     checksource(){
         let elapsed = performance.now() - this.lasttick
 
-        if(elapsed > ( 2 * QUERY_INTERVAL ) ){
-            this.alert(`Engine stream timed out, setting up new. If the problem persists, reload the page.`, "error")
+        if(IS_PROD()) if(elapsed > ( 2 * QUERY_INTERVAL ) ){
+            this.alert(`Server stream timed out, setting up new. If the problem persists, reload the page.`, "error")
 
             this.lasttick = performance.now()
 
@@ -2203,8 +2185,8 @@ class App extends SmartDomElement{
 
         this.source = new EventSource('/stream')
 
-        this.source.addEventListener('message', e => {
-            let analysisinfo = JSON.parse(e.data)            
+        this.source.addEventListener('message', e => {                        
+            let analysisinfo = JSON.parse(e.data)                 
             let m
             if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()

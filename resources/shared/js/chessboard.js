@@ -1151,17 +1151,30 @@ class Player_{
 
     fromBlob(propsOpt){
         let props = propsOpt || {}
+        this.id = props.id
         this.username = props.username
         this.provider = props.provider
         this.glicko = Glicko(props.glicko)
+        this.seated = !!props.seated
+        this.seatedAt = props.seatedAt || null
+        this.index = props.index || 0
+        return this
+    }
+
+    setIndex(index){
+        this.index = index
         return this
     }
 
     serialize(){
         return {
+            id: this.id,
             username: this.username,
             provider: this.provider,
-            glicko: this.glicko.serialize()
+            glicko: this.glicko.serialize(),
+            seated: this.seated,
+            seatedAt: this.seatedAt,
+            index: this.index,
         }
     }
 }
@@ -1230,20 +1243,32 @@ class Players_{
         this.fromBlob(props)
     }
 
+    forEach(func){
+        this.players.forEach(func)
+    }
+
+    hasPlayer(player){
+        return this.players.find(pl => pl.id == player.id)
+    }
+
     fromBlob(propsOpt){
         let props = propsOpt || {}
         this.players = []
         let repo = props.players || []
         for(let i=0; i < MAX_NUM_PLAYERS; i++){
-            let blob = repo.length ? repo.pop() : null
-            let player = Player(blob)
-            this.players.unshift(player)
+            let blob = repo.length ? repo.shift() : null
+            let player = Player(blob).setIndex(i)
+            this.players.push(player)
         }
         return this
     }
 
     getByIndex(index){
         return this.players[index]
+    }
+
+    setPlayer(player){        
+        this.players[player.index] = player
     }
 
     getByColor(color){
@@ -1459,17 +1484,122 @@ class GameNode_{
 }
 function GameNode(){return new GameNode_()}
 
+const UNSEAT                = true
+const UNSEAT_PLAYER_DELAY   = 5 * 60 * 1000
+
+const DURATION_VERBAL       = true
+
+function formatDuration(ms, verbal){
+    const sec = 1000
+    const min = 60 * sec
+    const hour = 60 * min
+    let buff = ""
+    let h = Math.floor(ms / hour)
+    if(ms > hour){        
+        ms = ms - h * hour
+        buff += `${h} hour`
+        if(h > 1) buff += "s"
+        buff += " , "
+    }
+    let m = Math.floor(ms / min)
+    if(ms > min){        
+        ms = ms - m * min
+        buff += `${m} minute`
+        if(m > 1) buff += "s"
+        buff += " , "
+    }
+    let s = Math.floor(ms / sec)
+    buff += `${s} second`
+    if(s > 1) buff += "s"
+    if(verbal) return buff
+    let hp = ("" + h).padStart(2, "0")
+    let mp = ("" + m).padStart(2, "0")
+    let sp = ("" + s).padStart(2, "0")
+    return `${hp}:${mp}:${sp}`
+}
+
+class OrderedHash_{
+    constructor(blob){
+        this.fromBlob(blob)
+    }
+
+    fromBlob(blobOpt){        
+        this.blob = blobOpt || []
+        return this
+    }
+
+    getKey(key){
+        return this.blob.find(entry => entry[0] == key)
+    }
+
+    get(key){
+        let entry = this.getKey(key)
+        if(entry) return entry[1]
+        return null
+    }
+
+    setKey(key, value){
+        let entry = this.getKey(key)
+
+        if(entry){
+            entry[1] = value
+            return
+        }
+
+        this.blob.push([key, value])
+    }
+}
+function OrderedHash(blobOpt){return new OrderedHash_(blobOpt)}
+
+function displayNameForVariantKey(variantKey){
+    return variantKey.substring(0,1).toUpperCase() + variantKey.substring(1)
+}
+
+function pgnVariantToVariantKey(pgnVariant){    
+    return pgnVariant.substring(0,1).toLowerCase() + pgnVariant.substring(1)
+}
+
+function parsePgnPartsFromLines(lines){
+    let parseHead = true
+    let parseBody = false
+    let headers = []
+    let bodyLines = []
+
+    // remove leading empty lines
+    while(lines.length && (!lines[0])) lines.shift()
+    
+    do{
+        let line = lines.shift()
+        let m
+        if(parseHead){
+            if(!line){
+                parseHead = false
+            }else if(m = line.match(/^\[([^ ]+) \"([^\"]+)/)){                
+                headers.push([m[1], m[2]])
+            }else{
+                parseHead = false
+                lines.unshift(line)
+            }
+        }else{
+            if(parseBody){
+                if(!line){
+                    return [lines, headers, bodyLines.join("\n")]
+                }else{
+                    bodyLines.push(line)
+                }
+            }else if(line){
+                parseBody = true
+                bodyLines.push(line)
+            }
+        }
+    }while(lines.length)
+    
+    return [lines, headers, bodyLines.join("\n")]
+}
+
 class Game_{
-    constructor(propsopt){        
-        let props = propsopt || {}
-
-        this.variant = props.variant || DEFAULT_VARIANT
-        this.flip = props.flip || false
-
-        this.pgnHeaders = OrderedHash()
-        this.pgnBody = ""
-
-        this.board = ChessBoard()
+    constructor(props){       
+        this.fromblob(props)
     }
 
     makeSanMove(sanOpt){        
@@ -1724,24 +1854,50 @@ class Game_{
         }))
     }
 
-    fromblob(blob){
-        this.variant = blob.variant
-        this.flip = blob.flip
-        let gamenodesserialized = blob.gamenodes || {}
-        this.gamenodes = {}
+    sitPlayer(player, UNSEAT){
+        let pl = this.players.getByIndex(player.index)
+        if(pl.seated && (pl.id != player.id)){
+            let elapsed = new Date().getTime() - pl.seatedAt
+            if(elapsed < UNSEAT_PLAYER_DELAY) return `Player can be unseated after ${formatDuration(UNSEAT_PLAYER_DELAY - elapsed, DURATION_VERBAL)}.`
+        }
+        if(UNSEAT){
+            player = Player().setIndex(player.index)
+        }else{            
+            if(this.players.hasPlayer(player)) return `Already seated.`
+            player.seated = true
+            player.seatedAt = new Date().getTime()
+        }        
+        this.players.setPlayer(player)
+        return true
+    }
+
+    // gbl
+    fromblob(blobOpt){
+        let blob = blobOpt || {}
+
+        this.board = ChessBoard()
+        this.variant = blob.variant || DEFAULT_VARIANT                
+        this.pgnHeaders = OrderedHash(blob.pgnHeaders)
+        this.pgnBody = blob.pgnBody || "*"        
+
+        this.setfromfen(null, null)                
+        let gamenodesserialized = blob.gamenodes || {}        
         for(let id in gamenodesserialized){
             this.gamenodes[id] = GameNode().fromblob(this, gamenodesserialized[id])
         }
         this.currentnodeid = blob.currentnodeid || "root"
         this.board.setfromfen(this.getcurrentnode().fen, this.variant)
+
+        this.setDefaultPgnHeaders()
+
+        this.flip = !!blob.flip        
         this.animations = blob.animations || []
         this.selectedAnimation = blob.selectedAnimation
-        this.animationDescriptors = blob.animationDescriptors || {}
-        this.pgnHeaders = OrderedHash(blob.pgnHeaders)
-        this.pgnBody = blob.pgnBody || "*"
-        this.setDefaultPgnHeaders()
+        this.animationDescriptors = blob.animationDescriptors || {}                
         this.timecontrol = Timecontrol(blob.timecontrol)
         this.players = Players(blob.players)
+        this.inProgress = !!blob.inProgress
+        this.chat = Chat(blob.chat)
         return this
     }
 
@@ -2013,6 +2169,7 @@ class Game_{
         return false
     }
 
+    // gsr
     serialize(){
         let gamenodesserialized = {}
         for(let id in this.gamenodes){
@@ -2029,7 +2186,9 @@ class Game_{
             pgnHeaders: this.pgnHeaders.blob,
             pgnBody: this.pgnBody,
             timecontrol: this.timecontrol.serialize(),
-            players: this.players.serialize()
+            players: this.players.serialize(),
+            inProgress: this.inProgress,
+            chat: this.chat.serialize()
         }
     }
 
@@ -2421,5 +2580,7 @@ if(typeof module != "undefined") if(typeof module.exports != "undefined"){
         Game: Game,    
         ChatMessage: ChatMessage,    
         Chat: Chat,
+        MAX_NUM_PLAYERS: MAX_NUM_PLAYERS,
+        UNSEAT: UNSEAT
     }
 }
