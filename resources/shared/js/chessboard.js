@@ -215,6 +215,8 @@ class Move_{
 }
 function Move(fromsq, tosq, prompiece, epclsq, epsq){return new Move_(fromsq, tosq, prompiece, epclsq, epsq)}
 
+const FIFTY_MOVE_RULE_LIMIT     = 100
+
 class ChessBoard_{
     constructor(props){        
         this.props = props || {}
@@ -232,6 +234,13 @@ class ChessBoard_{
         let lms = this.legalmovesforallpieces()
 
         if(lms.length){
+            if(this.halfmoveclock >= FIFTY_MOVE_RULE_LIMIT){
+                return {
+                    terminated: true,
+                    result: 0.5,
+                    resultReason: "fifty move rule"
+                }
+            }
             return {
                 terminated: false,
                 result: null,
@@ -1644,6 +1653,7 @@ function parsePgnPartsFromLines(lines){
 }
 
 const UPDATE_THINKING_TIME      = true
+const FOLD_REPETITION           = 3
 
 class Game_{
     constructor(props){       
@@ -1720,6 +1730,20 @@ class Game_{
         return false
     }
 
+    isRepetition(times){
+        let mults = {}
+
+        for(let id in this.gamenodes){
+            let node = this.gamenodes[id]
+            let sfen = strippedfen(node.fen)
+            if(mults[sfen]) mults[sfen]++
+            else mults[sfen] = 1
+            if(mults[sfen] >= times) return true
+        }
+
+        return false
+    }
+
     makeSanMoveResult(san){
         if(this.checkTurnTimedOut(UPDATE_THINKING_TIME)){
             return true
@@ -1728,8 +1752,16 @@ class Game_{
             if(status.terminated){
                 this.terminate(
                     status.result,
-                    status.reason
+                    status.resultReason
                 )
+                return true
+            }
+            if(this.isRepetition(FOLD_REPETITION)){
+                this.terminate(
+                    0.5,
+                    "threefold repetition"
+                )
+                return true
             }
             this.startThinking()
             return true
