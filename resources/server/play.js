@@ -4,9 +4,11 @@ const { Chat, ChatMessage, Game, Player, UNSEAT } = require('../shared/js/chessb
 
 var apisend, ssesend, bucket
 
-var stateBucket
+var stateBucket, gamesBucket
 
 var game = Game()
+
+var games = []
 
 function sendGameBlob(){    
     return({
@@ -17,6 +19,17 @@ function sendGameBlob(){
 
 function sendGame(){
     ssesend(sendGameBlob())
+}
+
+function sendGamesBlob(){    
+    return({
+        kind: "play:games",
+        games: games
+    })
+}
+
+function sendGames(){
+    ssesend(sendGamesBlob())
 }
 
 function init(setApisend, setSsesend, setBucket){
@@ -36,11 +49,34 @@ function init(setApisend, setSsesend, setBucket){
             console.log(err)
         }
     )
+
+    gamesBucket = new Bucket("easychessgames", bucket)
+
+    gamesBucket.get().then(
+        json => {
+            games = json
+            console.log(`loaded games`)            
+            sendGames()
+        },
+        err => {
+            console.log(err)
+        }
+    )
 }
 
 function saveGameState(){    
     if(stateBucket){
         stateBucket.put(game.serialize())
+    }
+}
+
+const MAX_STORED_GAMES = process.env.MAX_STORED_GAMES || 100
+
+function saveGames(){    
+    while(games.length > MAX_STORED_GAMES) games.pop()
+
+    if(gamesBucket){
+        gamesBucket.put(games)
     }
 }
 
@@ -103,7 +139,16 @@ function handleGameOperationResult(result, res, apiOkMessage){
     sendGame()
 }
 
+function gameTerminated(){
+    console.log(`game terminated`)
+    games.unshift(game.serialize())
+    saveGames()
+    sendGames()
+}
+
 function api(topic, payload, req, res){
+    game.terminationCallback = gameTerminated
+
     let player = Player({...req.user, ...{index: payload.index}})
 
     switch(topic){        
@@ -191,5 +236,6 @@ function api(topic, payload, req, res){
 module.exports = {
     init: init,
     api: api,
-    sendGameBlob: sendGameBlob
+    sendGameBlob: sendGameBlob,
+    sendGamesBlob: sendGamesBlob
 }

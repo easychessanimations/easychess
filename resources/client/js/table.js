@@ -130,7 +130,7 @@ class Table_ extends SmartDomElement{
         })
     }
 
-    cancelEditTimecotrol(){        
+    cancelEditTimecontrol(){        
         this.timecontrolFormHook.x()
         this.editTimeControlOn = false
     }
@@ -167,9 +167,9 @@ class Table_ extends SmartDomElement{
                 })
                     .marl(10),
                 div().a(
-                    Button("Set", this.setTimecotrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),
+                    Button("Set", this.setTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),
                     Button("Set and Store", this.setAndStoreTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),                    
-                    Button("Cancel", this.cancelEditTimecotrol.bind(this)).bc(YELLOW_BUTTON_COLOR).mart(5),
+                    Button("Cancel", this.cancelEditTimecontrol.bind(this)).bc(YELLOW_BUTTON_COLOR).mart(5),
                 ),
                 div().a(
                     div().mart(5).ffm().fs(12).html("Presets:"),
@@ -219,7 +219,7 @@ class Table_ extends SmartDomElement{
         }
     }
 
-    setTimecotrol(){
+    setTimecontrol(){
         this.requestSetTimecontrol(this.calcTimecontrolBlob())
     }
 
@@ -258,6 +258,9 @@ class Table_ extends SmartDomElement{
                 let game = Game(payload.game)
                 this.buildFromGame(game)
                 break
+            case "games":
+                this.showGames(payload.games)
+                break
         }
     }
 
@@ -268,6 +271,12 @@ class Table_ extends SmartDomElement{
         }, response => {
             //console.log(response)
         })
+    }
+
+    showGames(games){
+        this.gamesContainer.a(games.map(blob => GameLabel({...blob, ...{
+            analyzeCallback: this.parentApp.analyzeGame.bind(this.parentApp)
+        }})))
     }
 
     init(){        
@@ -323,7 +332,16 @@ class Table_ extends SmartDomElement{
 
         this.mar(3)
 
-        this.ame(this.mainContainer)
+        this.gamesContainer = div().hh(500).pad(5).mar(5).ovfys()
+
+        this.uberContainer = table().a(
+            tr().a(
+                td().a(this.mainContainer),
+                td().a(this.gamesContainer)
+            )
+        )
+
+        this.ame(this.uberContainer)
     }
 }
 function Table(props){return new Table_(props)}

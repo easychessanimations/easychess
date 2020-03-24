@@ -2183,6 +2183,16 @@ class App extends SmartDomElement{
         this.table.showOnline(online)
     }
 
+    showGames(games){
+        this.table.showGames(games)
+    }
+
+    analyzeGame(game){
+        this.ubertabs.selectTab("analyze")
+        this.tabs.selectTab("moves")
+        this.board.setgame(game)
+    }
+
     setupsourceFunc(){
         //this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
 

@@ -2050,6 +2050,10 @@ class Game_{
             pl.seated = false
             pl.seatedAt = null
         })
+
+        if(this.terminationCallback){
+            this.terminationCallback()
+        }
     }
 
     resignPlayer(player){
@@ -2103,6 +2107,7 @@ class Game_{
             pl.thinkingTime = this.timecontrol.initial * 60 * 1000
             pl.offerDraw = false
         })
+        this.startedAt = new Date().getTime()
         this.startThinking()
     }
 

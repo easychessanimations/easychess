@@ -302,6 +302,7 @@ app.get('/stream', function(req, res) {
     sseconnections.push(res)
     setTimeout(_ => {        
         res.sseSend(play.sendGameBlob())
+        res.sseSend(play.sendGamesBlob())
         monitor.sendOnlineUsers()
     }, SSE_STARTUP_DELAY)
     while(sseconnections.length > MAX_SSE_CONNECTIONS) sseconnections.shift()

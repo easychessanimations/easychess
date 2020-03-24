@@ -2298,3 +2298,32 @@ class ThinkingTimeLabel_ extends SmartDomElement{
     }
 }
 function ThinkingTimeLabel(props){return new ThinkingTimeLabel_(props)}
+
+class GameLabel_ extends SmartDomElement{
+    analyze(){
+        if(this.props.analyzeCallback){
+            let clone = Game().fromblob(this.props)
+            clone.terminated = false
+            this.props.analyzeCallback(clone)
+        }
+    }
+
+    constructor(props){
+        super("div", props)
+        
+        let game = Game().fromblob(props)
+
+        this.bc("#ddd").pad(2).bdr("solid", 3, "#999").a(
+            div().mar(1).fs(18).fwb().bc("#ffa").c("#007").pad(2).html(game.playersVerbal()),
+            div().dfc().a(
+                VariantLabel(game),
+                TimecontrolLabel(game).marl(3),
+                div().marl(5).fwb().fs(20).mar(1).bc("#eef").c("#007").pad(2).html(game.resultVerbal()),
+                div().marl(5).fs(12).c("#700").fst("italic").bc("#ffe").pad(3).padl(5).padr(5).html(game.resultReason),
+                div().fwb().c("#007").fs(12).marl(10).marr(2).html(game.startedAt ? new Date(game.startedAt).toLocaleString() : ""),
+                Button("Analyze", this.analyze.bind(this)).marl(5).bc(GREEN_BUTTON_COLOR)
+            )
+        )
+    }
+}
+function GameLabel(props){return new GameLabel_(props)}
