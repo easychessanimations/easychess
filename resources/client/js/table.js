@@ -35,14 +35,43 @@ class PlayerPanel_ extends SmartDomElement{
         })
     }
 
-    build(){
-        this.x().h(20)
+    get g(){return this.parentTable.g}
 
-        if(this.parentTable.g.inProgress){
+    offerDraw(){
+        api("play:offerDraw", {            
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    revokeDraw(){
+        api("play:revokeDraw", {            
+        }, response => {
+            //console.log(response)
+        })
+    }
+
+    build(){
+        this.x().h(28)
+
+        let isTurn = this.player.equalTo(this.g.turnPlayer())
+
+        if(this.g.inProgress){
             this.a(
                 div().dfc().a(
-                    UserLabel(this.player),
-                    IS_ME(this.player) ? Button("Resign", this.resign.bind(this)) : div()
+                    ThinkingTimeLabel({...this.player,...{isTurn: isTurn}}),
+                    UserLabel(this.player),                    
+                    IS_ME(this.player) ?
+                        this.player.offerDraw ?
+                            Button("Revoke Draw", this.revokeDraw.bind(this)).bc(YELLOW_BUTTON_COLOR)
+                        :
+                            this.g.drawOffered() ?                            
+                                Button("Accept Draw", this.offerDraw.bind(this)).bc(GREEN_BUTTON_COLOR).ac("blink_me")
+                            :
+                                Button("Offer Draw", this.offerDraw.bind(this)).bc(GREEN_BUTTON_COLOR)
+                    :
+                        div(),
+                    IS_ME(this.player) ? Button("Resign", this.resign.bind(this)).bc(RED_BUTTON_COLOR) : div(),                    
                 )                
             )
         }else if(this.player.seated){

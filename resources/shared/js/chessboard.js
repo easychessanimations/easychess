@@ -234,20 +234,23 @@ class ChessBoard_{
         if(lms.length){
             return {
                 terminated: false,
-                result: null
+                result: null,
+                resultReason: "in progress"
             }
         }
 
         if(this.iskingincheck(this.turn)){
             return {
                 terminated: true,
-                result: ( this.turn == WHITE ) ? 0 : 1
+                result: ( this.turn == WHITE ) ? 0 : 1,
+                resultReason: "mate"
             }
         }
 
         return {
             terminated: true,
-            result: 0.5
+            result: 0.5,
+            resultReason: "stalemate"
         }
     }
 
@@ -1185,6 +1188,9 @@ class Player_{
         this.seated = !!props.seated
         this.seatedAt = props.seatedAt || null
         this.index = props.index || 0
+        this.thinkingTime = props.thinkingTime || 0
+        this.startedThinkingAt = props.startedThinkingAt || null
+        this.offerDraw = props.offerDraw
         return this
     }
 
@@ -1202,6 +1208,9 @@ class Player_{
             seated: this.seated,
             seatedAt: this.seatedAt,
             index: this.index,
+            thinkingTime: this.thinkingTime,
+            startedThinkingAt: this.startedThinkingAt,
+            offerDraw: this.offerDraw,
         }
     }
 }
@@ -1634,9 +1643,51 @@ function parsePgnPartsFromLines(lines){
     return [lines, headers, bodyLines.join("\n")]
 }
 
+const UPDATE_THINKING_TIME      = true
+
 class Game_{
     constructor(props){       
         this.fromblob(props)
+    }
+
+    offerDraw(player){
+        let find = this.players.hasPlayer(player)
+        if(!find){
+            return `Only playing sides can offer draw.`
+        }
+        find.offerDraw = true
+        if(this.drawAccepted()){
+            this.terminate(
+                0.5,
+                "draw agreed"
+            )
+        }
+        return true
+    }
+
+    revokeDraw(player){
+        let find = this.players.hasPlayer(player)
+        if(!find){
+            return `Only playing sides can revoke draw.`
+        }
+        find.offerDraw = false
+        return true
+    }
+
+    drawOffered(){
+        let result = false
+        this.players.forEach(pl => {
+            if(pl.offerDraw) result = true
+        })
+        return result
+    }
+
+    drawAccepted(){
+        let result = true
+        this.players.forEach(pl => {
+            if(!pl.offerDraw) result = false
+        })
+        return result
     }
 
     turnPlayer(){
@@ -1647,12 +1698,40 @@ class Game_{
         return this.turnPlayer().equalTo(player)
     }
 
+    turnMoveTime(){
+        return new Date().getTime() - this.turnPlayer().startedThinkingAt
+    }
+
+    turnTimeLeft(){
+        return Math.max(this.turnPlayer().thinkingTime - this.turnMoveTime(), 0)
+    }
+
+    checkTurnTimedOut(updateThinkingTime){
+        if(!this.inProgress) return false
+        let tl = this.turnTimeLeft()        
+        if(updateThinkingTime) this.turnPlayer().thinkingTime = tl
+        if(tl <= 0){            
+            this.terminate(
+                (this.board.turn == WHITE) ? 0 : 1,
+                "flagged"
+            )
+            return true
+        }
+        return false
+    }
+
     makeSanMoveResult(san){
-        if(this.makeSanMove(san)){
+        if(this.checkTurnTimedOut(UPDATE_THINKING_TIME)){
+            return true
+        }else if(this.makeSanMove(san)){
             let status = this.board.status()
             if(status.terminated){
-                this.terminate(status.result)
+                this.terminate(
+                    status.result,
+                    status.reason
+                )
             }
+            this.startThinking()
             return true
         }
         return `Illegal move.`
@@ -1924,11 +2003,12 @@ class Game_{
         return this.players.getByColor(WHITE).seated && this.players.getByColor(BLACK).seated
     }
 
-    terminate(result){
+    terminate(result, reason){
         this.inProgress = false
         this.terminated = true
         this.terminatedAt = new Date().getTime()
         this.result = result
+        this.resultReason = reason
         this.players.forEach(pl => {
             pl.seated = false
             pl.seatedAt = null
@@ -1938,8 +2018,14 @@ class Game_{
     resignPlayer(player){
         if(!this.inProgress) return `You can only resign an ongoing game.`
         if(this.players.hasPlayer(player)){            
-            if(player.index == 0) this.terminate(1)
-            else this.terminate(0)
+            if(player.index == 0) this.terminate(
+                1,
+                "black resigned"
+            )
+            else this.terminate(
+                0,
+                "white resigned"
+            )
             return true
         }else{
             return `You can only resign your own game.`
@@ -1966,11 +2052,21 @@ class Game_{
         return true
     }
 
+    startThinking(){
+        this.turnPlayer().startedThinkingAt = new Date().getTime()
+    }
+
     startGame(){
         this.inProgress = true
         this.terminated = false
         this.result = null
+        this.resultReason = "in progress"
         this.setfromfen(null, this.variant)
+        this.players.forEach(pl => {
+            pl.thinkingTime = this.timecontrol.initial * 60 * 1000
+            pl.offerDraw = false
+        })
+        this.startThinking()
     }
 
     // gbl
@@ -2001,6 +2097,7 @@ class Game_{
         this.inProgress = !!blob.inProgress
         this.terminated = !!blob.terminated
         this.result = blob.result
+        this.resultReason = blob.resultReason || "in progress"
         this.startedAt = blob.startedAt || null
         this.terminatedAt = blob.terminatedAt || null
         this.chat = Chat(blob.chat)
@@ -2306,6 +2403,7 @@ class Game_{
             inProgress: this.inProgress,
             terminated: this.terminated,
             result: this.result,
+            resultReason: this.resultReason,
             startedAt: this.startedAt,
             terminatedAt: this.terminatedAt,
             chat: this.chat.serialize()

@@ -20,6 +20,12 @@ function sendGame(){
     ssesend(sendGameBlob())
 }
 
+setInterval(_ => {
+    if(game.checkTurnTimedOut()){
+        sendGame()
+    }
+}, 1000)
+
 function assert(req, res, props){
     if(props.login){
         if(!req.user){
@@ -90,6 +96,26 @@ function api(topic, payload, req, res){
                 game.setTimecontrol(player, payload),
                 res, `playapi:timecontrolSet`
             )
+            break
+        case "offerDraw":            
+            if(!assert(req, res, {
+                login: `Log in to offer a draw.`,
+                gameInProgess: `Error: Cannot offer draw for game not in progress.`
+            })) return                                    
+            handleGameOperationResult(
+                game.offerDraw(player),
+                res, `playapi:drawOffered`
+            )                         
+            break
+        case "revokeDraw":            
+            if(!assert(req, res, {
+                login: `Log in to revoke a draw.`,
+                gameInProgess: `Error: Cannot revoke draw for game not in progress.`
+            })) return                                    
+            handleGameOperationResult(
+                game.revokeDraw(player),
+                res, `playapi:drawRevoked`
+            )                         
             break
         case "sitPlayer":            
             if(!assert(req, res, {

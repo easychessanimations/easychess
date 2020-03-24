@@ -58,7 +58,7 @@ class Board_ extends SmartDomElement{
                 this.canvases,
                 this.resultDiv = div()
                     .op(0.8).poa().c("#00a").fwb()
-                    .w(this.boardsize()).h(this.boardsize()/2).dfcc().jcsa(),
+                    .w(this.boardsize()).h(this.boardsize() * 0.6).dfcc().jcsa(),
                 div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb()
             )            
         )
@@ -561,7 +561,8 @@ class Board_ extends SmartDomElement{
         if(this.game.terminated){
             this.resultDiv.a(
                 div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.game.playersVerbal()),
-                div().pad(10).bc("#ffa").fs(this.squaresize).html(this.game.resultVerbal())
+                div().pad(10).bc("#ffa").fs(this.squaresize).html(this.game.resultVerbal()),
+                div().fst("italic").pad(10).bc("#ffa").fs(this.squaresize/3).html(this.game.resultReason)
             )
         }
     }

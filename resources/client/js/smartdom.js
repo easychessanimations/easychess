@@ -313,6 +313,7 @@ class SmartDomElement{
     zi(x){return this.addStyle("zIndex", x)}
     op(x){return this.addStyle("opacity", x)}
     fs(x){return this.addStyle("fontSize", `${x}px`)}
+    fst(x){return this.addStyle("fontStyle", x)}
     fw(x){return this.addStyle("fontWeight", x)}
     fwb(){return this.fw("bold")}
     ff(x){return this.addStyle("fontFamily", x)}
@@ -2268,3 +2269,32 @@ class VariantLabel_ extends SmartDomElement{
     }
 }
 function VariantLabel(props){return new VariantLabel_(props)}
+
+class ThinkingTimeLabel_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.thinkingTime = this.props.thinkingTime || 0
+        this.isTurn = this.props.isTurn
+
+        this.startedAt = performance.now()
+
+        this.deduction = 0
+
+        if(this.isTurn) setInterval(_ => {
+            this.deduction = performance.now() - this.startedAt
+            this.build()
+        }, 1000)
+
+        this.build()
+    }
+
+    build(){
+        this.dib()
+        .bc("#ffd").mar(1).pad(2).padl(4).padr(4).ffm().fs(20)
+        .c(this.isTurn ? "#007" : "#700")
+        .op(this.isTurn ? 1 : 0.7)        
+        .html(formatDuration(Math.max(this.thinkingTime - this.deduction, 0)))
+    }
+}
+function ThinkingTimeLabel(props){return new ThinkingTimeLabel_(props)}

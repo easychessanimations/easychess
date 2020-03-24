@@ -4,6 +4,7 @@ set SKIP_FIREBASE=
 set SKIP_OAUTH=
 set SKIP_TOURNEYWATCH=1
 set SKIP_BOT=1
+set SKIP_DISCORD_BOT=1
 
 start s\s
 
