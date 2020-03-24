@@ -1,4 +1,5 @@
 const play = require('./play')
+const monitor = require('./monitor')
 const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
 if((!process.env.SKIP_FIREBASE) && (!process.env.SKIP_TOURNEYWATCH)) require('./tourneywatch')
@@ -137,7 +138,7 @@ const { fromchunks } = require('../utils/firebase')
 
 const PORT = process.env.PORT || 3000
 
-const MAX_SSE_CONNECTIONS = 100
+const MAX_SSE_CONNECTIONS = process.env.MAX_SSE_CONNECTIONS || 100
 
 const QUERY_INTERVAL = 3000
 
@@ -221,6 +222,8 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use(monitor.monitor)
+
 if(!process.env.SKIP_OAUTH){
     app.get('/auth/lichess',
     passport.authenticate('lichess'))
@@ -299,6 +302,7 @@ app.get('/stream', function(req, res) {
     sseconnections.push(res)
     setTimeout(_ => {        
         res.sseSend(play.sendGameBlob())
+        monitor.sendOnlineUsers()
     }, SSE_STARTUP_DELAY)
     while(sseconnections.length > MAX_SSE_CONNECTIONS) sseconnections.shift()
     clog(`new stream ${req.hostname} conns ${sseconnections.length}`)
@@ -524,7 +528,8 @@ app.get('/logout', (req, res) => {
     res.redirect('/')
 })
 
-app.get('/', (req, res) => res.send(`
+app.get('/', (req, res) => {
+res.send(`
 <!DOCTYPE html>
 <html lang="en">
 
@@ -557,7 +562,8 @@ app.get('/', (req, res) => res.send(`
     </body>
 
 </html>
-`))
+`)
+})
 
 app.get('/node', (req, res) => res.send(`
 <!DOCTYPE html>
@@ -613,5 +619,12 @@ if(process.env.KEEPALIVE){
 if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
 
 play.init(apisend, ssesend)
+
+monitor.setSendOnlineUsersFunc(online => {
+    ssesend({
+        kind: "online",
+        online: online
+    })
+})
 
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))

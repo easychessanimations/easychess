@@ -2179,6 +2179,10 @@ class App extends SmartDomElement{
         }
     }
 
+    showOnline(online){
+        this.table.showOnline(online)
+    }
+
     setupsourceFunc(){
         //this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
 
@@ -2186,9 +2190,11 @@ class App extends SmartDomElement{
 
         this.source.addEventListener('message', e => {                        
             let analysisinfo = JSON.parse(e.data)                 
-            let m
+            let m            
             if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()
+            }else if(analysisinfo.kind == "online"){
+                this.showOnline(analysisinfo.online)
             }else if(m = analysisinfo.kind.match(/^play:(.+)$/)){
                 this.table.processApi(m[1], analysisinfo)
             }else{

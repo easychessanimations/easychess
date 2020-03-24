@@ -103,6 +103,12 @@ class Table_ extends SmartDomElement{
         this.settings = {}
     }
 
+    showOnline(online){
+        this.onlineUsersDiv.x().a(
+            Object.entries(online).map(entry => UserLabel(entry[1]).fs(11))
+        )
+    }
+
     get g(){return this.board.game}
     get players(){return this.g.players}
 
@@ -305,6 +311,9 @@ class Table_ extends SmartDomElement{
             tr().a(
                 td().a(this.playerPanels[1]),
                 td()
+            ),
+            tr().a(                
+                td().sa("colspan", 2).a(this.onlineUsersDiv = div().pad(2).bc("#eee"))
             ),
         )
 
