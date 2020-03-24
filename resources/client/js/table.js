@@ -9,6 +9,8 @@ class PlayerPanel_ extends SmartDomElement{
         this.player = this.props.player || Player()
 
         this.setPlayer(this.player)
+
+        this.dfc()
     }
 
     sit(){
@@ -59,16 +61,16 @@ class PlayerPanel_ extends SmartDomElement{
         if(this.g.inProgress){
             this.a(
                 div().dfc().a(
-                    ThinkingTimeLabel({...this.player,...{isTurn: isTurn}}),
+                    ThinkingTimeLabel({...this.player,...{isTurn: isTurn}}).marr(3),
                     UserLabel(this.player),                    
                     IS_ME(this.player) ?
                         this.player.offerDraw ?
-                            Button("Revoke Draw", this.revokeDraw.bind(this)).bc(YELLOW_BUTTON_COLOR)
+                            Button("Revoke Draw", this.revokeDraw.bind(this)).marl(3).bc(YELLOW_BUTTON_COLOR)
                         :
                             this.g.drawOffered() ?                            
-                                Button("Accept Draw", this.offerDraw.bind(this)).bc(GREEN_BUTTON_COLOR).ac("blink_me")
+                                Button("Accept Draw", this.offerDraw.bind(this)).marl(3).bc(GREEN_BUTTON_COLOR).ac("blink_me")
                             :
-                                Button("Offer Draw", this.offerDraw.bind(this)).bc(GREEN_BUTTON_COLOR)
+                                Button("Offer Draw", this.offerDraw.bind(this)).marl(3).bc(GREEN_BUTTON_COLOR)
                     :
                         div(),
                     IS_ME(this.player) ? Button("Resign", this.resign.bind(this)).bc(RED_BUTTON_COLOR) : div(),                    
@@ -78,12 +80,12 @@ class PlayerPanel_ extends SmartDomElement{
             this.a(
                 div().dfc().a(
                     UserLabel(this.player),
-                    Button("Unseat", this.unseat.bind(this))
+                    Button("Unseat", this.unseat.bind(this)).marl(3).bc(RED_BUTTON_COLOR)
                 )                
             )
         }else{
             this.a(
-                Button("Sit", this.sit.bind(this)).w(this.parentTable.board.boardsize() / 2).bc(GREEN_BUTTON_COLOR)
+                Button("Sit", this.sit.bind(this)).w(this.parentTable.board.boardsize() / 2).marl(3).bc(GREEN_BUTTON_COLOR)
             )
         }
     }

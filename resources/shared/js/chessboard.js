@@ -1704,6 +1704,10 @@ class Game_{
         return this.players.getByColor(this.board.turn)
     }
 
+    oppTurnPlayer(){
+        return this.players.getByColor(!this.board.turn)
+    }
+
     canMakeMove(player){        
         return this.turnPlayer().equalTo(player)
     }
@@ -1763,6 +1767,7 @@ class Game_{
                 )
                 return true
             }
+            this.oppTurnPlayer().thinkingTime += this.timecontrol.increment * 1000
             this.startThinking()
             return true
         }

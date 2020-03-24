@@ -39,14 +39,14 @@ function assert(req, res, props){
     }
     if(props.gameNotInProgess){
         if(game.inProgress){
-            apisend({}, props.gameNotInProgess)
+            apisend({}, props.gameNotInProgess, res)
             sendGame()
             return false
         }        
     }
     if(props.gameInProgess){
         if(!game.inProgress){
-            apisend({}, props.gameInProgess)
+            apisend({}, props.gameInProgess, res)
             sendGame()
             return false
         }        
