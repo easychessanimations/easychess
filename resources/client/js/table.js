@@ -276,7 +276,7 @@ class Table_ extends SmartDomElement{
     showGames(games){
         this.gamesContainer.a(games.map(blob => GameLabel({...blob, ...{
             analyzeCallback: this.parentApp.analyzeGame.bind(this.parentApp)
-        }})))
+        }}).mart(3)))
     }
 
     init(){        
