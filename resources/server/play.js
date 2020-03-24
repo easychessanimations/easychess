@@ -1,13 +1,12 @@
+const { Bucket } = require('./bucket')
+
 const { Chat, ChatMessage, Game, Player, UNSEAT } = require('../shared/js/chessboard')
 
-var apisend, ssesend
+var apisend, ssesend, bucket
 
-function init(setApisend, setSsesend){
-    apisend = setApisend
-    ssesend = setSsesend
-}
+var stateBucket
 
-let game = Game()
+var game = Game()
 
 function sendGameBlob(){    
     return({
@@ -19,6 +18,33 @@ function sendGameBlob(){
 function sendGame(){
     ssesend(sendGameBlob())
 }
+
+function init(setApisend, setSsesend, setBucket){
+    apisend = setApisend
+    ssesend = setSsesend
+    bucket = setBucket
+
+    stateBucket = new Bucket("easychessgamestate", bucket)
+
+    stateBucket.get().then(
+        json => {
+            console.log(`loaded game state`)
+            game = Game().fromblob(json)
+            sendGame()
+        },
+        err => {
+            console.log(err)
+        }
+    )
+}
+
+function saveGameState(){    
+    if(stateBucket){
+        stateBucket.put(game.serialize())
+    }
+}
+
+setInterval(_ => saveGameState(), parseInt(process.env.GAME_STATE_STORE_INTERVAL || 5) * 60 * 1000)
 
 setInterval(_ => {
     if(game.checkTurnTimedOut()){

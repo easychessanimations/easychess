@@ -618,7 +618,7 @@ if(process.env.KEEPALIVE){
 
 if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
 
-play.init(apisend, ssesend)
+play.init(apisend, ssesend, bucket)
 
 monitor.setSendOnlineUsersFunc(online => {
     ssesend({
