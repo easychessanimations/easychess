@@ -1556,9 +1556,23 @@ class App extends SmartDomElement{
         })
     }
 
+    setcommandVariantEngine(command, payload){
+        let engineKey = VARIANT_TO_LOCAL_ENGINE[payload.variant || "standard"]
+        if(!engineKey){
+            this.shouldGo = false
+            return
+        }
+        this.engine.setcommand(command, payload)
+    }
+
+    setShouldGo(value){
+        this.shouldGo = value
+        if(this.shouldGo) localStorage.setItem("shouldGo", "true")
+        else localStorage.removeItem("shouldGo")
+    }
+
     go(){
-        this.shouldGo = true
-        localStorage.setItem("shouldGo", "true")
+        this.setShouldGo(true)
 
         let payload = {            
             variant: this.variant,
@@ -1573,15 +1587,15 @@ class App extends SmartDomElement{
 
             api("engine:go", payload, response => {
                 this.clog(response)
+                if(!response.ok) this.setShouldGo(false)
             })
         }else{            
-            this.engine.setcommand("go", payload)
+            this.setcommandVariantEngine("go", payload)
         }
     }
 
     stop(){
-        this.shouldGo = false
-        localStorage.removeItem("shouldGo")
+        this.setShouldGo(false)
 
         if(this.settings.useServerStockfishCheckbox.checked){
             api("engine:stop", {
@@ -1591,7 +1605,7 @@ class App extends SmartDomElement{
                 this.clog(response)
             })
         }else{            
-            this.engine.setcommand("stop")
+            this.setcommandVariantEngine("stop", payload)
         }        
     }
 

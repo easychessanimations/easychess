@@ -1,13 +1,22 @@
 const SUPPORTED_VARIANTS = [
     ["standard", "Standard"],
     ["atomic", "Atomic"],
-    ["seirawan", "S-Chess"]
+    ["seirawan", "S-Chess"],
+    ["eightpiece", "8-Piece"]
 ]
 
 const VARIANT_TO_ENGINE = {
     standard: "stockfish",
     atomic: "stockfish",
-    seirawan: "fairy"
+    seirawan: "fairy",
+    eightpiece: null
+}
+
+const VARIANT_TO_LOCAL_ENGINE = {
+    standard: "stockfish",
+    atomic: "stockfish",
+    seirawan: null,
+    eightpiece: null
 }
 
 const SUPPORTED_PERFS = [
@@ -72,6 +81,7 @@ const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
 const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
+const EIGHTPIECE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -123,6 +133,7 @@ const VARIANT_KEYS = [
     [ "racingKings", "Racing Kings", RACING_KINGS_START_FEN ],
     [ "threeCheck", "Three-check", THREE_CHECK_START_FEN ],
     [ "seirawan", "S-Chess", SCHESS_START_FEN ],
+    [ "eightpiece", "8-Piece", EIGHTPIECE_START_FEN ],
 ]
 
 const INCLUDE_LIMITS = true
@@ -273,6 +284,10 @@ class ChessBoard_{
 
     IS_SCHESS(){
         return this.variant == "seirawan"
+    }
+
+    IS_EIGHTPIECE(){
+        return this.variant == "eightpiece"
     }
 
     pieceStore(){

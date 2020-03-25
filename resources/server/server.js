@@ -324,6 +324,16 @@ function apisend(obj, error, res){
     res.send(JSON.stringify(obj))
 }
 
+function setcommandVariantEngine(command, payload, res){
+    let engineKey = VARIANT_TO_ENGINE[payload.variant || "standard"]
+    if(!engineKey){
+        apisend({}, `Error: No engine for variant ${payload.variant} .`, res)
+        return
+    }
+    engines[engineKey].setcommand(command, payload)    
+    apisend(`engine:${command} issued`, null, res)
+}
+
 const HANDLERS = {
     "api:ping": function(res, _){        
         apisend(`api:pong`, null, res)
@@ -387,13 +397,11 @@ const HANDLERS = {
         )
     },
     "engine:go": function(res, payload){        
-      if(process.env.ALLOW_SERVER_ENGINE) payload.threads = 1
-      engines[VARIANT_TO_ENGINE[payload.variant]].setcommand("go", payload)    
-      apisend(`engine:go issued`, null, res)
+        if(process.env.ALLOW_SERVER_ENGINE) payload.threads = 1      
+        setcommandVariantEngine("go", payload, res)      
     },
     "engine:stop":function(res, payload){
-      engines[VARIANT_TO_ENGINE[payload.variant]].setcommand("stop", null)
-      apisend(`engine:stop issued`, null, res)
+        setcommandVariantEngine("stop", payload, res)      
     },
     "bucket:put":function(res, payload){    
         let filename = payload.filename || "backup"    
