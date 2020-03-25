@@ -9,6 +9,11 @@ class Bucket{
     }
 
     put(json){        
+        if(!this.bucket){
+            console.log(`no bucket for putting ${this.filename}`)
+            return
+        }
+
         let content = JSON.stringify(json, null, 2)        
         fs.writeFile(this.filename, content, err => {            
             if(err){
@@ -25,7 +30,7 @@ class Bucket{
 
     get(){
         return new Promise((resolve, reject) => {
-            if(!this.bucket) reject(`no bucket for ${this.filename}`)
+            if(!this.bucket) reject(`no bucket for getting ${this.filename}`)
 
             this.bucket.file(this.filename).download((err, contents)=>{
                 if(err){

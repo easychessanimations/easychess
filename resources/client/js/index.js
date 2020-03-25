@@ -1605,7 +1605,7 @@ class App extends SmartDomElement{
                 this.clog(response)
             })
         }else{            
-            this.setcommandVariantEngine("stop", payload)
+            this.setcommandVariantEngine("stop", {})
         }        
     }
 

@@ -81,7 +81,7 @@ const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
 const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
-const EIGHTPIECE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+const EIGHTPIECE_START_FEN = "rlsebqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RLneBQKBNR w KQkq - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -97,6 +97,11 @@ const PIECE_DIRECTIONS = {
     q: [QUEEN_DIRECTIONS, true],
     k: [QUEEN_DIRECTIONS, false],
     n: [KNIGHT_DIRECTIONS, false],
+}
+
+function getPieceDirection(piece){
+    if(piece.kind == "l") return [ [ piece.direction ] , true ]
+    return PIECE_DIRECTIONS[piece.kind]
 }
 
 let ADJACENT_DIRECTIONS = []
@@ -173,10 +178,38 @@ function Square(file, rank){return new Square_(file, rank)}
 let ALL_SQUARES = []
 for(let rank=0;rank<NUM_SQUARES;rank++) for(let file=0;file<NUM_SQUARES;file++) ALL_SQUARES.push(Square(file, rank))
 
+function pieceDirectionToString(squareDelta){
+    let buff = ""
+    if(squareDelta.y){
+        buff += squareDelta.y < 0 ? "n" : "s"
+    }
+    if(squareDelta.x){
+        buff += squareDelta.x > 0 ? "e" : "w"
+    }
+    return buff
+}
+
+const PIECE_DIRECTION_STRINGS = ["w", "nw", "n", "ne", "e", "se", "s", "sw"]
+
+function squareDeltaToAngle(squareDelta){
+    let pds = pieceDirectionToString(squareDelta)    
+    return Math.PI / 4 * PIECE_DIRECTION_STRINGS.indexOf(pds)
+}
+
+function pieceDirectionStringToSquareDelta(pieceDirectionString){
+    let squareDelta = SquareDelta(0, 0)
+    if(pieceDirectionString.includes("n")) squareDelta.y = -1
+    if(pieceDirectionString.includes("s")) squareDelta.y = 1
+    if(pieceDirectionString.includes("e")) squareDelta.x = 1
+    if(pieceDirectionString.includes("w")) squareDelta.x = -1
+    return squareDelta
+}
+
 class Piece_{
-    constructor(kind, color){
+    constructor(kind, color, direction){
         this.kind = kind
         this.color = color
+        this.direction = direction
     }
 
     isempty(){
@@ -185,12 +218,13 @@ class Piece_{
 
     toString(){
         if(this.isempty()) return "-"
-        if(!this.color) return this.kind
-        return this.kind.toUpperCase()
+        let buff = (!this.color) ? this.kind: this.kind.toUpperCase()
+        if(this.direction) buff += pieceDirectionToString(this.direction)
+        return buff
     }
 
     tocolor(color){
-        return Piece(this.kind, color)
+        return Piece(this.kind, color, this.direction)
     }
 
     inverse(){
@@ -202,10 +236,10 @@ class Piece_{
     }
 
     clone(){
-        return Piece(this.kind, this.color)
+        return Piece(this.kind, this.color, this.direction)
     }
 }
-function Piece(kind, color){return new Piece_(kind, color)}
+function Piece(kind, color, direction){return new Piece_(kind, color, direction)}
 function PieceL(letter){
     if(letter == letter.toLowerCase()) return new Piece_(letter, BLACK)
     return new Piece_(letter.toLowerCase(), WHITE)
@@ -375,9 +409,12 @@ class ChessBoard_{
 
         for(let i=0;i<BOARD_AREA;i++) this.rep[i] = Piece()
 
-        let i = 0
-        for(let rankfen of this.rankfens){
-            for(let c of Array.from(rankfen)){
+        let i = 0        
+        for(let rankfen of this.rankfens){            
+            let rfa = Array.from(rankfen)
+            let rfai = 0
+            do{
+                let c = rfa[rfai++]
                 if((c>='0')&&(c<='9')){
                     let repcnt = c.charCodeAt(0) - '0'.charCodeAt(0)
                     for(let j=0;j<repcnt;j++){
@@ -389,10 +426,24 @@ class ChessBoard_{
                     if((c>='A')&&(c<="Z")){
                         kind = c.toLowerCase()
                         color = WHITE
+                    }   
+                    
+                    if(kind == "l"){
+                        // lancer
+                        let buff = rfa[rfai++]                                                
+                        if(["n", "s"].includes(buff)){
+                            let test = rfa[rfai]
+                            if(["e", "w"].includes(test)){
+                                buff += test
+                                rfai++
+                            }
+                        }                        
+                        this.rep[i++] = Piece(kind, color, pieceDirectionStringToSquareDelta(buff))
+                    }else{
+                        this.rep[i++] = Piece(kind, color)
                     }                    
-                    this.rep[i++] = Piece(kind, color)
                 }
-            }
+            }while(rfai < rfa.length)
         }                
 
         return this
@@ -831,8 +882,14 @@ class ChessBoard_{
         return this.pseudolegalmovesforpieceatsquareinnerpartial(p, sq)
     }
 
+    pushLancerMoves(plms, color, move){
+        for(let ds of PIECE_DIRECTION_STRINGS){
+            plms.push(Move(move.fromsq, move.tosq, Piece("l", color, pieceDirectionStringToSquareDelta(ds))))
+        }
+    }
+
     pseudolegalmovesforpieceatsquareinnerpartial(p, sq){                        
-        let dirobj = PIECE_DIRECTIONS[p.kind]
+        let dirobj = getPieceDirection(p)        
         let plms = []                
         if(dirobj){
             for(let dir of dirobj[0]){                
@@ -843,14 +900,25 @@ class ChessBoard_{
                     ok = this.squareok(currentsq)                    
                     if(ok){
                         let tp = this.pieceatsquare(currentsq)                                                
-                        if(tp.isempty()){                            
-                            plms.push(Move(sq, currentsq))
-                        }else if(tp.color != p.color){
-                            plms.push(Move(sq, currentsq))
-                            ok = false
+                        if(p.kind == "l"){
+                            if(tp.isempty()){                            
+                                this.pushLancerMoves(plms, p.color, Move(sq, currentsq))
+                            }else if(tp.color != p.color){
+                                this.pushLancerMoves(plms, p.color, Move(sq, currentsq))
+                                ok = false
+                            }else{
+                                // lancer can jump over own piece, but not capture it
+                            }
                         }else{
-                            ok = false
-                        }
+                            if(tp.isempty()){                            
+                                plms.push(Move(sq, currentsq))
+                            }else if(tp.color != p.color){
+                                plms.push(Move(sq, currentsq))
+                                ok = false
+                            }else{
+                                ok = false
+                            }
+                        }                        
                     }
                 }while(ok && dirobj[1])
             }
@@ -998,6 +1066,9 @@ class ChessBoard_{
         let fromalgeb = this.squaretoalgeb(move.fromsq)
         let toalgeb = this.squaretoalgeb(move.tosq)
         let prom = move.prompiece ? "=" + move.prompiece.kind.toUpperCase() : ""        
+        if(fromp.kind == "l"){
+            prom = pieceDirectionToString(move.prompiece.direction)
+        }
         let place = move.placePiece ? "/" + move.placePiece.kind.toUpperCase() : ""
 
         if(fromp.kind == "p"){
@@ -1022,7 +1093,7 @@ class ChessBoard_{
             else qualifier = fromalgeb[0]
         }        
         let letter = fromp.kind.toUpperCase()        
-        return capt ? letter + qualifier + "x" + toalgeb + check : letter + qualifier + toalgeb + place + prom + check
+        return capt ? letter + qualifier + "x" + toalgeb + prom + check : letter + qualifier + toalgeb + place + prom + check
     }
 
     squarefromalgeb(algeb){        

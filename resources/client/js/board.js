@@ -159,7 +159,7 @@ class Board_ extends SmartDomElement{
                         
                         let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
-                        if(valid) if(valid.prompiece){
+                        if(valid) if(valid.prompiece && (!this.draggedpiece.kind == "l")){
                             let pks = this.game.board.promkinds()
                             let promkind = window.prompt(`Promote piece, ${pks.map(kind => kind + " = " + DISPLAY_FOR_PIECE_LETTER[kind]).join(" , ")}  [ Enter / Ok = Queen ] : `)
                             promkind = promkind || "q"
@@ -199,6 +199,13 @@ class Board_ extends SmartDomElement{
                                 }
                             }
                         }                        
+
+                        if(valid) if(this.draggedpiece.kind == "l"){                            
+                            let ds = pieceDirectionToString(this.draggedpiece.direction)
+                            let sds = window.prompt(`Promote piece, ${PIECE_DIRECTION_STRINGS.join(" , ")}  [ Enter / Ok = ${ds} ] : `) || ds                            
+                            let dir = pieceDirectionStringToSquareDelta(sds)
+                            valid.prompiece = Piece("l", this.draggedpiece.color, dir)
+                        }
 
                         if(valid){
                             if(this.parentApp.trainMode == this.game.board.turnVerbal){
@@ -288,9 +295,10 @@ class Board_ extends SmartDomElement{
 
     piecesize(){return this.squaresize * 0.85}
 
-    drawPiece(canvas, coords, pOrig, scaleFactorOpt){                
+    drawPiece(canvas, coords, pOrig, scaleFactorOpt, rotateOpt){             
         let scaleFactor = scaleFactorOpt || 1
-        let p = Piece(pOrig.kind, pOrig.color)
+        let rotate = rotateOpt || 0
+        let p = Piece(pOrig.kind, pOrig.color, pOrig.direction)
         let addKnight = false
         let knightScaleFactor = 0.7
         if(p.kind == "e"){
@@ -301,15 +309,29 @@ class Board_ extends SmartDomElement{
             p.kind = "b"
             addKnight = true
         }
+        if(p.kind == "l"){            
+            p.kind = "n"            
+            rotate = squareDeltaToAngle(p.direction)
+        }
+        let drawImgFunc = (canvas, img, coords, scaleFactor, addKnight, rotate) => {
+            let size = this.piecesize() * scaleFactor
+            let middle = coords.p(Vect(size / 2, size / 2))
+            canvas.ctx.save()
+            canvas.ctx.translate(middle.x, middle.y)
+            canvas.ctx.rotate(rotate)
+            canvas.ctx.translate(-middle.x, -middle.y)
+            canvas.ctx.drawImage(img.e, coords.x, coords.y, size, size)
+            if(addKnight){
+                this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
+            }
+            canvas.ctx.restore()
+        }
         const klasssel = "." + getclassforpiece(p, this.piecestyle)                                                    
         let img
         if(!this.imgcache) this.imgcache = {}
         if(this.imgcache[klasssel]){
             img = this.imgcache[klasssel]
-            canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize() * scaleFactor, this.piecesize() * scaleFactor)
-            if(addKnight){
-                this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
-            }
+            drawImgFunc(canvas, img, coords, scaleFactor, addKnight, rotate)            
         }else{
             let style = getStyle(klasssel)            
             let imgurl = style.match(/url\("(.*?)"/)[1]                
@@ -323,10 +345,7 @@ class Board_ extends SmartDomElement{
             let fen = this.game.fen()
             img.e.onload = () => {
                 if(this.game.fen() == fen){
-                    canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize() * scaleFactor, this.piecesize() * scaleFactor)
-                    if(addKnight){
-                        this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
-                    }
+                    drawImgFunc(canvas, img, coords, scaleFactor, addKnight, rotate)            
                 }                
                 this.imgcache[klasssel] = img                
             }
