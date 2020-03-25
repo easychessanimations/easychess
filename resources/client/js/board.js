@@ -312,8 +312,9 @@ class Board_ extends SmartDomElement{
         if(p.kind == "l"){            
             p.kind = "n"            
             rotate = squareDeltaToAngle(p.direction)
+            if(this.game.flip) rotate = rotate - Math.PI
         }
-        let drawImgFunc = (canvas, img, coords, scaleFactor, addKnight, rotate) => {
+        let drawImgFunc = (piece, canvas, img, coords, scaleFactor, addKnight, rotate) => {
             let size = this.piecesize() * scaleFactor
             let middle = coords.p(Vect(size / 2, size / 2))
             canvas.ctx.save()
@@ -323,15 +324,25 @@ class Board_ extends SmartDomElement{
             canvas.ctx.drawImage(img.e, coords.x, coords.y, size, size)
             if(addKnight){
                 this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
+            }            
+            if(piece.kind == "l"){                
+                canvas.arrow(
+                    middle,
+                    middle.p(Vect(-this.squaresize / 2, 0)),
+                    {
+                        auxscalefactor: 0.4,
+                        color: piece.color ? "#00f" : "#f00"
+                    }
+                )
             }
-            canvas.ctx.restore()
+            canvas.ctx.restore()            
         }
         const klasssel = "." + getclassforpiece(p, this.piecestyle)                                                    
         let img
         if(!this.imgcache) this.imgcache = {}
         if(this.imgcache[klasssel]){
             img = this.imgcache[klasssel]
-            drawImgFunc(canvas, img, coords, scaleFactor, addKnight, rotate)            
+            drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, rotate)            
         }else{
             let style = getStyle(klasssel)            
             let imgurl = style.match(/url\("(.*?)"/)[1]                
@@ -345,7 +356,7 @@ class Board_ extends SmartDomElement{
             let fen = this.game.fen()
             img.e.onload = () => {
                 if(this.game.fen() == fen){
-                    drawImgFunc(canvas, img, coords, scaleFactor, addKnight, rotate)            
+                    drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, rotate)            
                 }                
                 this.imgcache[klasssel] = img                
             }

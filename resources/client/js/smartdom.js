@@ -1592,6 +1592,10 @@ class Canvas_ extends SmartDomElement{
         this.ctx.fillRect(orig.x, orig.y, size.x, size.y)
     }
 
+    strokeRect(orig, size){
+        this.ctx.strokeRect(orig.x, orig.y, size.x, size.y)
+    }
+
     setWidth(width){
         this.width = width
         this.sa("width", width)
