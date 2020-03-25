@@ -481,7 +481,15 @@ class ChessBoard_{
             }
         }
 
-        return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${move.prompiece ? move.prompiece.kind : ''}`
+        let fromp = this.pieceatsquare(move.fromsq)
+
+        let prom = move.prompiece ? move.prompiece.kind : ""
+
+        if(fromp.kind == "l"){
+            prom = pieceDirectionToString(move.prompiece.direction)
+        }
+
+        return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${prom}`
     }
 
     squaretorepindex(sq){

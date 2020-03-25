@@ -47,6 +47,13 @@ class ThreeBoard_ extends SmartDomElement{
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
                 tha.add(new ThreeAssemblyItem(threePiece))
                 break
+            case "l":
+                threePiece = THREE_PIECE_CACHE["Knight"].clone()
+                threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
+                let angle = 1.5*Math.PI-squareDeltaToAngle(piece.direction)                                
+                tha.rotateOnAxis(new THREE.Vector3(0, 1, 0), angle)                            
+                break
             case "b":
                 threePiece = THREE_PIECE_CACHE["Bishop"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
@@ -104,10 +111,12 @@ class ThreeBoard_ extends SmartDomElement{
         threePiece.material = new THREE.MeshLambertMaterial({color: piece.color ? 0xffffff : 0x00ff00})                                
         if(plusKnight) plusKnight.material = new THREE.MeshLambertMaterial({color: piece.color ? 0xffffff : 0x00ff00})                                
 
-        if(piece.color){
-            tha.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI)            
-        }else{
-            tha.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)            
+        if(piece.kind != "l"){
+            if(piece.color){
+                tha.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI)            
+            }else{
+                tha.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)            
+            }
         }
 
         this.threeRenderer.addToGroup("pieces", tha)
