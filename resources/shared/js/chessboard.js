@@ -285,6 +285,42 @@ class ChessBoard_{
         this.setfromfen()
     }
 
+    PROMOTION_PIECES(color, addCancel){
+        let basicPieces = [
+            Piece("q", color, SquareDelta(0, 0)),
+            Piece("r", color, SquareDelta(1, 0)),
+            Piece("b", color, SquareDelta(0, 1)),
+            Piece("n", color, SquareDelta(1, 1)),
+        ]
+
+        if(this.IS_SCHESS()){
+            basicPieces = basicPieces.concat([
+                Piece("e", color, SquareDelta(0, 2)),
+                Piece("h", color, SquareDelta(1, 2)),
+                Piece("x", BLACK, SquareDelta(0, 3)),
+            ])
+        }else if(this.IS_EIGHTPIECE()){
+            basicPieces = LANCER_PROMOTION_PIECES(color, ADD_CANCEL).concat([
+                Piece("q", color, SquareDelta(0, 2)),
+                Piece("r", color, SquareDelta(1, 2)),
+                Piece("b", color, SquareDelta(0, 3)),
+                Piece("n", color, SquareDelta(1, 3)),
+            ])
+        }else{
+            basicPieces = basicPieces.concat([
+                Piece("x", BLACK, SquareDelta(0, 2)),
+            ])
+        }
+
+        let maxy = basicPieces.map(p => p.direction).reduce((prev, curr) => curr.rank > prev ? curr.rank : prev, 0)
+
+        if(!color){
+            basicPieces.forEach(p => p.direction.y = maxy - p.direction.y)
+        }
+
+        return basicPieces
+    }
+
     status(){
         let lms = this.legalmovesforallpieces()
 

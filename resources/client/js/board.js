@@ -152,13 +152,11 @@ class Board_ extends SmartDomElement{
             let sq = osq.adddelta(p.direction).adddelta(corr)
             if(clickedSqOpt){                                     
                 if(sq.equalto(clickedSqOpt)){                                        
-                    let move = this.inputtedMove
-                    move.prompiece = p
-                    this.awaitSquareClick = false
-                    this.inputtedMove = null
-                    this.promotionPieces = null                    
-                    this.draw()                    
-                    this.mouseClickDiv.disp("none")
+                    let move = this.inputtedMove                    
+                    move.prompiece = p          
+                    if(p.kind != "l") move.prompiece.direction = null                       
+                    this.clearAwaitSquareClick()       
+                    this.draw()                                        
                     if(p.kind != "x"){
                         this.makeMove(move)
                     }
@@ -220,12 +218,19 @@ class Board_ extends SmartDomElement{
                         
                         let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
-                        if(valid) if(valid.prompiece && (!this.draggedpiece.kind == "l")){
+                        /*if(valid) if(valid.prompiece && (this.draggedpiece.kind != "l")){
                             let pks = this.b.promkinds()
                             let promkind = window.prompt(`Promote piece, ${pks.map(kind => kind + " = " + DISPLAY_FOR_PIECE_LETTER[kind]).join(" , ")}  [ Enter / Ok = Queen ] : `)
                             promkind = promkind || "q"
                             if(!pks.includes(promkind)) promkind = "q"
                             valid.prompiece = Piece(promkind, valid.prompiece.color)
+                        }*/
+                        
+                        if(valid) if(valid.prompiece && (this.draggedpiece.kind != "l")){                            
+                            this.awaitSquareClick = true
+                            this.inputtedMove = valid
+                            this.buildPromotionSquares(this.b.PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
+                            return
                         }
 
                         if(valid) if(valid.placeMove){
@@ -301,7 +306,16 @@ class Board_ extends SmartDomElement{
         }
     }
 
+    clearAwaitSquareClick(){
+        this.awaitSquareClick = false
+        this.inputtedMove = null
+        this.promotionPieces = null
+        this.mouseClickDiv.disp("none")
+    }
+
     positionchanged(){
+        this.clearAwaitSquareClick()
+
         this.draw()
 
         if(this.positionchangedcallback) this.positionchangedcallback()
