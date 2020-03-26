@@ -51,7 +51,7 @@ class ThreeBoard_ extends SmartDomElement{
                 threePiece = THREE_PIECE_CACHE["Knight"].clone()
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
                 tha.add(new ThreeAssemblyItem(threePiece))
-                let angle = 1.5*Math.PI-squareDeltaToAngle(piece.direction)                                
+                let angle = 1.5 * Math.PI - piece.direction.angle()
                 tha.rotateOnAxis(new THREE.Vector3(0, 1, 0), angle)                            
                 break
             case "b":

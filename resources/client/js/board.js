@@ -311,7 +311,7 @@ class Board_ extends SmartDomElement{
         }
         if(p.kind == "l"){            
             p.kind = "n"            
-            rotate = squareDeltaToAngle(p.direction)
+            rotate = p.direction.angle()
             if(this.game.flip) rotate = rotate - Math.PI
         }
         let drawImgFunc = (piece, canvas, img, coords, scaleFactor, addKnight, rotate) => {

@@ -62,10 +62,26 @@ function stripsan(san){
     return strippedsan
 }
 
+const PIECE_DIRECTION_STRINGS = ["w", "nw", "n", "ne", "e", "se", "s", "sw"]
+
+function pieceDirectionStringToSquareDelta(pieceDirectionString){
+    let squareDelta = SquareDelta(0, 0)
+    if(pieceDirectionString.includes("n")) squareDelta.y = -1
+    if(pieceDirectionString.includes("s")) squareDelta.y = 1
+    if(pieceDirectionString.includes("e")) squareDelta.x = 1
+    if(pieceDirectionString.includes("w")) squareDelta.x = -1
+    return squareDelta
+}
+
 class SquareDelta_{
     constructor(x, y){
         this.x = x
         this.y = y
+    }
+
+    angle(){
+        let pds = pieceDirectionToString(this)    
+        return Math.PI / 4 * PIECE_DIRECTION_STRINGS.indexOf(pds)
     }
 }
 function SquareDelta(x, y){return new SquareDelta_(x, y)}
@@ -187,22 +203,6 @@ function pieceDirectionToString(squareDelta){
         buff += squareDelta.x > 0 ? "e" : "w"
     }
     return buff
-}
-
-const PIECE_DIRECTION_STRINGS = ["w", "nw", "n", "ne", "e", "se", "s", "sw"]
-
-function squareDeltaToAngle(squareDelta){
-    let pds = pieceDirectionToString(squareDelta)    
-    return Math.PI / 4 * PIECE_DIRECTION_STRINGS.indexOf(pds)
-}
-
-function pieceDirectionStringToSquareDelta(pieceDirectionString){
-    let squareDelta = SquareDelta(0, 0)
-    if(pieceDirectionString.includes("n")) squareDelta.y = -1
-    if(pieceDirectionString.includes("s")) squareDelta.y = 1
-    if(pieceDirectionString.includes("e")) squareDelta.x = 1
-    if(pieceDirectionString.includes("w")) squareDelta.x = -1
-    return squareDelta
 }
 
 class Piece_{
