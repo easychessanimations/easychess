@@ -330,6 +330,7 @@ class Board_ extends SmartDomElement{
                     middle,
                     middle.p(Vect(-this.squaresize / 2, 0)),
                     {
+                        scalefactor: this.arrowscalefactor(),
                         auxscalefactor: 0.4,
                         color: piece.color ? "#00f" : "#f00"
                     }
