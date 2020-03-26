@@ -14,6 +14,7 @@ const CANVAS_NAMES = [
     "drawings",            
     "piece",
     "dragpiece",
+    "clicksquare",
     "gif"
 ]
 
@@ -38,6 +39,9 @@ class Board_ extends SmartDomElement{
         this.canvasnames = CANVAS_NAMES
     }
 
+    get g(){return this.game}
+    get b(){return this.g.board}
+
     positionWheeled(ev){
         ev.preventDefault()
         if(ev.wheelDelta < 0) this.back()
@@ -59,7 +63,8 @@ class Board_ extends SmartDomElement{
                 this.resultDiv = div()
                     .op(0.8).poa().c("#00a").fwb()
                     .w(this.boardsize()).h(this.boardsize() * 0.6).dfcc().jcsa(),
-                div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb()
+                this.mouseDiv = div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb(),
+                this.mouseClickDiv = div().ae("click", this.handleAwaitSquareClick.bind(this)).w(this.boardsize()).h(this.boardsize()).poa().disp("none")
             )            
         )
 
@@ -67,21 +72,21 @@ class Board_ extends SmartDomElement{
     }
 
     reset(variant){
-        this.game.reset(variant)
-        return this.setgame(this.game)
+        this.g.reset(variant)
+        return this.setgame(this.g)
     }
 
     coordstosq(coords){return this.fasq(Square(Math.floor(coords.x / this.squaresize), Math.floor(coords.y / this.squaresize)))}
 
     clearPiece(sq){                    
-        this.getCanvasByName("piece").clearRect(this.piececoords(sq), Vect(this.piecesize(), this.piecesize()))        
+        this.getCanvasByName("piece").clearRect(this.fasquarecoords(sq), Vect(this.squaresize, this.squaresize))        
     }
 
     getlms(RICH, decorate){
-        let lms = this.game.board.legalmovesforallpieces()
+        let lms = this.b.legalmovesforallpieces()
 
         if(RICH) lms.forEach(lm => {
-            lm.san = this.game.board.movetosan(lm)
+            lm.san = this.b.movetosan(lm)
             lm.gameNode = this.getcurrentnode().sortedchilds().find(child => child.gensan == lm.san)
             lm.evalWeight = 100000
             lm.hasEval = false
@@ -100,7 +105,7 @@ class Board_ extends SmartDomElement{
                 lm.decorate.total = lm.decorate.white + lm.decorate.draws + lm.decorate.black
                 lm.decorate.perf = lm.decorate.white + 0.5 * lm.decorate.draws
                 lm.decorate.perfpercent = Math.round(lm.decorate.perf / lm.decorate.total * 100)
-                if(!this.game.board.turn) lm.decorate.perfpercent = 100 - lm.decorate.perfpercent
+                if(!this.b.turn) lm.decorate.perfpercent = 100 - lm.decorate.perfpercent
                 if(!lm.hasEval) lm.sortweight += 100 + 100 * lm.decorate.total / ( decorate.white + decorate.draws + decorate.black )
             }
         })
@@ -109,24 +114,76 @@ class Board_ extends SmartDomElement{
     }
 
     makeMove(move){
-        let san = this.game.board.movetosan(move)
-        this.game.makemove(move)
+        let san = this.b.movetosan(move)
+        this.g.makemove(move)
         this.positionchanged()
         if(this.props.makeMoveCallback){
             this.props.makeMoveCallback(san)
         }
     }
 
+    handleAwaitSquareClick(ev){                                
+        if(!this.awaitSquareClick) return
+        let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
+        this.piececlickorig = Vect(ev.clientX - bcr.x, ev.clientY - bcr.y)        
+        this.clickedsq = this.coordstosq(this.piececlickorig)                          
+        if(this.inputtedMove){            
+            this.buildPromotionSquares(null, this.clickedsq)
+        }
+    }
+
+    buildPromotionSquares(piecesOpt, clickedSqOpt){        
+        this.promotionPieces = piecesOpt || this.promotionPieces        
+        if(!this.promotionPieces) return        
+        let osq = this.inputtedMove.tosq
+        let canvas = this.getCanvasByName("clicksquare")      
+        canvas.globalAlpha(0.7)
+        let allsqs = this.promotionPieces.map(p => osq.adddelta(p.direction))
+        let minx = allsqs.reduce((prev, curr) => curr.file < prev ? curr.file : prev, NUM_SQUARES)
+        let maxx = allsqs.reduce((prev, curr) => curr.file > prev ? curr.file : prev, 0)
+        let miny = allsqs.reduce((prev, curr) => curr.rank < prev ? curr.rank : prev, NUM_SQUARES)
+        let maxy = allsqs.reduce((prev, curr) => curr.rank > prev ? curr.rank : prev, 0)
+        let corr = SquareDelta(0, 0)
+        if(minx < 0) corr.x = -minx
+        if(maxx > LAST_SQUARE) corr.x = LAST_SQUARE - maxx
+        if(miny < 0) corr.y = -miny
+        if(maxy > LAST_SQUARE) corr.y = LAST_SQUARE - maxy        
+        for(let p of this.promotionPieces){
+            let sq = osq.adddelta(p.direction).adddelta(corr)
+            if(clickedSqOpt){                                     
+                if(sq.equalto(clickedSqOpt)){                                        
+                    let move = this.inputtedMove
+                    move.prompiece = p
+                    this.awaitSquareClick = false
+                    this.inputtedMove = null
+                    this.promotionPieces = null                    
+                    this.draw()                    
+                    this.mouseClickDiv.disp("none")
+                    if(p.kind != "x"){
+                        this.makeMove(move)
+                    }
+                    return
+                }
+            }else{
+                canvas.fillStyle("#ff0")            
+                canvas.fillRect(this.fasquarecoords(sq), Vect(this.squaresize, this.squaresize))
+                this.drawPiece(canvas, this.piececoords(sq), p)
+            }            
+        }                
+        this.mouseClickDiv.disp("initial")
+    }
+
     handleEvent(sev){
         if(sev.do == "dragpiece"){
-            switch(sev.kind){
+            let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()            
+            switch(sev.kind){                
                 case "dragstart":
                     sev.ev.preventDefault()                        
-                    if(this.game.terminated) return
-                    let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
+                    if(this.g.terminated) return
+                    if(this.awaitSquareClick) return                    
                     this.piecedragorig = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)        
                     this.draggedsq = this.coordstosq(this.piecedragorig)        
-                    this.draggedpiece = this.game.board.pieceatsquare(this.draggedsq)
+                    this.draggedpiece = this.b.pieceatsquare(this.draggedsq)
                     if(!this.draggedpiece.isempty()){
                         this.draggedpiececoords = this.piececoords(this.draggedsq)        
                         this.clearPiece(this.draggedsq)
@@ -153,14 +210,18 @@ class Board_ extends SmartDomElement{
 
                         dragpiececanvas.clear()            
 
-                        this.drawPiece(dragpiececanvas, this.piececoords(this.fasq(this.dragtargetsq)), this.draggedpiece)
+                        if(!this.dragtargetsq){
+                            this.draw()
+                            return
+                        }
+                        this.drawPiece(dragpiececanvas, this.piececoords(this.dragtargetsq), this.draggedpiece)
             
                         let move = Move(this.draggedsq, this.dragtargetsq)
                         
                         let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
                         if(valid) if(valid.prompiece && (!this.draggedpiece.kind == "l")){
-                            let pks = this.game.board.promkinds()
+                            let pks = this.b.promkinds()
                             let promkind = window.prompt(`Promote piece, ${pks.map(kind => kind + " = " + DISPLAY_FOR_PIECE_LETTER[kind]).join(" , ")}  [ Enter / Ok = Queen ] : `)
                             promkind = promkind || "q"
                             if(!pks.includes(promkind)) promkind = "q"
@@ -168,9 +229,9 @@ class Board_ extends SmartDomElement{
                         }
 
                         if(valid) if(valid.placeMove){
-                            let pstore = this.game.board.pieceStoreColor(this.game.board.turn)
+                            let pstore = this.b.pieceStoreColor(this.b.turn)
                             if(pstore.length){
-                                if(this.game.board.squareStore().find(sq => sq.equalto(valid.fromsq))){
+                                if(this.b.squareStore().find(sq => sq.equalto(valid.fromsq))){
                                     let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + " = " + DISPLAY_FOR_PIECE_LETTER[p.kind]).join(" , ")}  [ Enter / Ok = None ] : `)
                                     if(placeKind){
                                         let pf = pstore.find(tp => tp.kind == placeKind)
@@ -183,7 +244,7 @@ class Board_ extends SmartDomElement{
                         }
 
                         if(valid) if(valid.castling){
-                            let pstore = this.game.board.pieceStoreColor(this.game.board.turn)
+                            let pstore = this.b.pieceStoreColor(this.b.turn)
                             if(pstore.length){
                                 let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + "k = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ King , " + p.kind + "r = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ Rook").join(" , ")}  [ Enter / Ok = None ] : `)
                                 if(placeKind) if(placeKind.length > 1){
@@ -194,26 +255,33 @@ class Board_ extends SmartDomElement{
                                             valid.fromsq
                                                 :
                                             valid.delrooksq
-                                        valid.san += "/" + pf.kind.toUpperCase() + this.game.board.squaretoalgeb(valid.placeCastlingSquare)
+                                        valid.san += "/" + pf.kind.toUpperCase() + this.b.squaretoalgeb(valid.placeCastlingSquare)
                                     }
                                 }
                             }
                         }                        
 
-                        if(valid) if(this.draggedpiece.kind == "l"){                            
-                            let ds = pieceDirectionToString(this.draggedpiece.direction)
+                        /*if(valid) if(this.draggedpiece.kind == "l"){                            
+                            let ds = this.draggedpiece.direction.toPieceDirectionString()
                             let sds = window.prompt(`Promote piece, ${PIECE_DIRECTION_STRINGS.join(" , ")}  [ Enter / Ok = ${ds} ] : `) || ds                            
                             let dir = pieceDirectionStringToSquareDelta(sds)
                             valid.prompiece = Piece("l", this.draggedpiece.color, dir)
+                        }*/
+
+                        if(valid) if(this.draggedpiece.kind == "l"){                            
+                            this.awaitSquareClick = true
+                            this.inputtedMove = valid
+                            this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
+                            return
                         }
 
                         if(valid){
-                            if(this.parentApp.trainMode == this.game.board.turnVerbal){
+                            if(this.parentApp.trainMode == this.b.turnVerbal){
                                 let candidates = this.getcurrentnode().sortedchilds().filter(child => child.weights[0])
                                 if(candidates.length == 0){
                                     return this.parentApp.trainingLineCompleted()
                                 }else{
-                                    if(candidates.find(cand => cand.gensan == this.game.board.movetosan(valid))){
+                                    if(candidates.find(cand => cand.gensan == this.b.movetosan(valid))){
                                         this.makeMove(valid)
                                     }else{
                                         this.parentApp.alert("Wrong move", "error")
@@ -240,12 +308,12 @@ class Board_ extends SmartDomElement{
     }
 
     doflip(){
-        this.game.flip = !this.game.flip        
+        this.g.flip = !this.g.flip        
         this.positionchanged()
     }
 
     fasq(sq){
-        if(this.game.flip) return Square(LAST_SQUARE - sq.file, LAST_SQUARE - sq.rank)
+        if(this.g.flip) return Square(LAST_SQUARE - sq.file, LAST_SQUARE - sq.rank)
         return sq
     }
 
@@ -257,7 +325,7 @@ class Board_ extends SmartDomElement{
         this.game = game        
         this.positionchanged()
         try{
-            this.parentApp.pgnHeadersEditableList.fromOrderedHash(this.game.pgnHeaders)
+            this.parentApp.pgnHeadersEditableList.fromOrderedHash(this.g.pgnHeaders)
         }catch(err){}        
         return this
     }
@@ -270,8 +338,12 @@ class Board_ extends SmartDomElement{
         return Vect(sq.file * this.squaresize, sq.rank * this.squaresize)
     }
 
+    fasquarecoords(sq){
+        return this.squarecoords(this.fasq(sq))
+    }
+
     piececoords(sq){
-        let sc = this.squarecoords(this.fasq(sq))
+        let sc = this.fasquarecoords(sq)
         return Vect(sc.x + this.piecemargin(), sc.y + this.piecemargin())
     }
 
@@ -296,6 +368,12 @@ class Board_ extends SmartDomElement{
     piecesize(){return this.squaresize * 0.85}
 
     drawPiece(canvas, coords, pOrig, scaleFactorOpt, rotateOpt){             
+        if(pOrig.kind == "x"){
+            canvas.fillStyle("#f00")
+            canvas.fillRect(coords, Vect(this.piecesize(), this.piecesize()))
+            return
+        }
+
         let scaleFactor = scaleFactorOpt || 1
         let rotate = rotateOpt || 0
         let p = Piece(pOrig.kind, pOrig.color, pOrig.direction)
@@ -312,7 +390,7 @@ class Board_ extends SmartDomElement{
         if(p.kind == "l"){            
             p.kind = "n"            
             rotate = p.direction.angle()
-            if(this.game.flip) rotate = rotate - Math.PI
+            if(this.g.flip) rotate = rotate - Math.PI
         }
         let drawImgFunc = (piece, canvas, img, coords, scaleFactor, addKnight, rotate) => {
             let size = this.piecesize() * scaleFactor
@@ -354,9 +432,9 @@ class Board_ extends SmartDomElement{
             let newsvgb64 = btoa(newsvg)
             let newimgurl = imgurlparts[0] + "," + newsvgb64            
             let img = Img({width: this.piecesize(), height: this.piecesize()})                            
-            let fen = this.game.fen()
+            let fen = this.g.fen()
             img.e.onload = () => {
-                if(this.game.fen() == fen){
+                if(this.g.fen() == fen){
                     drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, rotate)            
                 }                
                 this.imgcache[klasssel] = img                
@@ -369,7 +447,7 @@ class Board_ extends SmartDomElement{
         let piececanvas = this.getCanvasByName("piece")
         piececanvas.clear()
         for(let sq of ALL_SQUARES){
-            let p = this.game.board.pieceatsquare(sq)
+            let p = this.b.pieceatsquare(sq)
             if(!p.isempty()){                
                 let pc = this.piececoords(sq)
                 this.drawPiece(piececanvas, pc, p)
@@ -403,11 +481,11 @@ class Board_ extends SmartDomElement{
     }
 
     analysiskey(){        
-        return `analysis/${this.game.variant}/${strippedfen(this.getcurrentnode().fen)}`
+        return `analysis/${this.g.variant}/${strippedfen(this.getcurrentnode().fen)}`
     }
 
     getcurrentnode(){
-        return this.game.getcurrentnode()
+        return this.g.getcurrentnode()
     }
     
     createAnalysisInfoItemMove(item, lastcompleteddepth){
@@ -534,7 +612,7 @@ class Board_ extends SmartDomElement{
         let highlightcanvas = this.getCanvasByName("highlight")
         highlightcanvas.clear()        
         if(currentnode.genalgeb){                        
-            let move = this.game.board.movefromalgeb(currentnode.genalgeb)                        
+            let move = this.b.movefromalgeb(currentnode.genalgeb)                        
             this.drawmovearrow(highlightcanvas, move, {
                 scalefactor: this.arrowscalefactor()
             })
@@ -548,7 +626,7 @@ class Board_ extends SmartDomElement{
         if(this.parentApp.trainOn && (!this.forceWeights)) return
         this.forceWeights = false
         for(let child of currentnode.sortedchilds()){
-            let move = this.game.board.movefromalgeb(child.genalgeb)
+            let move = this.b.movefromalgeb(child.genalgeb)
             if(child.priority){
                 this.drawmovearrow(weightscanvas, move, {
                     scalefactor: this.arrowscalefactor(),
@@ -575,6 +653,7 @@ class Board_ extends SmartDomElement{
 
     draw(){
         this.getCanvasByName("dragpiece").clear()
+        this.getCanvasByName("clicksquare").clear()
 
         this.drawSquares()
 
@@ -589,42 +668,42 @@ class Board_ extends SmartDomElement{
         this.createCommentCanvas()
 
         this.resultDiv.x()
-        if(this.game.terminated){
+        if(this.g.terminated){
             this.resultDiv.a(
-                div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.game.playersVerbal()),
-                div().pad(10).bc("#ffa").fs(this.squaresize).html(this.game.resultVerbal()),
-                div().fst("italic").pad(10).bc("#ffa").fs(this.squaresize/3).html(this.game.resultReason)
+                div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.g.playersVerbal()),
+                div().pad(10).bc("#ffa").fs(this.squaresize).html(this.g.resultVerbal()),
+                div().fst("italic").pad(10).bc("#ffa").fs(this.squaresize/3).html(this.g.resultReason)
             )
         }
     }
 
     tobegin(){
-        this.game.tobegin()
+        this.g.tobegin()
         this.positionchanged()
     }
 
     back(){
-        this.game.back()
+        this.g.back()
         this.positionchanged()
     }
 
     forward(){
-        this.game.forward()
+        this.g.forward()
         this.positionchanged()
     }
 
     toend(){
-        this.game.toend()
+        this.g.toend()
         this.positionchanged()
     }
 
     del(){
-        this.game.del()
+        this.g.del()
         this.positionchanged()
     }
 
     setfromnode(node){
-        this.game.setfromnode(node)
+        this.g.setfromnode(node)
         this.positionchanged()
     }
 
@@ -649,7 +728,7 @@ class Board_ extends SmartDomElement{
         let drawings = this.getcurrentnode().drawings()        
         let drawingscanvas = this.getCanvasByName("drawings")
         drawingscanvas.clear()
-        let b = this.game.board
+        let b = this.b
         for(let drawing of drawings){                     
             try{
                 let squares = drawing.squares.map(algeb => this.fasq(b.algebtosquare(algeb)))

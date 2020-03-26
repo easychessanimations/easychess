@@ -80,8 +80,19 @@ class SquareDelta_{
     }
 
     angle(){
-        let pds = pieceDirectionToString(this)    
+        let pds = this.toPieceDirectionString()
         return Math.PI / 4 * PIECE_DIRECTION_STRINGS.indexOf(pds)
+    }
+
+    toPieceDirectionString(){
+        let buff = ""
+        if(this.y){
+            buff += this.y < 0 ? "n" : "s"
+        }
+        if(this.x){
+            buff += this.x > 0 ? "e" : "w"
+        }
+        return buff
     }
 }
 function SquareDelta(x, y){return new SquareDelta_(x, y)}
@@ -194,17 +205,6 @@ function Square(file, rank){return new Square_(file, rank)}
 let ALL_SQUARES = []
 for(let rank=0;rank<NUM_SQUARES;rank++) for(let file=0;file<NUM_SQUARES;file++) ALL_SQUARES.push(Square(file, rank))
 
-function pieceDirectionToString(squareDelta){
-    let buff = ""
-    if(squareDelta.y){
-        buff += squareDelta.y < 0 ? "n" : "s"
-    }
-    if(squareDelta.x){
-        buff += squareDelta.x > 0 ? "e" : "w"
-    }
-    return buff
-}
-
 class Piece_{
     constructor(kind, color, direction){
         this.kind = kind
@@ -219,7 +219,7 @@ class Piece_{
     toString(){
         if(this.isempty()) return "-"
         let buff = (!this.color) ? this.kind: this.kind.toUpperCase()
-        if(this.direction) buff += pieceDirectionToString(this.direction)
+        if(this.direction) buff += this.direction.toPieceDirectionString()
         return buff
     }
 
@@ -259,6 +259,16 @@ class Move_{
     }
 }
 function Move(fromsq, tosq, prompiece, epclsq, epsq){return new Move_(fromsq, tosq, prompiece, epclsq, epsq)}
+
+const ADD_CANCEL = true
+
+function LANCER_PROMOTION_PIECES(color, addCancel){
+    let lpp = QUEEN_DIRECTIONS.map(qd => Piece("l", color, qd))
+    if(addCancel) lpp = lpp.concat([
+        Piece("x", BLACK, SquareDelta(0, 0))
+    ])
+    return lpp
+}
 
 const FIFTY_MOVE_RULE_LIMIT     = 100
 
@@ -486,7 +496,7 @@ class ChessBoard_{
         let prom = move.prompiece ? move.prompiece.kind : ""
 
         if(fromp.kind == "l"){
-            prom = pieceDirectionToString(move.prompiece.direction)
+            prom = move.prompiece.direction.toPieceDirectionString()
         }
 
         return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${prom}`
@@ -1075,7 +1085,7 @@ class ChessBoard_{
         let toalgeb = this.squaretoalgeb(move.tosq)
         let prom = move.prompiece ? "=" + move.prompiece.kind.toUpperCase() : ""        
         if(fromp.kind == "l"){
-            prom = pieceDirectionToString(move.prompiece.direction)
+            prom = move.prompiece.direction.toPieceDirectionString()
         }
         let place = move.placePiece ? "/" + move.placePiece.kind.toUpperCase() : ""
 

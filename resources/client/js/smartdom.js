@@ -238,6 +238,10 @@ class SmartDomElement{
         for(let kind of kinds.split(" ")) this.e.addEventListener(kind, callback)
         return this
     }
+    re(kinds, callback){
+        for(let kind of kinds.split(" ")) this.e.removeEventListener(kind, callback)
+        return this
+    }
     x(){
         this.e.innerHTML = ""
         this.childs = []
@@ -1538,6 +1542,10 @@ class Canvas_ extends SmartDomElement{
         this.ctx.beginPath()
         this.ctx.arc(orig.x, orig.y, r, 0, 2 * Math.PI, false)
         this.ctx.stroke()
+    }
+
+    globalAlpha(op){
+        this.ctx.globalAlpha = op
     }
 
     arrow(from, to, argsopt){        
