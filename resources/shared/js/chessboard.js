@@ -320,18 +320,22 @@ class ChessBoard_{
         if(this.IS_SCHESS()){
             basicPieces = basicPieces.concat([
                 Piece("e", color, SquareDelta(0, 2)),
-                Piece("h", color, SquareDelta(1, 2)),
-                Piece("x", BLACK, SquareDelta(0, 3)),
+                Piece("h", color, SquareDelta(1, 2)),                
             ])
+            if(addCancel){
+                basicPieces = basicPieces.concat([                  
+                    Piece("x", BLACK, SquareDelta(0, 3)),
+                ])
+            }
         }else if(this.IS_EIGHTPIECE()){
-            basicPieces = LANCER_PROMOTION_PIECES(color, ADD_CANCEL).concat([
+            basicPieces = LANCER_PROMOTION_PIECES(color, addCancel).concat([
                 Piece("q", color, SquareDelta(0, 2)),
                 Piece("r", color, SquareDelta(1, 2)),
                 Piece("b", color, SquareDelta(0, 3)),
                 Piece("n", color, SquareDelta(1, 3)),
             ])
         }else{
-            basicPieces = basicPieces.concat([
+            if(addCancel) basicPieces = basicPieces.concat([
                 Piece("x", BLACK, SquareDelta(0, 2)),
             ])
         }
@@ -936,15 +940,6 @@ class ChessBoard_{
         return ( sq.file >= 0 ) && ( sq.rank >= 0 ) && ( sq.file < NUM_SQUARES ) && ( sq.rank < NUM_SQUARES)
     }
 
-    promkinds(){        
-        let pks = ["q", "r", "b", "n"]
-        if(this.IS_ANTICHESS()) return pks.concat(["k"])        
-        if(this.IS_SCHESS()){
-            pks = pks.concat(["e", "h"])
-        }
-        return pks
-    }
-
     pseudolegalmovesforpieceatsquare(p, sq){                        
         let acc = this.pseudolegalmovesforpieceatsquareinner(p, sq)
 
@@ -1029,9 +1024,10 @@ class ChessBoard_{
             let pushonesq = sq.adddelta(pdirobj.pushone)
             let pushoneempty = this.pieceatsquare(pushonesq).isempty()
             if(pushoneempty){
-                if(pushonesq.rank == pdirobj.promrank){                    
-                    for(let kind of this.promkinds()){                        
-                        plms.push(Move(sq, pushonesq, Piece(kind, BLACK)))    
+                if(pushonesq.rank == pdirobj.promrank){                                        
+                    for(let pp of this.PROMOTION_PIECES(p.color)){
+                        if(pp.kind != "l") pp.direction = null
+                        plms.push(Move(sq, pushonesq, pp))    
                     }
                 }else{
                     plms.push(Move(sq, pushonesq))
@@ -1060,8 +1056,9 @@ class ChessBoard_{
                     let captp = this.pieceatsquare(captsq)
                     if(!captp.isempty() && captp.color != p.color){
                         if(captsq.rank == pdirobj.promrank){
-                            for(let kind of this.promkinds()){
-                                plms.push(Move(sq, captsq, Piece(kind, BLACK)))    
+                            for(let pp of this.PROMOTION_PIECES(p.color)){
+                                if(pp.kind != "l") pp.direction = null
+                                plms.push(Move(sq, captsq, pp))    
                             }
                         }else{
                             plms.push(Move(sq, captsq))
@@ -1167,7 +1164,11 @@ class ChessBoard_{
         let capt = this.ismovecapture(move)
         let fromalgeb = this.squaretoalgeb(move.fromsq)
         let toalgeb = this.squaretoalgeb(move.tosq)
-        let prom = move.prompiece ? "=" + move.prompiece.kind.toUpperCase() : ""        
+        let prom = ""
+        if(move.prompiece){
+            prom = "=" + move.prompiece.kind.toUpperCase()
+            if(move.prompiece.kind == "l") prom += move.prompiece.direction.toPieceDirectionString()
+        }
         if(fromp.kind == "l"){
             prom = move.prompiece.direction.toPieceDirectionString()
         }
