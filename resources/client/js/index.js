@@ -385,12 +385,12 @@ class App extends SmartDomElement{
 
         this.setupsource()        
 
-        this.checkSourceInterval = setInterval(this.checksource.bind(this), QUERY_INTERVAL)
+        if(IS_PROD()) this.checkSourceInterval = setInterval(this.checksource.bind(this), QUERY_INTERVAL)
 
         this.lastApiTick = performance.now()
 
-        this.apiPingInterval = setInterval(this.apiPing.bind(this), 5 * QUERY_INTERVAL)
-        this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
+        if(IS_PROD()) this.apiPingInterval = setInterval(this.apiPing.bind(this), 5 * QUERY_INTERVAL)
+        if(IS_PROD()) this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
     }
 
     renderFeedbackDiv(){
@@ -2233,6 +2233,9 @@ class App extends SmartDomElement{
         this.source.addEventListener('error', e => {
             if (e.readyState == EventSource.CLOSED) {                
                 //this.clog("connection closed")
+            }else{
+                //document.location.href = "about:blank"
+                this.source.close()
             }
         }, false)
 

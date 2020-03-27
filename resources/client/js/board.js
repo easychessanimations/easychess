@@ -171,17 +171,88 @@ class Board_ extends SmartDomElement{
         this.mouseClickDiv.disp("initial")
     }
 
+    handleValidMoveInput(valid){
+        if(valid.prompiece && (this.draggedpiece.kind != "l")){                            
+            this.awaitSquareClick = true
+            this.inputtedMove = valid
+            this.buildPromotionSquares(this.b.PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
+            return
+        }
+
+        if(valid.placeMove){
+            let pstore = this.b.pieceStoreColor(this.b.turn)
+            if(pstore.length){
+                if(this.b.squareStore().find(sq => sq.equalto(valid.fromsq))){
+                    let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + " = " + DISPLAY_FOR_PIECE_LETTER[p.kind]).join(" , ")}  [ Enter / Ok = None ] : `)
+                    if(placeKind){
+                        let pf = pstore.find(tp => tp.kind == placeKind)
+                        if(pf){
+                            valid.placePiece = pf
+                        }
+                    }
+                }                                
+            }                            
+        }
+
+        if(valid.castling){
+            let pstore = this.b.pieceStoreColor(this.b.turn)
+            if(pstore.length){
+                let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + "k = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ King , " + p.kind + "r = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ Rook").join(" , ")}  [ Enter / Ok = None ] : `)
+                if(placeKind) if(placeKind.length > 1){
+                    let pf = pstore.find(tp => tp.kind == placeKind.substring(0,1))
+                    if(pf){
+                        valid.placeCastlingPiece = pf
+                        valid.placeCastlingSquare = placeKind.substring(1, 2) == "k" ?
+                            valid.fromsq
+                                :
+                            valid.delrooksq
+                        valid.san += "/" + pf.kind.toUpperCase() + this.b.squaretoalgeb(valid.placeCastlingSquare)
+                    }
+                }
+            }
+        }                        
+
+        if(this.draggedpiece.kind == "l"){                            
+            this.awaitSquareClick = true
+            this.inputtedMove = valid
+            this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
+            return
+        }
+        
+        if(this.parentApp.trainMode == this.b.turnVerbal){
+            let candidates = this.getcurrentnode().sortedchilds().filter(child => child.weights[0])
+            if(candidates.length == 0){
+                return this.parentApp.trainingLineCompleted()
+            }else{
+                if(candidates.find(cand => cand.gensan == this.b.movetosan(valid))){
+                    this.makeMove(valid)
+                }else{
+                    this.parentApp.alert("Wrong move", "error")
+                    this.forceWeights = true
+                    this.draw()
+                }
+            }
+        }else{
+            this.makeMove(valid)
+        }                            
+    }
+
     handleEvent(sev){
         if(sev.do == "dragpiece"){
             let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()            
+            let dragpiececanvas = this.getCanvasByName("dragpiece")
+
             switch(sev.kind){                
                 case "dragstart":
                     sev.ev.preventDefault()                        
+
                     if(this.g.terminated) return
                     if(this.awaitSquareClick) return                    
+
                     this.piecedragorig = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)        
                     this.draggedsq = this.coordstosq(this.piecedragorig)        
                     this.draggedpiece = this.b.pieceatsquare(this.draggedsq)
+
                     if(!this.draggedpiece.isempty()){
                         this.draggedpiececoords = this.piececoords(this.draggedsq)        
                         this.clearPiece(this.draggedsq)
@@ -189,118 +260,39 @@ class Board_ extends SmartDomElement{
                     }        
                     break
                 case "mousemove":
-                    if(this.piecedragon){
-                        let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
-                        this.piecedragvect = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)
-                        this.piecedragdiff = this.piecedragvect.m(this.piecedragorig)
-                        this.dragtargetsq = this.coordstosq(this.piecedragvect)            
-                        
-                        let dragpiececanvas = this.getCanvasByName("dragpiece")
-                        dragpiececanvas.clear()
-                        this.drawPiece(dragpiececanvas, this.draggedpiececoords.p(this.piecedragdiff), this.draggedpiece)
-                    }
+                    if(!this.piecedragon) return
+                    
+                    this.piecedragvect = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)
+                    this.piecedragdiff = this.piecedragvect.m(this.piecedragorig)
+                    this.dragtargetsq = this.coordstosq(this.piecedragvect)                    
+
+                    dragpiececanvas.clear()
+
+                    this.drawPiece(dragpiececanvas, this.draggedpiececoords.p(this.piecedragdiff), this.draggedpiece)
                     break
                 case "mouseup":
-                    if(this.piecedragon){
-                        this.piecedragon = false
+                    if(!this.piecedragon) return
 
-                        let dragpiececanvas = this.getCanvasByName("dragpiece")
+                    this.piecedragon = false
+                    
+                    dragpiececanvas.clear()            
 
-                        dragpiececanvas.clear()            
-
-                        if(!this.dragtargetsq){
-                            this.draw()
-                            return
-                        }
-                        this.drawPiece(dragpiececanvas, this.piececoords(this.dragtargetsq), this.draggedpiece)
-            
-                        let move = Move(this.draggedsq, this.dragtargetsq)
-                        
-                        let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
-
-                        /*if(valid) if(valid.prompiece && (this.draggedpiece.kind != "l")){
-                            let pks = this.b.promkinds()
-                            let promkind = window.prompt(`Promote piece, ${pks.map(kind => kind + " = " + DISPLAY_FOR_PIECE_LETTER[kind]).join(" , ")}  [ Enter / Ok = Queen ] : `)
-                            promkind = promkind || "q"
-                            if(!pks.includes(promkind)) promkind = "q"
-                            valid.prompiece = Piece(promkind, valid.prompiece.color)
-                        }*/
-                        
-                        if(valid) if(valid.prompiece && (this.draggedpiece.kind != "l")){                            
-                            this.awaitSquareClick = true
-                            this.inputtedMove = valid
-                            this.buildPromotionSquares(this.b.PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
-                            return
-                        }
-
-                        if(valid) if(valid.placeMove){
-                            let pstore = this.b.pieceStoreColor(this.b.turn)
-                            if(pstore.length){
-                                if(this.b.squareStore().find(sq => sq.equalto(valid.fromsq))){
-                                    let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + " = " + DISPLAY_FOR_PIECE_LETTER[p.kind]).join(" , ")}  [ Enter / Ok = None ] : `)
-                                    if(placeKind){
-                                        let pf = pstore.find(tp => tp.kind == placeKind)
-                                        if(pf){
-                                            valid.placePiece = pf
-                                        }
-                                    }
-                                }                                
-                            }                            
-                        }
-
-                        if(valid) if(valid.castling){
-                            let pstore = this.b.pieceStoreColor(this.b.turn)
-                            if(pstore.length){
-                                let placeKind = window.prompt(`Place piece, ${pstore.map(p => p.kind + "k = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ King , " + p.kind + "r = " + DISPLAY_FOR_PIECE_LETTER[p.kind] + " @ Rook").join(" , ")}  [ Enter / Ok = None ] : `)
-                                if(placeKind) if(placeKind.length > 1){
-                                    let pf = pstore.find(tp => tp.kind == placeKind.substring(0,1))
-                                    if(pf){
-                                        valid.placeCastlingPiece = pf
-                                        valid.placeCastlingSquare = placeKind.substring(1, 2) == "k" ?
-                                            valid.fromsq
-                                                :
-                                            valid.delrooksq
-                                        valid.san += "/" + pf.kind.toUpperCase() + this.b.squaretoalgeb(valid.placeCastlingSquare)
-                                    }
-                                }
-                            }
-                        }                        
-
-                        /*if(valid) if(this.draggedpiece.kind == "l"){                            
-                            let ds = this.draggedpiece.direction.toPieceDirectionString()
-                            let sds = window.prompt(`Promote piece, ${PIECE_DIRECTION_STRINGS.join(" , ")}  [ Enter / Ok = ${ds} ] : `) || ds                            
-                            let dir = pieceDirectionStringToSquareDelta(sds)
-                            valid.prompiece = Piece("l", this.draggedpiece.color, dir)
-                        }*/
-
-                        if(valid) if(this.draggedpiece.kind == "l"){                            
-                            this.awaitSquareClick = true
-                            this.inputtedMove = valid
-                            this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
-                            return
-                        }
-
-                        if(valid){
-                            if(this.parentApp.trainMode == this.b.turnVerbal){
-                                let candidates = this.getcurrentnode().sortedchilds().filter(child => child.weights[0])
-                                if(candidates.length == 0){
-                                    return this.parentApp.trainingLineCompleted()
-                                }else{
-                                    if(candidates.find(cand => cand.gensan == this.b.movetosan(valid))){
-                                        this.makeMove(valid)
-                                    }else{
-                                        this.parentApp.alert("Wrong move", "error")
-                                        this.forceWeights = true
-                                        this.draw()
-                                    }
-                                }
-                            }else{
-                                this.makeMove(valid)
-                            }                            
-                        }else{
-                            this.draw()
-                        }                        
+                    if(!this.dragtargetsq){
+                        this.draw()
+                        return
                     }
+
+                    this.drawPiece(dragpiececanvas, this.piececoords(this.dragtargetsq), this.draggedpiece)
+        
+                    let move = Move(this.draggedsq, this.dragtargetsq)
+                    
+                    let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
+
+                    if(valid){
+                        this.handleValidMoveInput(valid)
+                    }else{
+                        this.draw()
+                    }                       
                     break
             }
         }
