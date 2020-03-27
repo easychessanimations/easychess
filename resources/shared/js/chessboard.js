@@ -1,3 +1,5 @@
+const MAX_PLMS_GEN_DEPTH = 1
+
 const SUPPORTED_VARIANTS = [
     ["standard", "Standard"],
     ["atomic", "Atomic"],
@@ -813,6 +815,9 @@ class ChessBoard_{
     }
 
     algebtomove(algeb){
+        if(!algeb) return null
+        if(algeb == "-") return null
+
         let lms = this.legalmovesforallpieces()
 
         return lms.find(move => this.movetoalgeb(move) == algeb)
@@ -990,8 +995,15 @@ class ChessBoard_{
         return ( sq.file >= 0 ) && ( sq.rank >= 0 ) && ( sq.file < NUM_SQUARES ) && ( sq.rank < NUM_SQUARES)
     }
 
+    assertMaxPlmsGenDepth(depth){        
+        if(depth <= MAX_PLMS_GEN_DEPTH) return true
+        console.log(`max plms gen depth ${MAX_PLMS_GEN_DEPTH} exceeded at depth ${depth}`)
+        return false
+    }
+
     pseudolegalmovesforpieceatsquare(p, sq, depthOpt){                        
         let depth = depthOpt || 0
+        if(!this.assertMaxPlmsGenDepth(depth)) return []
 
         let acc = this.pseudolegalmovesforpieceatsquareinner(p, sq, depth)
 
@@ -1017,6 +1029,7 @@ class ChessBoard_{
 
     pseudolegalmovesforpieceatsquareinner(p, sq, depthOpt){
         let depth = depthOpt || 0
+        if(!this.assertMaxPlmsGenDepth(depth)) return []
 
         if(p.kind == "e"){
             let acc = this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("r", p.color), sq, depth)
@@ -1040,7 +1053,8 @@ class ChessBoard_{
     }
 
     pseudolegalmovesforpieceatsquareinnerpartial(p, sq, depthOpt){                        
-        let depth = depthOpt
+        let depth = depthOpt || 0
+        if(!this.assertMaxPlmsGenDepth(depth)) return []
 
         let dirobj = getPieceDirection(p)        
         let plms = []                
@@ -1135,6 +1149,14 @@ class ChessBoard_{
                 }                
             }
         }
+
+        if(this.IS_EIGHTPIECE()){
+            let disabledMove = this.algebtomove(this.disablefen)
+            if(disabledMove){
+                plms = plms.filter(plm => !plm.roughlyequalto(disabledMove))
+            }
+        }
+
         return plms
     }
 
