@@ -134,7 +134,7 @@ class Board_ extends SmartDomElement{
 
     buildPromotionSquares(piecesOpt, clickedSqOpt){        
         this.promotionPieces = piecesOpt || this.promotionPieces        
-        if(!this.promotionPieces) return        
+        if(!this.promotionPieces) return                
         let osq = this.inputtedMove.tosq
         let canvas = this.getCanvasByName("clicksquare")      
         canvas.globalAlpha(0.7)
@@ -153,8 +153,12 @@ class Board_ extends SmartDomElement{
             if(clickedSqOpt){                                     
                 if(sq.equalto(clickedSqOpt)){                                        
                     let move = this.inputtedMove                    
-                    move.prompiece = p          
-                    if(p.kind != "l") move.prompiece.direction = null                       
+                    if(move.promsq){
+                        move.promsq = sq
+                    }else{
+                        move.prompiece = p          
+                        if(p.kind != "l") move.prompiece.direction = null                       
+                    }                    
                     this.clearAwaitSquareClick()       
                     this.draw()                                        
                     if(p.kind != "x"){
@@ -167,15 +171,26 @@ class Board_ extends SmartDomElement{
                 canvas.fillRect(this.fasquarecoords(sq), Vect(this.squaresize, this.squaresize))
                 this.drawPiece(canvas, this.piececoords(sq), p)
             }            
-        }                
+        }                        
         this.mouseClickDiv.disp("initial")
     }
 
-    handleValidMoveInput(valid){
-        if(valid.prompiece && (this.draggedpiece.kind != "l")){                            
+    handleValidMoveInput(valid, allValid){
+        if(valid.prompiece && (this.draggedpiece.kind != "l") && (this.draggedpiece.kind != "s")){                            
             this.awaitSquareClick = true
             this.inputtedMove = valid
             this.buildPromotionSquares(this.b.PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
+            return
+        }
+
+        if(valid.promsq){            
+            this.awaitSquareClick = true
+            this.inputtedMove = valid
+            let psqs = allValid.map(v => Piece(v.prompiece.kind, v.prompiece.color,
+                SquareDelta(v.promsq.file - valid.tosq.file, v.promsq.rank - valid.tosq.rank)))            
+            psqs.push(Piece("x", BLACK, SquareDelta(0, 0)))
+            this.getCanvasByName("highlight").clear()
+            this.buildPromotionSquares(psqs)
             return
         }
 
@@ -288,8 +303,10 @@ class Board_ extends SmartDomElement{
                     
                     let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
+                    let allValid = this.getlms().filter((testmove) => testmove.roughlyequalto(move))
+
                     if(valid){
-                        this.handleValidMoveInput(valid)
+                        this.handleValidMoveInput(valid, allValid)
                     }else{
                         this.draw()
                     }                       
@@ -632,10 +649,16 @@ class Board_ extends SmartDomElement{
         let highlightcanvas = this.getCanvasByName("highlight")
         highlightcanvas.clear()        
         if(currentnode.genalgeb){                        
-            let move = this.b.movefromalgeb(currentnode.genalgeb)                        
+            let move = this.b.movefromalgeb(currentnode.genalgeb)                                    
             this.drawmovearrow(highlightcanvas, move, {
                 scalefactor: this.arrowscalefactor()
             })
+            if(move.promsq){
+                this.drawmovearrow(highlightcanvas, Move(move.tosq, move.promsq), {
+                    scalefactor: this.arrowscalefactor(),
+                    color: "#0ff"
+                })
+            }
         }
     }
 

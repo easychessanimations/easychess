@@ -33,7 +33,7 @@ const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
 const GAME_TEXT_AREA_HEIGHT     = 95
 const GAME_TEXT_AREA_WIDTH      = 882
-const COMMENT_TEXT_AREA_WIDTH   = 290
+const COMMENT_TEXT_AREA_WIDTH   = 270
 
 const THUMB_SIZE                = 150
 
@@ -1794,7 +1794,7 @@ class App extends SmartDomElement{
             div()
                 .cp().bc(lm.gameMove ? movecolor(lm.gameNode.weights) : "#eee")
                 .fwb()
-                .pad(1).mar(1).w(80).fs(16).html(lm.san)
+                .pad(1).mar(1).w(100).fs(16).html(lm.san)
                 .ae("click", this.moveClicked.bind(this, lm)),
             [0,1].map(index =>
                 Combo({

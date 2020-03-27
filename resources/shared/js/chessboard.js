@@ -242,8 +242,12 @@ class Piece_{
         return Piece(this.kind, color, this.direction)
     }
 
+    colorInverse(){
+        return this.tocolor(!this.color)
+    }
+
     inverse(){
-        let colorInverse = this.tocolor(!this.color)
+        let colorInverse = this.colorInverse()
 
         if(this.kind == "l"){
             colorInverse.direction = colorInverse.direction.inverse()
@@ -468,6 +472,13 @@ class ChessBoard_{
         return Square(file, rank)
     }
 
+    algebtomovesimple(algeb){
+        return Move(
+            this.algebtosquare(algeb.substring(0,2)),
+            this.algebtosquare(algeb.substring(2,4))
+        )
+    }
+
     get turnVerbal(){
         return this.turn ? "white" : "black"
     }
@@ -560,6 +571,8 @@ class ChessBoard_{
     squaretoalgeb(sq){return `${String.fromCharCode(sq.file + 'a'.charCodeAt(0))}${String.fromCharCode(NUM_SQUARES - 1 - sq.rank + '1'.charCodeAt(0))}`}
 
     movetoalgeb(move){
+        if(!move) return "-"
+
         if(this.IS_SCHESS()){            
             if(move.castling){                
                 let from = move.fromsq
@@ -581,7 +594,11 @@ class ChessBoard_{
         let prom = move.prompiece ? move.prompiece.kind : ""
 
         if(fromp.kind == "l"){
-            prom = move.prompiece.direction.toPieceDirectionString()
+            if(move.prompiece){
+                prom = move.prompiece.direction.toPieceDirectionString()
+            }else{
+                // lancer prompiece may be missing when lancer is pushed
+            }            
         }
 
         if(move.promsq) prom += "@" + this.squaretoalgeb(move.promsq)
@@ -613,8 +630,20 @@ class ChessBoard_{
         return attacks.map(attack => Move(attack.tosq, attack.fromsq))
     }
 
+    attacksonsquarebysentry(sq, color){
+        let attacks = []
+        for(let testsq of this.squaresForPieceKind("s", color)){
+            let plms = this.pseudolegalmovesforpieceatsquare(this.pieceatsquare(testsq), testsq)            
+            attacks = attacks.concat(plms.filter(plm => plm.promsq))
+                .filter(plm => plm.promsq.equalto(sq))
+        }        
+        return attacks.map(attack => Move(attack.promsq, attack.fromsq))
+    }
+
     attacksonsquarebypieceInner(sq, p){                        
         if(p.kind == "l") return this.attacksonsquarebylancer(sq, p.color)
+
+        if(p.kind == "s") return this.attacksonsquarebysentry(sq, p.color)
 
         let plms = this.pseudolegalmovesforpieceatsquare(p.inverse(), sq)        
 
@@ -630,6 +659,7 @@ class ChessBoard_{
     issquareattackedbycolor(sq, color){
         let pieceLetters = ['q', 'r', 'b', 'n', 'k']
         if(this.IS_SCHESS()) pieceLetters = pieceLetters.concat(["e", "h"])
+        if(this.IS_EIGHTPIECE()) pieceLetters = pieceLetters.concat(["s"])
         for(let pl of pieceLetters){
             if(this.attacksonsquarebypiece(sq, Piece(pl, color)).length > 0) return true
         }
@@ -658,6 +688,9 @@ class ChessBoard_{
 
     iskingincheck(color){
         let wk = this.whereisking(color)        
+        if(this.IS_EIGHTPIECE()){
+            if(!wk) return true
+        }
         if(this.IS_ATOMIC()){
             if(!wk) return true
             let wkopp = this.whereisking(!color)        
@@ -874,11 +907,22 @@ class ChessBoard_{
             this.removeSquareFromStore(move.fromsq)
         }
 
+        // move from piece in any case, overwrite this with normal promotion if needed
+        this.setpieaceatsquare(move.tosq, fromp)
+
         if(move.prompiece){                                    
-            this.setpieaceatsquare(move.effpromsq(), this.turn ? move.prompiece.tocolor(WHITE) : move.prompiece)
-        }else{            
-            this.setpieaceatsquare(move.tosq, fromp)
+            this.setpieaceatsquare(move.effpromsq(), move.promsq ? move.prompiece : this.turn ? move.prompiece.tocolor(WHITE) : move.prompiece)
         }   
+
+        if(move.promsq){
+            if(fromp.kind == "s"){
+                if(move.prompiece.kind != "p"){
+                    this.disablefen = this.movetoalgeb(Move(move.promsq, move.tosq))
+                }                
+            }
+        }else{
+            this.disablefen = "-"
+        }
 
         if(move.epclsq){            
             this.setpieaceatsquare(move.epclsq, Piece())
@@ -1088,7 +1132,18 @@ class ChessBoard_{
                             if(tp.isempty()){                            
                                 plms.push(Move(sq, currentsq))
                             }else if(tp.color != p.color){
-                                if(p.kind != "j") plms.push(Move(sq, currentsq))
+                                if(p.kind == "s"){
+                                    // sentry push
+                                    let pushedPiece = this.pieceatsquare(currentsq)
+                                    let testPiece = pushedPiece.colorInverse()
+                                    let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)
+                                    tplms.forEach(tplm => {
+                                        let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
+                                        plms.push(testMove)
+                                    })
+                                }else{
+                                    if(p.kind != "j") plms.push(Move(sq, currentsq))
+                                }                                
                                 ok = false
                             }else{
                                 ok = false
@@ -1100,7 +1155,8 @@ class ChessBoard_{
         }else if(p.kind == "p"){
             let pdirobj = PAWNDIRS(p.color)
             let pushonesq = sq.adddelta(pdirobj.pushone)
-            let pushoneempty = this.pieceatsquare(pushonesq).isempty()
+            // sentry may push pawn to a square where push one is not possible
+            let pushoneempty = this.squareok(pushonesq) ? this.pieceatsquare(pushonesq).isempty() : false
             if(pushoneempty){
                 if(pushonesq.rank == pdirobj.promrank){                                        
                     for(let pp of this.PROMOTION_PIECES(p.color)){
@@ -1151,7 +1207,7 @@ class ChessBoard_{
         }
 
         if(this.IS_EIGHTPIECE()){
-            let disabledMove = this.algebtomove(this.disablefen)
+            let disabledMove = this.algebtomovesimple(this.disablefen)
             if(disabledMove){
                 plms = plms.filter(plm => !plm.roughlyequalto(disabledMove))
             }
@@ -1305,12 +1361,19 @@ class ChessBoard_{
     }
 
     movefromalgeb(algeb){
-        if(algeb.includes("@")){
-            let sq = this.squarefromalgeb(algeb.slice(2,4))
-            let p = new Piece(algeb.slice(0,1).toLowerCase(), this.turnfen == "w")
-            return new Move(sq, sq, p)    
+        let move = new Move(this.squarefromalgeb(algeb.slice(0,2)), this.squarefromalgeb(algeb.slice(2,4)))
+        if(algeb.includes("@")){            
+            if(this.IS_SCHESS()){                
+                let sq = this.squarefromalgeb(algeb.slice(2,4))
+                let p = new Piece(algeb.slice(0,1).toLowerCase(), this.turnfen == "w")
+                return new Move(sq, sq, p)    
+            }            
+            if(this.IS_EIGHTPIECE()){
+                let sq = this.squarefromalgeb(algeb.slice(6,8))
+                move.promsq = sq
+            }
         }        
-        return new Move(this.squarefromalgeb(algeb.slice(0,2)), this.squarefromalgeb(algeb.slice(2,4)))
+        return move
     }
 }
 function ChessBoard(props){return new ChessBoard_(props)}
