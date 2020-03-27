@@ -119,7 +119,7 @@ const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
 const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
-const EIGHTPIECE_START_FEN = "jlsesqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneSQKBNR w KQkq - 0 1"
+const EIGHTPIECE_START_FEN = "jlsesqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneSQKBNR w KQkq - 0 1 -"
 
 const WHITE = true
 const BLACK = false
@@ -272,19 +272,24 @@ function PieceL(letter){
 }
 
 class Move_{
-    constructor(fromsq, tosq, prompiece, epclsq, epsq){
+    constructor(fromsq, tosq, prompiece, epclsq, epsq, promsq){
         this.fromsq = fromsq
         this.tosq = tosq
         this.prompiece = prompiece
         this.epclsq = epclsq
         this.epsq = epsq
+        this.promsq = promsq
+    }
+
+    effpromsq(){
+        return this.promsq || this.tosq
     }
 
     roughlyequalto(move){
         return this.fromsq.equalto(move.fromsq) && this.tosq.equalto(move.tosq)
     }
 }
-function Move(fromsq, tosq, prompiece, epclsq, epsq){return new Move_(fromsq, tosq, prompiece, epclsq, epsq)}
+function Move(fromsq, tosq, prompiece, epclsq, epsq, promsq){return new Move_(fromsq, tosq, prompiece, epclsq, epsq, promsq)}
 
 const ADD_CANCEL = true
 
@@ -481,6 +486,8 @@ class ChessBoard_{
         this.epfen = this.fenparts[3]  
         this.halfmovefen = this.fenparts[4]          
         this.fullmovefen = this.fenparts[5]          
+        this.disablefen = null
+        if(this.fenparts.length > 6) this.disablefen = this.fenparts[6]
 
         // schess piece store
         let rawfenparts = this.rawfen.split(/\[|\]/)
@@ -574,6 +581,8 @@ class ChessBoard_{
         if(fromp.kind == "l"){
             prom = move.prompiece.direction.toPieceDirectionString()
         }
+
+        if(move.promsq) prom += "@" + this.squaretoalgeb(move.promsq)
 
         return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${prom}`
     }
@@ -769,6 +778,7 @@ class ChessBoard_{
             epfen: this.epfen,
             halfmovefen: this.halfmovefen,
             fullmovefen: this.fullmovefen,
+            disablefen: this.disablefen,
             piecestorefen: this.piecestorefen,            
 
             fen: this.fen
@@ -792,6 +802,7 @@ class ChessBoard_{
         this.epfen = state.epfen
         this.halfmovefen = state.halfmovefen
         this.fullmovefen = state.fullmovefen
+        this.disablefen = state.disablefen
         this.piecestorefen = state.piecestorefen        
 
         this.fen = state.fen
@@ -858,8 +869,8 @@ class ChessBoard_{
             this.removeSquareFromStore(move.fromsq)
         }
 
-        if(move.prompiece){            
-            this.setpieaceatsquare(move.tosq, this.turn ? move.prompiece.tocolor(WHITE) : move.prompiece)
+        if(move.prompiece){                                    
+            this.setpieaceatsquare(move.effpromsq(), this.turn ? move.prompiece.tocolor(WHITE) : move.prompiece)
         }else{            
             this.setpieaceatsquare(move.tosq, fromp)
         }   
@@ -971,21 +982,25 @@ class ChessBoard_{
         let psb = this.IS_SCHESS() ? `[${this.piecestorefen}]` : ""
 
         this.fen = this.rawfen + psb + " " + this.turnfen + " " + this.castlefen + " " + this.epfen + " " + this.halfmovefen + " " + this.fullmovefen
+
+        if(this.disablefen) this.fen += " " + this.disablefen
     }
 
     squareok(sq){
         return ( sq.file >= 0 ) && ( sq.rank >= 0 ) && ( sq.file < NUM_SQUARES ) && ( sq.rank < NUM_SQUARES)
     }
 
-    pseudolegalmovesforpieceatsquare(p, sq){                        
-        let acc = this.pseudolegalmovesforpieceatsquareinner(p, sq)
+    pseudolegalmovesforpieceatsquare(p, sq, depthOpt){                        
+        let depth = depthOpt || 0
+
+        let acc = this.pseudolegalmovesforpieceatsquareinner(p, sq, depth)
 
         let pstore = this.pieceStoreColor(p.color)
         
         if(this.IS_SCHESS()){
             if(sq.rank == baseRank(p.color)){
                 if(this.squareStore().find(tsq => tsq.equalto(sq))) for(let psp of pstore){
-                    acc = acc.concat(this.pseudolegalmovesforpieceatsquareinner(p, sq).map(psm => {                        
+                    acc = acc.concat(this.pseudolegalmovesforpieceatsquareinner(p, sq, depth).map(psm => {                        
                         psm.placePiece = psp
                         return psm
                     }))
@@ -1000,16 +1015,18 @@ class ChessBoard_{
         return acc
     }
 
-    pseudolegalmovesforpieceatsquareinner(p, sq){
+    pseudolegalmovesforpieceatsquareinner(p, sq, depthOpt){
+        let depth = depthOpt || 0
+
         if(p.kind == "e"){
-            let acc = this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("r", p.color), sq)
-            acc = acc.concat(this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("n", p.color), sq))
+            let acc = this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("r", p.color), sq, depth)
+            acc = acc.concat(this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("n", p.color), sq, depth))
             return acc
         }
 
         if(p.kind == "h"){
-            let acc = this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("b", p.color), sq)
-            acc = acc.concat(this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("n", p.color), sq))
+            let acc = this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("b", p.color), sq, depth)
+            acc = acc.concat(this.pseudolegalmovesforpieceatsquareinnerpartial(Piece("n", p.color), sq, depth))
             return acc
         }
 
@@ -1022,7 +1039,9 @@ class ChessBoard_{
         }
     }
 
-    pseudolegalmovesforpieceatsquareinnerpartial(p, sq){                        
+    pseudolegalmovesforpieceatsquareinnerpartial(p, sq, depthOpt){                        
+        let depth = depthOpt
+
         let dirobj = getPieceDirection(p)        
         let plms = []                
 
@@ -1213,7 +1232,10 @@ class ChessBoard_{
         let prom = ""
         if(move.prompiece){
             prom = "=" + move.prompiece.kind.toUpperCase()
+
             if(move.prompiece.kind == "l") prom += move.prompiece.direction.toPieceDirectionString()
+
+            if(move.promsq) prom += "@" + this.squaretoalgeb(move.promsq)
         }
         if(fromp.kind == "l"){
             prom = move.prompiece.direction.toPieceDirectionString()
