@@ -79,6 +79,17 @@ class SquareDelta_{
         this.y = y
     }
 
+    equalto(sd){
+        return ( 
+            ( this.x == sd.x ) &&
+            ( this.y == sd.y )
+        )
+    }
+
+    inverse(){
+        return SquareDelta(-this.x, -this.y)
+    }
+
     angle(){
         let pds = this.toPieceDirectionString()
         return Math.PI / 4 * PIECE_DIRECTION_STRINGS.indexOf(pds)
@@ -228,11 +239,24 @@ class Piece_{
     }
 
     inverse(){
-        return this.tocolor(!this.color)
+        let colorInverse = this.tocolor(!this.color)
+
+        if(this.kind == "l"){
+            colorInverse.direction = colorInverse.direction.inverse()
+        }
+
+        return colorInverse
     }
 
     equalto(p){
-        return ( ( this.kind == p.kind ) && ( this.color == p.color ) )
+        if(this.direction && p.direction){
+            if(!this.direction.equalto(p.direction)) return false
+        }else if(this.direction || p.direction) return false
+
+        return ( 
+            ( this.kind == p.kind ) &&
+            ( this.color == p.color )
+        )
     }
 
     clone(){
@@ -546,9 +570,28 @@ class ChessBoard_{
         this.rep[this.squaretorepindex(sq)] = p
     }
 
+    squaresForPieceKind(kind, color){
+        return ALL_SQUARES.filter(sq => {
+            let p = this.pieceatsquare(sq)
+            return (p.kind == kind) && (p.color == color)
+        })
+    }
+
+    attacksonsquarebylancer(sq, color){
+        let attacks = []
+        for(let testsq of this.squaresForPieceKind("l", color)){
+            let plms = this.pseudolegalmovesforpieceatsquare(this.pieceatsquare(testsq), testsq)
+            attacks = attacks.concat(plms.filter(plm => plm.tosq.equalto(sq)))
+        }
+        return attacks.map(attack => Move(attack.tosq, attack.fromsq))
+    }
+
     attacksonsquarebypiece(sq, p){                        
+        if(p.kind == "l") return this.attacksonsquarebylancer(sq, p.color)
+
         let plms = this.pseudolegalmovesforpieceatsquare(p.inverse(), sq)        
-        return plms.filter((move)=>this.pieceatsquare(move.tosq).equalto(p))
+
+        return plms.filter(move => this.pieceatsquare(move.tosq).equalto(p))
     }
 
     issquareattackedbycolor(sq, color){
@@ -556,6 +599,11 @@ class ChessBoard_{
         if(this.IS_SCHESS()) pieceLetters = pieceLetters.concat(["e", "h"])
         for(let pl of pieceLetters){
             if(this.attacksonsquarebypiece(sq, Piece(pl, color)).length > 0) return true
+        }
+        if(this.IS_EIGHTPIECE){
+            for(let lancer of LANCER_PROMOTION_PIECES(color)){
+                if(this.attacksonsquarebypiece(sq, lancer).length > 0) return true
+            }
         }
         let pd = PAWNDIRS(!color)
         for(let capt of pd.captures){
@@ -1131,6 +1179,15 @@ class ChessBoard_{
 
         let qualifier = ""                
         let attacks = this.attacksonsquarebypiece(move.tosq, fromp)        
+        if(fromp.kind == "l"){
+            attacks = []
+            for(let lancer of LANCER_PROMOTION_PIECES(fromp.color)){
+                let lancerattacks = this.attacksonsquarebypiece(move.tosq, lancer)                                
+                for(let lancerattack of lancerattacks){                    
+                    if(!attacks.find(attack => attack.tosq.equalto(lancerattack.tosq))) attacks.push(lancerattack)
+                }                
+            }
+        }
         let files = []
         let ranks = []
         let samefiles = false
