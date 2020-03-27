@@ -398,6 +398,10 @@ class Board_ extends SmartDomElement{
             p.kind = "r"
             addCircle = true
         }
+        if(p.kind == "s"){
+            p.kind = "b"
+            addCircle = true
+        }
         if(p.kind == "l"){            
             p.kind = "n"            
             rotate = p.direction.angle()

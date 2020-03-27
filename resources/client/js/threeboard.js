@@ -111,6 +111,11 @@ class ThreeBoard_ extends SmartDomElement{
                 threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
                 tha.add(new ThreeAssemblyItem(threePiece))
                 break
+            case "s":
+                threePiece = THREE_PIECE_CACHE["Bishop"].clone()
+                threePiece.scale.set(this.PIECE_SCALE, this.PIECE_SCALE, this.PIECE_SCALE)
+                tha.add(new ThreeAssemblyItem(threePiece))
+                break
         }        
 
         threePiece.material = new THREE.MeshLambertMaterial({color: piece.color ? 0xffffff : 0x00ff00})                                

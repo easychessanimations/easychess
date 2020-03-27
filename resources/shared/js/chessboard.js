@@ -119,7 +119,7 @@ const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
 const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
-const EIGHTPIECE_START_FEN = "jlsebqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneBQKBNR w KQkq - 0 1"
+const EIGHTPIECE_START_FEN = "jlsesqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneSQKBNR w KQkq - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -136,6 +136,7 @@ const PIECE_DIRECTIONS = {
     k: [QUEEN_DIRECTIONS, false],
     n: [KNIGHT_DIRECTIONS, false],
     j: [ROOK_DIRECTIONS, true],
+    s: [BISHOP_DIRECTIONS, true],
 }
 
 function getPieceDirection(piece){
@@ -333,6 +334,7 @@ class ChessBoard_{
                 Piece("j", color, SquareDelta(-1, 2)),
                 Piece("q", color, SquareDelta(0, 2)),
                 Piece("r", color, SquareDelta(1, 2)),
+                Piece("s", color, SquareDelta(-1, 3)),
                 Piece("b", color, SquareDelta(0, 3)),
                 Piece("n", color, SquareDelta(1, 3)),
             ])
@@ -1053,7 +1055,7 @@ class ChessBoard_{
                             if(tp.isempty()){                            
                                 plms.push(Move(sq, currentsq))
                             }else if(tp.color != p.color){
-                                if(!p.kind == "j") plms.push(Move(sq, currentsq))
+                                if(p.kind != "j") plms.push(Move(sq, currentsq))
                                 ok = false
                             }else{
                                 ok = false
