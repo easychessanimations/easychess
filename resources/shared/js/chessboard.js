@@ -119,7 +119,7 @@ const HORDE_START_FEN = "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/
 const THREE_CHECK_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 3+3 0 1"
 const CRAZYHOUSE_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1"
 const SCHESS_START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[HEhe] w KQBCDFGkqbcdfg - 0 1"
-const EIGHTPIECE_START_FEN = "rlsebqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RLneBQKBNR w KQkq - 0 1"
+const EIGHTPIECE_START_FEN = "jlsebqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneBQKBNR w KQkq - 0 1"
 
 const WHITE = true
 const BLACK = false
@@ -135,6 +135,7 @@ const PIECE_DIRECTIONS = {
     q: [QUEEN_DIRECTIONS, true],
     k: [QUEEN_DIRECTIONS, false],
     n: [KNIGHT_DIRECTIONS, false],
+    j: [ROOK_DIRECTIONS, true],
 }
 
 function getPieceDirection(piece){
@@ -329,6 +330,7 @@ class ChessBoard_{
             }
         }else if(this.IS_EIGHTPIECE()){
             basicPieces = LANCER_PROMOTION_PIECES(color, addCancel).concat([
+                Piece("j", color, SquareDelta(-1, 2)),
                 Piece("q", color, SquareDelta(0, 2)),
                 Piece("r", color, SquareDelta(1, 2)),
                 Piece("b", color, SquareDelta(0, 3)),
@@ -432,6 +434,14 @@ class ChessBoard_{
 
     adjacentsquares(sq){
         return ADJACENT_DIRECTIONS.map((dir)=>sq.adddelta(dir)).filter((sq)=>this.squareok(sq))
+    }
+
+    jailerAdjacentSquares(sq){
+        return ROOK_DIRECTIONS.map(dir => sq.adddelta(dir)).filter(sq => this.squareok(sq))
+    }
+
+    isSquareJailedBy(sq, color){
+        return this.jailerAdjacentSquares(sq).filter(testsq => this.pieceatsquare(testsq).equalto(Piece("j", color))).length > 0
     }
 
     kingsadjacent(){
@@ -590,12 +600,18 @@ class ChessBoard_{
         return attacks.map(attack => Move(attack.tosq, attack.fromsq))
     }
 
-    attacksonsquarebypiece(sq, p){                        
+    attacksonsquarebypieceInner(sq, p){                        
         if(p.kind == "l") return this.attacksonsquarebylancer(sq, p.color)
 
         let plms = this.pseudolegalmovesforpieceatsquare(p.inverse(), sq)        
 
         return plms.filter(move => this.pieceatsquare(move.tosq).equalto(p))
+    }
+
+    attacksonsquarebypiece(sq, p){
+        let attacks = this.attacksonsquarebypieceInner(sq, p)
+
+        return attacks.filter(attack => !this.isSquareJailedBy(attack.tosq, !p.color))
     }
 
     issquareattackedbycolor(sq, color){
@@ -604,7 +620,7 @@ class ChessBoard_{
         for(let pl of pieceLetters){
             if(this.attacksonsquarebypiece(sq, Piece(pl, color)).length > 0) return true
         }
-        if(this.IS_EIGHTPIECE){
+        if(this.IS_EIGHTPIECE()){
             for(let lancer of LANCER_PROMOTION_PIECES(color)){
                 if(this.attacksonsquarebypiece(sq, lancer).length > 0) return true
             }
@@ -657,6 +673,13 @@ class ChessBoard_{
             if(side == "k") return Square(7, 0)
             else return Square(0, 0)
         }
+    }
+
+    rookorigpiece(side, color){
+        if(this.IS_EIGHTPIECE()){
+            if(side == "q") return Piece("j", color)
+        }
+        return Piece("r", color)
     }
 
     castletargetsq(side, color){
@@ -715,7 +738,19 @@ class ChessBoard_{
         for(let sq of passingsqs){
             if(this.issquareattackedbycolor(sq, !color)) return false
         }
+        if(this.IS_EIGHTPIECE()){
+            if(this.isSquareJailedBy(this.rookorigsq(side, color), !color)) return false
+            if(this.isKingJailed(color)) return false
+        }
         return true
+    }
+
+    isKingJailed(color){
+        let wk = this.whereisking(color)
+
+        if(!wk) return false
+
+        return this.isSquareJailedBy(wk, !color)
     }
 
     getstate(){
@@ -833,7 +868,7 @@ class ChessBoard_{
 
         if(move.castling){
             this.setpieaceatsquare(move.delrooksq, Piece())
-            this.setpieaceatsquare(move.putrooksq, Piece('r', this.turn))
+            this.setpieaceatsquare(move.putrooksq, move.putrookpiece)
         }
 
         // set castling rights
@@ -857,7 +892,7 @@ class ChessBoard_{
         for(let side of ["k", "q"]){
             let rosq = this.rookorigsq(side, this.turn)
             let rop = this.pieceatsquare(rosq)
-            if(!rop.equalto(Piece('r', this.turn))) this.deletecastlingrights(side, this.turn)
+            if(!rop.equalto(this.rookorigpiece(side, this.turn))) this.deletecastlingrights(side, this.turn)
         }
 
         // calculate new state
@@ -988,6 +1023,14 @@ class ChessBoard_{
     pseudolegalmovesforpieceatsquareinnerpartial(p, sq){                        
         let dirobj = getPieceDirection(p)        
         let plms = []                
+
+        if((p.kind == "k") && this.isSquareJailedBy(sq, !p.color)){
+            // jailed king can pass
+            plms.push(Move(sq, sq.clone()))
+        }
+
+        if(this.isSquareJailedBy(sq, !p.color)) return plms
+
         if(dirobj){
             for(let dir of dirobj[0]){                
                 var ok
@@ -1010,7 +1053,7 @@ class ChessBoard_{
                             if(tp.isempty()){                            
                                 plms.push(Move(sq, currentsq))
                             }else if(tp.color != p.color){
-                                plms.push(Move(sq, currentsq))
+                                if(!p.kind == "j") plms.push(Move(sq, currentsq))
                                 ok = false
                             }else{
                                 ok = false
@@ -1101,6 +1144,7 @@ class ChessBoard_{
         move.san = side == "k" ? "O-O" : "O-O-O"
         move.delrooksq = this.rookorigsq(side, this.turn)
         move.putrooksq = this.rooktargetsq(side, this.turn)
+        move.putrookpiece = this.rookorigpiece(side, this.turn)
         move.passingSquares = this.squaresbetween(move.fromsq, move.delrooksq, INCLUDE_LIMITS)        
         return move
     }

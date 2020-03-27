@@ -384,6 +384,7 @@ class Board_ extends SmartDomElement{
         let rotate = rotateOpt || 0
         let p = Piece(pOrig.kind, pOrig.color, pOrig.direction)
         let addKnight = false
+        let addCircle = false
         let knightScaleFactor = 0.7
         if(p.kind == "e"){
             p.kind = "r"
@@ -393,12 +394,16 @@ class Board_ extends SmartDomElement{
             p.kind = "b"
             addKnight = true
         }
+        if(p.kind == "j"){
+            p.kind = "r"
+            addCircle = true
+        }
         if(p.kind == "l"){            
             p.kind = "n"            
             rotate = p.direction.angle()
             if(this.g.flip) rotate = rotate - Math.PI
         }
-        let drawImgFunc = (piece, canvas, img, coords, scaleFactor, addKnight, rotate) => {
+        let drawImgFunc = (piece, canvas, img, coords, scaleFactor, addKnight, addCircle, rotate) => {
             let size = this.piecesize() * scaleFactor
             let middle = coords.p(Vect(size / 2, size / 2))
             canvas.ctx.save()
@@ -408,6 +413,11 @@ class Board_ extends SmartDomElement{
             canvas.ctx.drawImage(img.e, coords.x, coords.y, size, size)
             if(addKnight){
                 this.drawPiece(canvas, coords, Piece("n", p.color), knightScaleFactor)
+            }            
+            if(addCircle){
+                Math.floor(canvas.lineWidth(this.squaresize / 10)) + 1
+                canvas.strokeStyle(p.color ? "#00f" : "#f00")
+                canvas.strokeCircle(middle, this.squaresize / 10)                            
             }            
             if(piece.kind == "l"){                
                 canvas.arrow(
@@ -427,7 +437,7 @@ class Board_ extends SmartDomElement{
         if(!this.imgcache) this.imgcache = {}
         if(this.imgcache[klasssel]){
             img = this.imgcache[klasssel]
-            drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, rotate)            
+            drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, addCircle, rotate)            
         }else{
             let style = getStyle(klasssel)            
             let imgurl = style.match(/url\("(.*?)"/)[1]                
@@ -441,7 +451,7 @@ class Board_ extends SmartDomElement{
             let fen = this.g.fen()
             img.e.onload = () => {
                 if(this.g.fen() == fen){
-                    drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, rotate)            
+                    drawImgFunc(pOrig, canvas, img, coords, scaleFactor, addKnight, addCircle, rotate)            
                 }                
                 this.imgcache[klasssel] = img                
             }
