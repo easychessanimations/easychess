@@ -1274,8 +1274,8 @@ class ChessBoard_{
                                         let nmove = Move(sq, ncurrentsq, Piece("l", p.color, dir))
                                         nmove.keepDirection = true
                                         plms.push(nmove)
-                                    }
-                                    nok = false
+                                        nok = false
+                                    }                                    
                                 }
                             }else{
                                 nok = false
