@@ -132,7 +132,7 @@ class Board_ extends SmartDomElement{
         }
     }
 
-    buildPromotionSquares(piecesOpt, clickedSqOpt){        
+    buildPromotionSquares(piecesOpt, clickedSqOpt){               
         this.promotionPieces = piecesOpt || this.promotionPieces        
         if(!this.promotionPieces) return                
         let osq = this.inputtedMove.tosq
@@ -159,10 +159,27 @@ class Board_ extends SmartDomElement{
                         move.prompiece = p          
                         if(p.kind != "l") move.prompiece.direction = null                       
                     }                    
+                    let nudgeMove = this.nudgeMove
+                    let nudgeMoves = this.nudgeMoves                    
                     this.clearAwaitSquareClick()       
-                    this.draw()                                        
+                    this.draw()                                                            
                     if(p.kind != "x"){
-                        this.makeMove(move)
+                        if(nudgeMove){                            
+                            nudgeMove.prompiece.direction = SquareDelta(
+                                sq.file - nudgeMove.promsq.file,
+                                sq.rank - nudgeMove.promsq.rank
+                            )
+                            this.makeMove(nudgeMove)
+                        }else{
+                            this.nudgeMove = nudgeMoves.find(nm => nm.promsq.equalto(sq))                                                    
+                            if(this.nudgeMove){                            
+                                this.inputtedMove = Move(this.nudgeMove.fromsq, this.nudgeMove.promsq)
+                                this.awaitSquareClick = true
+                                this.buildPromotionSquares(LANCER_PROMOTION_PIECES(!this.b.turn, ADD_CANCEL))
+                            }else{
+                                this.makeMove(move)                        
+                            }
+                        }                        
                     }
                     return
                 }
@@ -176,6 +193,8 @@ class Board_ extends SmartDomElement{
     }
 
     handleValidMoveInput(valid, allValid){
+        this.nudgeMoves = []
+
         if(valid.prompiece && (this.draggedpiece.kind != "l") && (this.draggedpiece.kind != "s")){                            
             this.awaitSquareClick = true
             this.inputtedMove = valid
@@ -184,6 +203,7 @@ class Board_ extends SmartDomElement{
         }
 
         if(valid.promsq){            
+            this.nudgeMoves = allValid.filter(v => v.nudge)
             this.awaitSquareClick = true
             this.inputtedMove = valid
             let psqs = allValid.map(v => Piece(v.prompiece.kind, v.prompiece.color,
@@ -318,6 +338,8 @@ class Board_ extends SmartDomElement{
     clearAwaitSquareClick(){
         this.awaitSquareClick = false
         this.inputtedMove = null
+        this.nudgeMove = null
+        this.nudgeMoves = []
         this.promotionPieces = null
         this.mouseClickDiv.disp("none")
     }

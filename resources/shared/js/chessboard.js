@@ -1163,10 +1163,26 @@ class ChessBoard_{
                                         let pushedPiece = this.pieceatsquare(currentsq)
                                         let testPiece = pushedPiece.colorInverse()
                                         let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)
+                                        let sentryPushSquares = []
                                         tplms.forEach(tplm => {
                                             let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
-                                            plms.push(testMove)
+                                            sentryPushSquares.push(tplm.tosq)
+                                            plms.push(testMove)                                            
                                         })
+                                        if(pushedPiece.kind == "l"){
+                                            // nudge lancer
+                                            let emptyAdjacentSquares = this.adjacentsquares(currentsq)
+                                                .filter(testsq => this.pieceatsquare(testsq).isempty())
+                                            for(let eas of emptyAdjacentSquares){
+                                                for(let dir of QUEEN_DIRECTIONS){
+                                                    let nudgeMove = Move(sq, currentsq, Piece("l", pushedPiece.color, dir), null, null, eas)
+                                                    nudgeMove.nudge = true                                                    
+                                                    if(!sentryPushSquares.find(sps => sps.equalto(nudgeMove.promsq))){
+                                                        plms.push(nudgeMove)
+                                                    }                                                    
+                                                }
+                                            }
+                                        }                                        
                                     }
                                 }else{
                                     if(p.kind != "j") plms.push(Move(sq, currentsq))
