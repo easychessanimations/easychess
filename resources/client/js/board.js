@@ -7,6 +7,7 @@ const DEFAULT_BOARD_BACKGROUND = "maple.jpg"
 const CANVAS_NAMES = [
     "background",
     "square",
+    "check",
     "highlight",            
     "weights",
     "showanalysis",
@@ -715,12 +716,26 @@ class Board_ extends SmartDomElement{
         }
     }
 
+    highlightCheck(){
+        let wk = this.b.whereisking(this.b.turn)
+        if(wk){
+            if(this.b.iskingincheck(this.b.turn)){
+                let coords = this.fasquarecoords(wk)
+                let canvas = this.getCanvasByName("check")
+                canvas.fillStyle("#f33")
+                canvas.fillRect(coords, Vect(this.squaresize, this.squaresize))
+            }
+        }
+    }
 
     draw(){
         this.getCanvasByName("dragpiece").clear()
         this.getCanvasByName("clicksquare").clear()
+        this.getCanvasByName("check").clear()
 
         this.drawSquares()
+
+        this.highlightCheck()
 
         this.highlightLastMove()
 
