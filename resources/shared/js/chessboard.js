@@ -1087,7 +1087,7 @@ class ChessBoard_{
             return acc
         }
 
-        return this.pseudolegalmovesforpieceatsquareinnerpartial(p, sq)
+        return this.pseudolegalmovesforpieceatsquareinnerpartial(p, sq, depth)
     }
 
     pushLancerMoves(plms, color, move){
@@ -1103,12 +1103,25 @@ class ChessBoard_{
         let dirobj = getPieceDirection(p)        
         let plms = []                
 
+        let sentryCaptureAllowed = true
+        let pushTwoAllowed = true
+        let moveJailedProhibited = true
+
+        if(this.IS_EIGHTPIECE() && (depth > 0)){
+            // impose restrictions on sentry push
+            sentryCaptureAllowed = false            
+            pushTwoAllowed = false
+            // allow sentry to push jailed piece
+            // TODO: clarify this rule
+            moveJailedProhibited = false
+        }
+
         if((p.kind == "k") && this.isSquareJailedBy(sq, !p.color)){
             // jailed king can pass
             plms.push(Move(sq, sq.clone()))
         }
 
-        if(this.isSquareJailedBy(sq, !p.color)) return plms
+        if(this.isSquareJailedBy(sq, !p.color) && moveJailedProhibited) return plms
 
         if(dirobj){
             for(let dir of dirobj[0]){                
@@ -1133,14 +1146,16 @@ class ChessBoard_{
                                 plms.push(Move(sq, currentsq))
                             }else if(tp.color != p.color){
                                 if(p.kind == "s"){
-                                    // sentry push
-                                    let pushedPiece = this.pieceatsquare(currentsq)
-                                    let testPiece = pushedPiece.colorInverse()
-                                    let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)
-                                    tplms.forEach(tplm => {
-                                        let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
-                                        plms.push(testMove)
-                                    })
+                                    // sentry push                                    
+                                    if(sentryCaptureAllowed){
+                                        let pushedPiece = this.pieceatsquare(currentsq)
+                                        let testPiece = pushedPiece.colorInverse()
+                                        let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)
+                                        tplms.forEach(tplm => {
+                                            let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
+                                            plms.push(testMove)
+                                        })
+                                    }
                                 }else{
                                     if(p.kind != "j") plms.push(Move(sq, currentsq))
                                 }                                
@@ -1170,7 +1185,8 @@ class ChessBoard_{
             if(sq.rank == pdirobj.baserank){
                 if(pushoneempty){
                     let pushtwosq = sq.adddelta(pdirobj.pushtwo)
-                    if(this.pieceatsquare(pushtwosq).isempty()){                        
+                    if(this.pieceatsquare(pushtwosq).isempty() && pushTwoAllowed){                        
+                        // push two
                         let setepsq = null
                         for(let ocsqdelta of pdirobj.captures){
                             let ocsq = pushonesq.adddelta(ocsqdelta)
