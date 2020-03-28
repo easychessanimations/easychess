@@ -1254,6 +1254,35 @@ class ChessBoard_{
             let disabledMove = this.algebtomovesimple(this.disablefen)
             if(disabledMove){
                 plms = plms.filter(plm => !plm.roughlyequalto(disabledMove))
+                
+                if( (p.kind == "l") && (sq.equalto(disabledMove.fromsq)) ){
+                    // nudged lancer has special moves
+                    let ndirs = QUEEN_DIRECTIONS.filter(qd => !qd.equalto(p.direction))
+                    for(let dir of ndirs){
+                        let nok = true
+                        let ncurrentsq = sq
+                        while(nok){
+                            ncurrentsq = ncurrentsq.adddelta(dir)
+                            if(this.squareok(ncurrentsq)){
+                                let np = this.pieceatsquare(ncurrentsq)
+                                if(np.isempty()){
+                                    let nmove = Move(sq, ncurrentsq, Piece("l", p.color, dir))
+                                    nmove.keepDirection = true
+                                    plms.push(nmove)
+                                }else{                                    
+                                    if(np.color != p.color){
+                                        let nmove = Move(sq, ncurrentsq, Piece("l", p.color, dir))
+                                        nmove.keepDirection = true
+                                        plms.push(nmove)
+                                    }
+                                    nok = false
+                                }
+                            }else{
+                                nok = false
+                            }
+                        }
+                    }
+                }
             }
         }
 

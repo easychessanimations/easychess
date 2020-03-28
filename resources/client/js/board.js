@@ -247,7 +247,7 @@ class Board_ extends SmartDomElement{
             }
         }                        
 
-        if(this.draggedpiece.kind == "l"){                            
+        if( (this.draggedpiece.kind == "l") && (!valid.keepDirection) ){                            
             this.awaitSquareClick = true
             this.inputtedMove = valid
             this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
