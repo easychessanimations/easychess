@@ -1049,6 +1049,15 @@ class ChessBoard_{
         let depth = depthOpt || 0
         if(!this.assertMaxPlmsGenDepth(depth)) return []
 
+        let origPiece = this.pieceatsquare(sq)
+
+        if(this.IS_EIGHTPIECE()){
+            if(p.kind == "s"){
+                // remove sentry for move generation                
+                this.setpieaceatsquare(sq, Piece())
+            }
+        }
+
         let acc = this.pseudolegalmovesforpieceatsquareinner(p, sq, depth)
 
         let pstore = this.pieceStoreColor(p.color)
@@ -1067,6 +1076,9 @@ class ChessBoard_{
                 })
             }            
         }
+
+        // restore original piece in any case
+        this.setpieaceatsquare(sq, origPiece)
 
         return acc
     }
