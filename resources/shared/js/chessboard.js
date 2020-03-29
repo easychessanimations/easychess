@@ -2544,6 +2544,7 @@ class Game_{
             pl.offerDraw = false
         })
         this.startedAt = new Date().getTime()
+        this.playerSeatedAfterTermination = false
         this.startThinking()
     }
 
