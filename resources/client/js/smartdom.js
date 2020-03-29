@@ -2316,9 +2316,9 @@ class PlayersLabel_ extends SmartDomElement{
         super("div", props)
 
         this.dib().a(div().pad(5).padl(5).padr(5).dfc().jc("space-between").bc("#ffc").a(
-            UserLabel(this.props.players.players[0]),
+            UserLabel(this.props.players.players[1]),
             div().html("-").marl(10).marr(10),
-            UserLabel(this.props.players.players[1])
+            UserLabel(this.props.players.players[0])
         ))
     }
 }
