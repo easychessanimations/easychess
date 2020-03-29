@@ -2545,6 +2545,7 @@ class Game_{
         })
         this.startedAt = new Date().getTime()
         this.playerSeatedAfterTermination = false
+        this.chat.messages = []
         this.startThinking()
     }
 
