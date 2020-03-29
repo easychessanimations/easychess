@@ -2461,35 +2461,37 @@ class App extends SmartDomElement{
         this.recorder = new MediaRecorder(this.stream, {mimeType: 'video/webm'})
 
         this.recorder.ondataavailable = e => {
-            console.log("data handler called")
+            console.log(`data handler called`)
             if (e.data) {
-                console.log("data available: " + e.data.size)
+                console.log(`data available: ${e.data.size}`)
                 if (e.data.size > 0) {
-                    console.log("data added")
+                    console.log(`data added`)
                     this.allChunks.push(e.data)
                 }
             } else {
-                console.error("Data handler received no data in event: " + JSON.stringify(e))
+                console.error(`data handler received no data in event: ${JSON.stringify(e)}`)
             }
         }
 
         this.recorder.onstart = e => {
-            console.log("recording started")
+            console.log(`recording started`)
         }
 
         this.recorder.onstop = e => {
-            console.log("recording stopped")
+            console.log(`recording stopped`)
 
             const fullBlob = new Blob(this.allChunks)
 
-            console.log('Generated video size is: ' + fullBlob.size + ' bytes')
+            console.log(`generated video size: ${fullBlob.size} bytes, number of chunks ${this.allChunks.length}`)
 
-            this.videoExportLink = a().marl(10).mart(10).fs(18).href("#").html("Save video to file")
+            this.videoExportLink = a()
+                .marl(10).mart(10).fs(18).href("#")
+                .html("Save video to file")
             
             this.videoDownloadLinkHook.x().a(this.videoExportLink)
 
             this.videoExportLink.e.href = window.URL.createObjectURL(fullBlob)
-            this.videoExportLink.e.download = 'media.webm'
+            this.videoExportLink.e.download = 'chess.webm'
 
             this.videoExportLink.e.click()
         }
@@ -2500,16 +2502,14 @@ class App extends SmartDomElement{
     }
 
     animateVideo(){        
-        let fw = this.board.forward()        
         this.drawBoardOnCanvas(this.videoCanvas)
+        let fw = this.board.forward()                
         if(fw){                        
             setTimeout(_ => {
-                this.animateVideo()
+                window.requestAnimationFrame(this.animateVideo.bind(this))
             }, this.recorderDelay)
-        }else{                        
-            setTimeout(_ => {                
-                this.recorder.stop()
-            }, this.recorderDelay)
+        }else{                                    
+            this.recorder.stop()
         }        
     }
 
@@ -2520,13 +2520,11 @@ class App extends SmartDomElement{
 
         this.board.tobegin()
 
-        this.drawBoardOnCanvas(this.videoCanvas)
-
         this.initMediaRecorder(this.videoCanvas.e)
 
         this.recorder.start()
         
-        setTimeout(_ => this.animateVideo(), this.recorderDelay)
+        window.requestAnimationFrame(this.animateVideo.bind(this))
     }
 
     renderVideoDiv(){
