@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
-const DEFAULT_VIDEO_ANIMATION_DELAY = 1
+const DEFAULT_VIDEO_ANIMATION_DELAY         = 1
+const DEFAULT_VIDEO_ANIMATION_GRANULARITY   = 3
 const MAKE_THREE_DELAY              = 1000
 
 const MOVESDIV_HEIGHT_CORRECTION    = 36
@@ -2493,7 +2494,7 @@ class App extends SmartDomElement{
             this.videoExportLink.e.href = window.URL.createObjectURL(fullBlob)
             this.videoExportLink.e.download = 'chess.webm'
 
-            this.videoExportLink.e.click()
+            if(IS_PROD()) this.videoExportLink.e.click()
         }
 
         this.recorderDelay = parseInt(this.settings.videoAnimationDelayCombo.selected * 1000)
@@ -2501,15 +2502,37 @@ class App extends SmartDomElement{
         return this.recorder
     }
 
-    animateVideo(){        
-        this.drawBoardOnCanvas(this.videoCanvas)
-        let fw = this.board.forward()                
-        if(fw){                        
+    animateMove(){
+        this.drawBoardOnCanvas(this.videoCanvas, this.moveAnimationState)
+        this.videoAnimationInfo.html(`animating move ${this.b.movetosan(this.moveAnimationState.move)} phase ${this.moveAnimationState.i}`)
+        this.moveAnimationState.i++
+        if(this.moveAnimationState.i == this.videoGranularity){
+            this.board.forward()            
             setTimeout(_ => {
                 window.requestAnimationFrame(this.animateVideo.bind(this))
-            }, this.recorderDelay)
-        }else{                                    
-            this.recorder.stop()
+            }, this.recorderDelay / this.videoGranularity)
+        }else{
+            setTimeout(_ => {
+                window.requestAnimationFrame(this.animateMove.bind(this))
+            }, this.recorderDelay / this.videoGranularity)
+        }
+    }
+
+    animateVideo(){                
+        this.drawBoardOnCanvas(this.videoCanvas)
+        let fwm = this.g.getForwardMove()                
+        if(fwm){                        
+            this.moveAnimationState = {
+                move: fwm,
+                i: 0
+            }                        
+            setTimeout(_ => {
+                window.requestAnimationFrame(this.animateMove.bind(this))
+            }, this.recorderDelay / this.videoGranularity)            
+        }else{                                                            
+            setTimeout(_ => {                
+                this.recorder.stop()
+            }, this.recorderDelay)            
         }        
     }
 
@@ -2523,6 +2546,8 @@ class App extends SmartDomElement{
         this.initMediaRecorder(this.videoCanvas.e)
 
         this.recorder.start()
+
+        this.videoGranularity = parseInt(this.settings.videoAnimationGranularityCombo.selected)        
         
         window.requestAnimationFrame(this.animateVideo.bind(this))
     }
@@ -2531,7 +2556,8 @@ class App extends SmartDomElement{
         return div().a(
             div().mar(5).a(
                 Button("Record main line as video", this.recordMainLineAsVideo.bind(this)).fs(20).mar(5).bc(MAGENTA_BUTTON_COLOR),                
-                this.videoDownloadLinkHook = div()
+                this.videoAnimationInfo = div().dib().marl(10),
+                this.videoDownloadLinkHook = div().mar(5)
             )
         )
     }
@@ -2598,14 +2624,37 @@ class App extends SmartDomElement{
         return canvas
     }
 
-    drawBoardOnCanvas(canvas){
+    drawBoardOnCanvas(canvas, moveAnimationState){
         canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
         canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
         canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
         canvas.ctx.globalAlpha = 1
-        if(this.settings.highlightanimationmovesCheckbox.checked)
-            canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
-        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+        if((this.settings.highlightanimationmovesCheckbox.checked) && (!moveAnimationState))
+            canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)        
+        if(moveAnimationState){
+            let animCanvas = Canvas({width: this.board.boardsize(), height: this.board.boardsize()})
+            animCanvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+            let move = moveAnimationState.move
+            let fromp = this.b.pieceatsquare(move.fromsq)
+            this.board.clearPiece(move.fromsq, animCanvas)
+            let fromCoords = this.board.piececoords(move.fromsq)
+            let toCoords = this.board.piececoords(move.tosq)
+            let diff = toCoords.m(fromCoords)
+            let coords = fromCoords.p(
+                diff.s(moveAnimationState.i / this.videoGranularity)
+            )
+            let pd = Vect(this.board.piecesize() / 2, this.board.piecesize() / 2)
+            if(this.settings.highlightanimationmovesCheckbox.checked){
+                if(this.moveAnimationState.i)
+                animCanvas.arrow(fromCoords.p(pd), coords.p(pd), {
+                    scalefactor: this.board.arrowscalefactor()
+                })
+            }
+            this.board.drawPiece(animCanvas, coords, fromp)
+            canvas.ctx.drawImage(animCanvas.e, 0, 0)
+        }else{
+            canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+        }
         canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
     }
 
@@ -3441,6 +3490,13 @@ class App extends SmartDomElement{
                     display: "Video animation delay sec(s)",                    
                     options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
                     selected: DEFAULT_VIDEO_ANIMATION_DELAY,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "videoAnimationGranularityCombo",                    
+                    display: "Video animation granularity phases / move",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_VIDEO_ANIMATION_GRANULARITY,
                     settings: this.settings
                 }),
                 CheckBoxInput({

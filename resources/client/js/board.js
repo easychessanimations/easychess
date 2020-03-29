@@ -79,8 +79,9 @@ class Board_ extends SmartDomElement{
 
     coordstosq(coords){return this.fasq(Square(Math.floor(coords.x / this.squaresize), Math.floor(coords.y / this.squaresize)))}
 
-    clearPiece(sq){                    
-        this.getCanvasByName("piece").clearRect(this.fasquarecoords(sq), Vect(this.squaresize, this.squaresize))        
+    clearPiece(sq, canvasOpt){                    
+        (canvasOpt || this.getCanvasByName("piece"))
+            .clearRect(this.fasquarecoords(sq), Vect(this.squaresize, this.squaresize))        
     }
 
     getlms(RICH, decorate){

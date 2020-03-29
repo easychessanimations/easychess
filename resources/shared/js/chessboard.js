@@ -465,7 +465,7 @@ class ChessBoard_{
         return this.adjacentsquares(wkw).find((sq)=>sq.equalto(wkb))
     }
 
-    algebtosquare(algeb){        
+    algebtosquare(algeb){                
         if(algeb == "-") return null
         let file = algeb.charCodeAt(0) - "a".charCodeAt(0)
         let rank = NUM_SQUARES - 1 - ( algeb.charCodeAt(1) - "1".charCodeAt(0) )
@@ -928,7 +928,9 @@ class ChessBoard_{
                 }                
             }
         }else{
-            this.disablefen = "-"
+            if(this.IS_EIGHTPIECE()){
+                this.disablefen = "-"
+            }            
         }
 
         if(move.epclsq){            
@@ -1371,6 +1373,8 @@ class ChessBoard_{
     }
 
     santomove(san){
+        if(typeof san == "undefined") return null
+        if(san === null) return null
         let lms = this.legalmovesforallpieces()
         return lms.find((move)=>stripsan(this.movetosan(move)) == stripsan(san))
     }
@@ -1800,6 +1804,13 @@ class GameNode_{
     constructor(){        
     }
 
+    getMove(){                
+        if(!this.parentid) return null
+        let board = ChessBoard().setfromfen(this.getparent().fen, this.parentgame.variant)
+        let move = board.santomove(this.gensan)        
+        return move
+    }
+
     get strippedfen(){
         return strippedfen(this.fen)
     }
@@ -2091,6 +2102,12 @@ const FOLD_REPETITION           = 3
 class Game_{
     constructor(props){       
         this.fromblob(props)
+    }
+
+    getForwardMove(){
+        let scs = this.getcurrentnode().sortedchilds()        
+        if(!scs.length) return null
+        return scs[0].getMove()
     }
 
     offerDraw(player){
