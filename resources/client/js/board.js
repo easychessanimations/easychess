@@ -747,8 +747,12 @@ class Board_ extends SmartDomElement{
 
         this.createCommentCanvas()
 
+        this.drawResult()
+    }
+
+    drawResult(){
         this.resultDiv.x()
-        if(this.g.terminated){
+        if(this.g.terminated && (!this.g.playerSeatedAfterTermination)){
             this.resultDiv.a(
                 div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.g.playersVerbal()),
                 div().pad(10).bc("#ffa").fs(this.squaresize).html(this.g.resultVerbal()),

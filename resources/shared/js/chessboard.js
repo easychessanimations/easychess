@@ -2522,7 +2522,10 @@ class Game_{
         this.players.setPlayer(player)
         if(this.hasAllPlayers()){
             this.startGame()
-        }
+        }else{
+            if(this.terminated){
+                this.playerSeatedAfterTermination = true        }
+            }            
         return true
     }
 
