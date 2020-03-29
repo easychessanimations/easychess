@@ -754,7 +754,9 @@ class Board_ extends SmartDomElement{
         this.resultDiv.x()
         if(this.g.terminated && (!this.g.playerSeatedAfterTermination)){
             this.resultDiv.a(
-                div().pad(10).bc("#ffa").fs(this.squaresize/3).html(this.g.playersVerbal()),
+                div().dfc().pad(10).bc("#ffa").fs(this.squaresize/3).a(
+                    PlayersLabel(this.g)
+                ),
                 div().pad(10).bc("#ffa").fs(this.squaresize).html(this.g.resultVerbal()),
                 div().fst("italic").pad(10).bc("#ffa").fs(this.squaresize/3).html(this.g.resultReason)
             )

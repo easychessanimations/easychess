@@ -2311,6 +2311,19 @@ class ThinkingTimeLabel_ extends SmartDomElement{
 }
 function ThinkingTimeLabel(props){return new ThinkingTimeLabel_(props)}
 
+class PlayersLabel_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.dib().a(div().pad(5).padl(5).padr(5).dfc().jc("space-between").bc("#ffc").a(
+            UserLabel(this.props.players.players[0]),
+            div().html("-").marl(10).marr(10),
+            UserLabel(this.props.players.players[1])
+        ))
+    }
+}
+function PlayersLabel(props){return new PlayersLabel_(props)}
+
 class GameLabel_ extends SmartDomElement{
     analyze(){
         if(this.props.analyzeCallback){
@@ -2326,14 +2339,14 @@ class GameLabel_ extends SmartDomElement{
         let game = Game().fromblob(props)
 
         this.bc("#ddd").pad(2).bdr("solid", 3, "#999").a(
-            div().mar(1).fs(18).fwb().bc("#ffa").c("#007").pad(2).html(game.playersVerbal()),
-            div().dfc().a(
+            PlayersLabel(game).disp("block"),
+            div().dfc().jc("space-between").a(
                 VariantLabel(game),
                 TimecontrolLabel(game).marl(3),
                 div().marl(5).fwb().fs(20).mar(1).bc("#eef").c("#007").pad(2).html(game.resultVerbal()),
                 div().marl(5).fs(12).c("#700").fst("italic").bc("#ffe").pad(3).padl(5).padr(5).html(game.resultReason),
                 div().fwb().c("#007").fs(12).marl(10).marr(2).html(game.startedAt ? new Date(game.startedAt).toLocaleString() : ""),
-                Button("Analyze", this.analyze.bind(this)).marl(5).bc(GREEN_BUTTON_COLOR)
+                Button("Analyze", this.analyze.bind(this)).marl(5).bc("#0ff")
             )
         )
     }

@@ -2579,6 +2579,7 @@ class Game_{
         this.startedAt = blob.startedAt || null
         this.terminatedAt = blob.terminatedAt || null
         this.chat = Chat(blob.chat)
+        this.playerSeatedAfterTermination = blob.playerSeatedAfterTermination
         return this
     }
 
@@ -2884,7 +2885,8 @@ class Game_{
             resultReason: this.resultReason,
             startedAt: this.startedAt,
             terminatedAt: this.terminatedAt,
-            chat: this.chat.serialize()
+            chat: this.chat.serialize(),
+            playerSeatedAfterTermination: this.playerSeatedAfterTermination,
         }
     }
 
