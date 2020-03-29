@@ -774,8 +774,9 @@ class Board_ extends SmartDomElement{
     }
 
     forward(){
-        this.g.forward()
+        let fw = this.g.forward()
         this.positionchanged()
+        return fw
     }
 
     toend(){

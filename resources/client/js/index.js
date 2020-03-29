@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const DEFAULT_VIDEO_ANIMATION_DELAY = 1
 const MAKE_THREE_DELAY              = 1000
 
 const MOVESDIV_HEIGHT_CORRECTION    = 36
@@ -303,6 +304,8 @@ class App extends SmartDomElement{
         this.lichessUsersDiv = div()
 
         this.animsDiv = div()
+
+        this.videoDiv = this.renderVideoDiv()
 
         this.backupDiv = this.renderBackupDiv()
 
@@ -2452,6 +2455,89 @@ class App extends SmartDomElement{
         if(task == "stop") stopfunc()
     }
 
+    initMediaRecorder(canvasElement) {
+        this.allChunks = []
+        this.stream = canvasElement.captureStream()        
+        this.recorder = new MediaRecorder(this.stream, {mimeType: 'video/webm'})
+
+        this.recorder.ondataavailable = e => {
+            console.log("data handler called")
+            if (e.data) {
+                console.log("data available: " + e.data.size)
+                if (e.data.size > 0) {
+                    console.log("data added")
+                    this.allChunks.push(e.data)
+                }
+            } else {
+                console.error("Data handler received no data in event: " + JSON.stringify(e))
+            }
+        }
+
+        this.recorder.onstart = e => {
+            console.log("recording started")
+        }
+
+        this.recorder.onstop = e => {
+            console.log("recording stopped")
+
+            const fullBlob = new Blob(this.allChunks)
+
+            console.log('Generated video size is: ' + fullBlob.size + ' bytes')
+
+            this.videoExportLink = a().marl(10).mart(10).fs(18).href("#").html("Save video to file")
+            
+            this.videoDownloadLinkHook.x().a(this.videoExportLink)
+
+            this.videoExportLink.e.href = window.URL.createObjectURL(fullBlob)
+            this.videoExportLink.e.download = 'media.webm'
+
+            this.videoExportLink.e.click()
+        }
+
+        this.recorderDelay = parseInt(this.settings.videoAnimationDelayCombo.selected * 1000)
+
+        return this.recorder
+    }
+
+    animateVideo(){        
+        let fw = this.board.forward()        
+        this.drawBoardOnCanvas(this.videoCanvas)
+        if(fw){                        
+            setTimeout(_ => {
+                this.animateVideo()
+            }, this.recorderDelay)
+        }else{                        
+            setTimeout(_ => {                
+                this.recorder.stop()
+            }, this.recorderDelay)
+        }        
+    }
+
+    recordMainLineAsVideo(){
+        this.videoDownloadLinkHook.x().a(
+            this.videoCanvas = Canvas({width: this.board.boardsize(), height: this.board.boardsize()})
+        )
+
+        this.board.tobegin()
+
+        this.drawBoardOnCanvas(this.videoCanvas)
+
+        this.initMediaRecorder(this.videoCanvas.e)
+
+        this.recorder.start()
+        
+        setTimeout(_ => this.animateVideo(), this.recorderDelay)
+    }
+
+    renderVideoDiv(){
+        return div().a(
+            div().mar(5).a(
+                Button("Record main line as video", this.recordMainLineAsVideo.bind(this)).fs(20).mar(5).bc(MAGENTA_BUTTON_COLOR),                
+                this.videoDownloadLinkHook = div()
+            )
+        )
+    }
+
     buildAnimsDiv(){
         let selanim = this.g.selectedAnimation
         let anims = this.g.animations
@@ -2466,7 +2552,7 @@ class App extends SmartDomElement{
             forceZIndex: 20
         }).mar(5)
 
-        this.animsDiv.x().a(            
+        this.animsDiv.x().a(                        
             div().a(
                 Button("Step", this.moveAnimationForward.bind(this)).mar(5).bc(BLUE_BUTTON_COLOR),
                 Button("Play", this.playAnimation.bind(this, "play")).mar(5).bc(BLUE_BUTTON_COLOR),
@@ -2514,6 +2600,17 @@ class App extends SmartDomElement{
         return canvas
     }
 
+    drawBoardOnCanvas(canvas){
+        canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
+        canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
+        canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
+        canvas.ctx.globalAlpha = 1
+        if(this.settings.highlightanimationmovesCheckbox.checked)
+            canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
+        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+        canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+    }
+
     record(){return P(resolve => {
         let bs = this.board.boardsize()
         let props = this.getcurrentnode().props()
@@ -2526,14 +2623,7 @@ class App extends SmartDomElement{
         if(this.settings.animate3dCheckbox.checked){
             canvas.ctx.drawImage(this.threeBoard.threeRenderer.renderer.domElement, 0, 0)
         }else{
-            canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
-            canvas.ctx.globalAlpha = DEFAULT_SQUARE_OPACITY
-            canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
-            canvas.ctx.globalAlpha = 1
-            if(this.settings.highlightanimationmovesCheckbox.checked)
-                canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
-            canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
-            canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+            this.drawBoardOnCanvas(canvas)
         }        
 
         let finalizefunc = _ => {
@@ -2940,6 +3030,7 @@ class App extends SmartDomElement{
 
         this.animsTabPane = TabPane({id: "animstabpane"}).setTabs([
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),            
+            Tab({id: "video", caption: "Video", content: this.videoDiv}),            
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
         ])
 
@@ -3345,6 +3436,13 @@ class App extends SmartDomElement{
                     display: "Threads",                    
                     options: Array(4).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
                     selected: DEFAULT_THREADS,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "videoAnimationDelayCombo",                    
+                    display: "Video animation delay sec(s)",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_VIDEO_ANIMATION_DELAY,
                     settings: this.settings
                 }),
                 CheckBoxInput({
