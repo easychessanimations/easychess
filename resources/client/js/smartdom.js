@@ -2249,7 +2249,7 @@ class UserLabel_ extends SmartDomElement{
     constructor(props){
         super("div", props)
 
-        let name = this.props.id ? `${this.props.username} ( ${this.props.provider} )` : "@nonymous"
+        let name = this.props.id ? `${this.props.username} (&nbsp;${this.props.provider}&nbsp;)` : "@nonymous"
 
         this.dib().mar(1).pad(2)
             .bc(getProviderBackgroundColor(this.props.provider))
