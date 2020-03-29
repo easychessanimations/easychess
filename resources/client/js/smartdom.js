@@ -2251,7 +2251,7 @@ class UserLabel_ extends SmartDomElement{
 
         let name = this.props.id ? `${this.props.username} (&nbsp;${this.props.provider}&nbsp;)` : "@nonymous"
 
-        this.dib().mar(1).pad(2)
+        this.dib().mar(1).pad(2).padl(5).padr(5)
             .bc(getProviderBackgroundColor(this.props.provider))
             .html(name)
     }
@@ -2275,8 +2275,9 @@ class VariantLabel_ extends SmartDomElement{
     constructor(props){
         super("div", props)
 
-        this.dib().a(div().padl(5).padr(5).dfc().bc("#ffc").a(            
-            div().c("#700").padl(5).padr(5).html(displayNameForVariant(this.props.variant))
+        this.dib().a(div().padl(5).padr(5).dfc().bc("#fbd").a(            
+            div().fs(18).fwb().c("#00f").padl(5).padr(5)
+                .html(displayNameForVariant(this.props.variant))
         ))
     }
 }
@@ -2338,15 +2339,15 @@ class GameLabel_ extends SmartDomElement{
         
         let game = Game().fromblob(props)
 
-        this.bc("#ddd").pad(2).bdr("solid", 3, "#999").a(
+        this.bc("#ccc").pad(2).bdr("solid", 3, "#999").a(
             PlayersLabel(game).disp("block"),
             div().dfc().jc("space-between").a(
-                VariantLabel(game),
-                TimecontrolLabel(game).marl(3),
+                VariantLabel(game).marl(5),
+                TimecontrolLabel(game).marl(3).marr(5),
                 div().marl(5).fwb().fs(20).mar(1).bc("#eef").c("#007").pad(2).html(game.resultVerbal()),
                 div().marl(5).fs(12).c("#700").fst("italic").bc("#ffe").pad(3).padl(5).padr(5).html(game.resultReason),
                 div().fwb().c("#007").fs(12).marl(10).marr(2).html(game.startedAt ? new Date(game.startedAt).toLocaleString() : ""),
-                Button("Analyze", this.analyze.bind(this)).marl(5).bc("#0ff")
+                Button("Analyze", this.analyze.bind(this)).marl(5).marr(5).bc("#0ff")
             )
         )
     }

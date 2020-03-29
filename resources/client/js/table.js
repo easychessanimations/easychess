@@ -240,7 +240,7 @@ class Table_ extends SmartDomElement{
         this.timecontrolDiv.x().a(
             VariantLabel(this.g),
             TimecontrolLabel(this.g).marl(5),
-            Button("Edit", this.editTimeControl.bind(this)).marl(5)
+            Button("Set", this.editTimeControl.bind(this)).marl(5)
         )
     }
 
