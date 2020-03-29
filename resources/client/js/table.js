@@ -245,7 +245,7 @@ class Table_ extends SmartDomElement{
     }
 
     buildFromGame(game){
-        //console.log(game)
+        console.log(game)
         this.board.op(1)
         game.flip = IS_ME(game.players.getByColor(BLACK))        
         this.board.setgame(game)        

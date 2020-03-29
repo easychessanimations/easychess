@@ -142,6 +142,7 @@ function handleGameOperationResult(result, res, apiOkMessage){
 function gameTerminated(){
     console.log(`game terminated`)
     games.unshift(game.serialize())
+    saveGameState()
     saveGames()
     sendGames()
 }
