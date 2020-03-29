@@ -686,6 +686,13 @@ class ChessBoard_{
         return null
     }
 
+    iskingincheckAfterMove(move, color){
+        this.push(move)
+        let ischeck = this.iskingincheck(color)
+        this.pop()
+        return ischeck
+    }
+
     iskingincheck(color){
         let wk = this.whereisking(color)        
         if(this.IS_EIGHTPIECE()){
@@ -1333,21 +1340,23 @@ class ChessBoard_{
         for(let side of ["k", "q"])
         if(this.cancastle(side, this.turn)){
             let move = this.createCastlingMove(side)
-            lms.push(move)
-            let pstore = this.pieceStoreColor(this.turn)
-            if(pstore.length){
-                if(this.IS_SCHESS()){
-                    for(let psp of pstore){
-                        let moveK = this.createCastlingMove(side)
-                        moveK.placeCastlingPiece = psp
-                        moveK.placeCastlingSquare = move.fromsq
-                        moveK.san += "/" + psp.kind.toUpperCase() + this.squaretoalgeb(moveK.placeCastlingSquare)
-                        lms.push(moveK)
-                        let moveR = this.createCastlingMove(side)
-                        moveR.placeCastlingPiece = psp
-                        moveR.placeCastlingSquare = this.rookorigsq(side, this.turn)
-                        moveR.san += "/" + psp.kind.toUpperCase() + this.squaretoalgeb(moveR.placeCastlingSquare)
-                        lms.push(moveR)
+            if(!this.iskingincheckAfterMove(move, this.turn)){
+                lms.push(move)
+                let pstore = this.pieceStoreColor(this.turn)
+                if(pstore.length){
+                    if(this.IS_SCHESS()){
+                        for(let psp of pstore){
+                            let moveK = this.createCastlingMove(side)
+                            moveK.placeCastlingPiece = psp
+                            moveK.placeCastlingSquare = move.fromsq
+                            moveK.san += "/" + psp.kind.toUpperCase() + this.squaretoalgeb(moveK.placeCastlingSquare)
+                            lms.push(moveK)
+                            let moveR = this.createCastlingMove(side)
+                            moveR.placeCastlingPiece = psp
+                            moveR.placeCastlingSquare = this.rookorigsq(side, this.turn)
+                            moveR.san += "/" + psp.kind.toUpperCase() + this.squaretoalgeb(moveR.placeCastlingSquare)
+                            lms.push(moveR)
+                        }
                     }
                 }
             }

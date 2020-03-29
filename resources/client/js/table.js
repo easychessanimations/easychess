@@ -152,15 +152,15 @@ class Table_ extends SmartDomElement{
                         Combo({                    
                             id: "initialClockCombo",                    
                             display: "Initial Clock",                                        
-                            options: Array(30).fill(0).map((_, i) => ({value: i, display: i})),
-                            selected: 3,
+                            options: Array(61).fill(0).map((_, i) => ({value: i, display: i})),
+                            selected: 15,
                             settings: this.settings
                         }),
                         Combo({                    
                             id: "incrementCombo",                    
                             display: "Increment",                                        
-                            options: Array(30).fill(0).map((_, i) => ({value: i, display: i})),
-                            selected: 2,
+                            options: Array(61).fill(0).map((_, i) => ({value: i, display: i})),
+                            selected: 20,
                             settings: this.settings
                         })
                     ]
