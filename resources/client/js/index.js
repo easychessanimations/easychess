@@ -3335,6 +3335,7 @@ class App extends SmartDomElement{
         this.animsTabPane = TabPane({id: "animstabpane"}).setTabs([
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),            
             Tab({id: "video", caption: "Video", content: this.videoDiv}),            
+            Tab({id: "threeanimation", caption: "Three Animation", content: this.threeAnimationDiv}),
             Tab({id: "settings", caption: "Settings", content: this.animSettingsDiv}),            
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
         ])
@@ -3343,8 +3344,7 @@ class App extends SmartDomElement{
             Tab({id: "log", caption: "Log", content: this.logDiv}),
             Tab({id: "multiPGN", caption: "Multi PGN", content: this.multiPGNDiv}),
             Tab({id: "fen", caption: "FEN", content: this.fenDiv}),
-            Tab({id: "study", caption: "Studies", content: this.studyDiv}),
-            Tab({id: "threeanimation", caption: "Three Animation", content: this.threeAnimationDiv}),
+            Tab({id: "study", caption: "Studies", content: this.studyDiv}),            
             Tab({id: "smartdom", caption: "Smartdom", content: this.smartdomDiv}),
             Tab({id: "tourney", caption: "Tourney", content: this.tourneyDiv}),
         ])
