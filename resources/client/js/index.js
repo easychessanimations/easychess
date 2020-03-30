@@ -310,6 +310,8 @@ class App extends SmartDomElement{
 
         this.videoDiv = this.renderVideoDiv()
 
+        this.animSettingsDiv = this.renderAnimSettingsDiv()
+
         this.backupDiv = this.renderBackupDiv()
 
         this.settingsDiv = this.renderSettingsForm()
@@ -399,6 +401,42 @@ class App extends SmartDomElement{
         if(IS_PROD()) this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
 
         this.doLater("importGame", IMPORT_GAME_DELAY)
+    }
+
+    renderAnimSettingsDiv(){
+        return div().a(FormTable({
+            options: [
+                Combo({                    
+                    id: "videoAnimationDelayCombo",                    
+                    display: "Video animation delay sec(s)",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_VIDEO_ANIMATION_DELAY,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "videoAnimationGranularityCombo",                    
+                    display: "Video animation granularity phases / move",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_VIDEO_ANIMATION_GRANULARITY,
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "animate3dCheckbox",                    
+                    display: "Animate 3d",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "highlightanimationmovesCheckbox",                    
+                    display: "Highlight animation moves",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowThreeAnimationCheckbox",                    
+                    display: "Allow three animation",                                        
+                    settings: this.settings
+                }),
+            ]
+        }))
     }
 
     importGame(){
@@ -3137,6 +3175,7 @@ class App extends SmartDomElement{
         this.animsTabPane = TabPane({id: "animstabpane"}).setTabs([
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),            
             Tab({id: "video", caption: "Video", content: this.videoDiv}),            
+            Tab({id: "settings", caption: "Settings", content: this.animSettingsDiv}),            
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
         ])
 
@@ -3543,31 +3582,7 @@ class App extends SmartDomElement{
                     options: Array(4).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
                     selected: DEFAULT_THREADS,
                     settings: this.settings
-                }),
-                Combo({                    
-                    id: "videoAnimationDelayCombo",                    
-                    display: "Video animation delay sec(s)",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
-                    selected: DEFAULT_VIDEO_ANIMATION_DELAY,
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "videoAnimationGranularityCombo",                    
-                    display: "Video animation granularity phases / move",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
-                    selected: DEFAULT_VIDEO_ANIMATION_GRANULARITY,
-                    settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "animate3dCheckbox",                    
-                    display: "Animate 3d",                                        
-                    settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "highlightanimationmovesCheckbox",                    
-                    display: "Highlight animation moves",                                        
-                    settings: this.settings
-                }),
+                }),                
                 Combo({                    
                     id: "boardBackgroundCombo",                    
                     display: "Board bakcground",                    
@@ -3628,12 +3643,7 @@ class App extends SmartDomElement{
                     id: "showAnalysisInBoardCheckbox",                    
                     display: "Show analysis in board",                                        
                     settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "allowThreeAnimationCheckbox",                    
-                    display: "Allow three animation",                                        
-                    settings: this.settings
-                }),
+                }),                
             ]
         }))
     }
