@@ -85,6 +85,20 @@ To set the study from a PGN, go to `Tools / FEN` and paste the PGN into the `Res
 
 To set the study from a FEN, go to `Tools / FEN` and paste the PGN into the `Reset from this FEN` text box. This will delete the entire study and set it as a single position described by the FEN. The variant will be the current variant.
 
+### Export / import game
+
+To export a game visit
+
+[Tools / MultiPGN](https://easychess.herokuapp.com/?ubertab=analyze&tab=tools/multiPGN)
+
+and press "Export game" .
+
+An import url will be generated and you will be redirected to this import url.
+
+Bookmark the redirected page, or copy its url from the browser's address bar so that you can share it.
+
+There is no catalogue of the exported games; if you forget the url ( game ID ), it is practically lost for you, so make sure you bookmark or share the game right after exporting.
+
 ## New ideas
 
 I created chess interfaces before, but this one has new ideas and is built on a completely different basis than the former ones.
