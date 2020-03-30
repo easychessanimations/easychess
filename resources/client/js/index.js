@@ -3372,7 +3372,7 @@ class App extends SmartDomElement{
             Tab({id: "users", caption: "Users", content: this.lichessUsersDiv})
                 .toolTip({msg: "Lichess users"}),
             Tab({id: "tools", caption: "Tools", content: this.toolsTabPane})
-                .toolTip({msg: "Tools ( FEN, PGN, Study )"})
+                .toolTip({msg: "Tools ( Export game, report / set FEN / PGN, save / load Study )"})
         ])
 
         this.containerPane = SplitPane({                        
@@ -3630,7 +3630,7 @@ class App extends SmartDomElement{
                     .toolTip({msg: "Reload page"}),                                                                                        
                 this.commandInput = TextInput().w(60).ae("keyup", this.commandChanged.bind(this)),                                
                 Button("G", this.loadLatestGame.bind(this)).bc(GREEN_BUTTON_COLOR)
-                    .toolTip({msg: "Load latest game"}),                                                                                        
+                    .toolTip({msg: "Load latest lichess game"}),                                                                                        
             )
     }
 

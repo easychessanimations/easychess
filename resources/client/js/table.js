@@ -81,11 +81,13 @@ class PlayerPanel_ extends SmartDomElement{
                 div().dfc().a(
                     UserLabel(this.player),
                     Button("Unseat", this.unseat.bind(this)).marl(3).bc(RED_BUTTON_COLOR)
+                    .toolTip({msg: "Unseat player"}),
                 )                
             )
         }else{
             this.a(
                 Button("Sit", this.sit.bind(this)).w(this.parentTable.board.boardsize() / 2).marl(3).bc(GREEN_BUTTON_COLOR)
+                    .toolTip({msg: "Sit at table to play"}),
             )
         }
     }
@@ -167,12 +169,16 @@ class Table_ extends SmartDomElement{
                 })
                     .marl(10),
                 div().a(
-                    Button("Set", this.setTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),
-                    Button("Set and Store", this.setAndStoreTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5),                    
-                    Button("Cancel", this.cancelEditTimecontrol.bind(this)).bc(YELLOW_BUTTON_COLOR).mart(5),
+                    Button("Set", this.setTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5)
+                        .toolTip({msg: "Set variant and time control"}),
+                    Button("Set and Store", this.setAndStoreTimecontrol.bind(this)).bc(GREEN_BUTTON_COLOR).mart(5)
+                        .toolTip({msg: "Set and store variant and time control in presets"}),                    
+                    Button("Cancel / Close", this.cancelEditTimecontrol.bind(this)).bc(YELLOW_BUTTON_COLOR).mart(5)
+                        .toolTip({msg: "Cancel / close this form"}),
                 ),
                 div().a(
-                    div().mart(5).ffm().fs(12).html("Presets:"),
+                    div().mart(5).ffm().fs(12).html("Presets:")
+                        .toolTip({msg: "Time control presets"}),
                     this.presets = EditableList({
                         id: "presets",
                         disableEditOption: true,
@@ -241,6 +247,7 @@ class Table_ extends SmartDomElement{
             VariantLabel(this.g),
             TimecontrolLabel(this.g).marl(5),
             Button("Set", this.editTimeControl.bind(this)).marl(5)
+                .toolTip({msg: "Set variant and time control"}),
         )
     }
 
