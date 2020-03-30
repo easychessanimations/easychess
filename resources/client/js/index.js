@@ -2601,7 +2601,7 @@ class App extends SmartDomElement{
 
     animateMove(){
         this.drawBoardOnCanvas(this.videoCanvas, this.moveAnimationState)
-        this.videoAnimationInfo.html(`animating move ${this.b.movetosan(this.moveAnimationState.move)} phase ${this.moveAnimationState.i}`)
+        this.videoAnimationInfo.bc("#aaf").html(`animating move ${this.b.movetosan(this.moveAnimationState.move)} phase ${this.moveAnimationState.i}`)
         this.moveAnimationState.i++
         if(this.moveAnimationState.i == this.videoGranularity){
             this.board.forward()            
@@ -2612,6 +2612,23 @@ class App extends SmartDomElement{
             setTimeout(_ => {
                 window.requestAnimationFrame(this.animateMove.bind(this))
             }, this.recorderDelay / this.videoGranularity)
+        }
+    }
+
+    phaseOffVideo(){
+        if(this.phaseOffVideoCounter){
+            this.videoAnimationInfo.bc("#faa").html(`phasing off video ${this.phaseOffVideoCounter}`)
+            this.videoCanvas.fillStyle("#000")
+            this.videoCanvas.globalAlpha(0.1)
+            let bs = this.board.boardsize()
+            this.videoCanvas.fillRect(Vect(0, 0), Vect(bs, bs))
+            this.phaseOffVideoCounter--
+            setTimeout(_ => {                
+                this.phaseOffVideo()
+            }, this.recorderDelay)            
+        }else{
+            this.videoAnimationInfo.bc("#afa").html(`recording done`)
+            this.recorder.stop()
         }
     }
 
@@ -2628,7 +2645,9 @@ class App extends SmartDomElement{
             }, this.recorderDelay / this.videoGranularity)            
         }else{                                                            
             setTimeout(_ => {                
-                this.recorder.stop()
+                this.phaseOffVideoCounter = 20
+                this.phaseOffVideo()
+                //this.recorder.stop()
             }, this.recorderDelay)            
         }        
     }
@@ -2652,8 +2671,10 @@ class App extends SmartDomElement{
     renderVideoDiv(){
         return div().a(
             div().mar(5).a(
-                Button("Record main line as video", this.recordMainLineAsVideo.bind(this)).fs(20).mar(5).bc(MAGENTA_BUTTON_COLOR),                
-                this.videoAnimationInfo = div().dib().marl(10),
+                div().dfc().a(
+                    Button("Record main line as video", this.recordMainLineAsVideo.bind(this)).fs(24).mar(5).bc(MAGENTA_BUTTON_COLOR),                
+                    this.videoAnimationInfo = div().pad(6).padl(12).padr(12).ffm().fs(16).dib().marl(10),
+                ),
                 this.videoDownloadLinkHook = div().mar(5)
             )
         )
