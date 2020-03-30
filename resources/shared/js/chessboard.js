@@ -107,6 +107,16 @@ class SquareDelta_{
         }
         return buff
     }
+
+    normalized(){
+        if((this.x == 0) && (this.y == 0)) return null
+        if((this.x * this.y) == 0){
+            return SquareDelta(Math.sign(this.x), Math.sign(this.y))
+        }else{
+            if(Math.abs(this.x) != Math.abs(this.y)) return null
+            return SquareDelta(Math.sign(this.x), Math.sign(this.y))
+        }
+    }
 }
 function SquareDelta(x, y){return new SquareDelta_(x, y)}
 
@@ -473,6 +483,10 @@ class ChessBoard_{
     }
 
     algebtomovesimple(algeb){
+        if(typeof algeb == "undefined") return null
+        if(algeb === null) return null
+        if((algeb == "-") || (algeb == "")) return null
+
         return Move(
             this.algebtosquare(algeb.substring(0,2)),
             this.algebtosquare(algeb.substring(2,4))
@@ -1171,19 +1185,27 @@ class ChessBoard_{
                                     if(sentryCaptureAllowed){
                                         let pushedPiece = this.pieceatsquare(currentsq)
                                         let testPiece = pushedPiece.colorInverse()
-                                        let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)
+                                        let tplms = this.pseudolegalmovesforpieceatsquare(testPiece, currentsq, depth + 1)                                        
                                         let sentryPushSquares = []
+                                        let usedSquares = []
                                         tplms.forEach(tplm => {
-                                            let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
-                                            sentryPushSquares.push(tplm.tosq)
-                                            plms.push(testMove)                                            
+                                            // make sure only one move is added per target square
+                                            if(!usedSquares.find(usq => usq.equalto(tplm.tosq))){                                                
+                                                let testMove = Move(sq, currentsq, pushedPiece, null, null, tplm.tosq)
+                                                sentryPushSquares.push(tplm.tosq)
+                                                plms.push(testMove)              
+                                                usedSquares.push(tplm.tosq)                              
+                                            }                                            
                                         })
                                         if(pushedPiece.kind == "l"){
                                             // nudge lancer
                                             let emptyAdjacentSquares = this.adjacentsquares(currentsq)
                                                 .filter(testsq => this.pieceatsquare(testsq).isempty())
                                             for(let eas of emptyAdjacentSquares){
-                                                for(let dir of QUEEN_DIRECTIONS){
+                                                let lancerNudgeDirs = [
+                                                    SquareDelta(eas.file - currentsq.file, eas.rank - currentsq.rank)
+                                                ]
+                                                for(let dir of lancerNudgeDirs){
                                                     let nudgeMove = Move(sq, currentsq, Piece("l", pushedPiece.color, dir), null, null, eas)
                                                     nudgeMove.nudge = true                                                    
                                                     if(!sentryPushSquares.find(sps => sps.equalto(nudgeMove.promsq))){
@@ -1261,6 +1283,7 @@ class ChessBoard_{
 
         if(this.IS_EIGHTPIECE()){
             let disabledMove = this.algebtomovesimple(this.disablefen)
+
             if(disabledMove){
                 plms = plms.filter(plm => !plm.roughlyequalto(disabledMove))
                 
@@ -1292,6 +1315,25 @@ class ChessBoard_{
                         }
                     }
                 }
+
+                // disallow moving back towards sentry
+                plms = plms.filter(plm => {
+                    // knight and king are already taken care of, as they are not sliding pieces
+                    if((p.kind != "n") && (p.kind != "k")){                        
+                        let normDir = SquareDelta(
+                            disabledMove.tosq.file - disabledMove.fromsq.file,
+                            disabledMove.tosq.rank - disabledMove.fromsq.rank
+                        ).normalized()
+                        if(normDir){
+                            let testcurrentsq = plm.fromsq.adddelta(normDir)
+                            while(this.squareok(testcurrentsq)){
+                                if(plm.tosq.equalto(testcurrentsq)) return false
+                                testcurrentsq = testcurrentsq.adddelta(normDir)
+                            }
+                        }
+                    }
+                    return true
+                })
             }
         }
 

@@ -175,6 +175,8 @@ class Board_ extends SmartDomElement{
                         }else{
                             this.nudgeMove = nudgeMoves.find(nm => nm.promsq.equalto(sq))                                                    
                             if(this.nudgeMove){                            
+                                this.makeMove(this.nudgeMove)                        
+                                return // disallow changing lancer direction
                                 this.inputtedMove = Move(this.nudgeMove.fromsq, this.nudgeMove.promsq)
                                 this.awaitSquareClick = true
                                 this.buildPromotionSquares(LANCER_PROMOTION_PIECES(!this.b.turn, ADD_CANCEL))
@@ -205,7 +207,7 @@ class Board_ extends SmartDomElement{
         }
 
         if(valid.promsq){            
-            this.nudgeMoves = allValid.filter(v => v.nudge)
+            this.nudgeMoves = allValid.filter(v => v.nudge)            
             this.awaitSquareClick = true
             this.inputtedMove = valid
             let psqs = allValid.map(v => Piece(v.prompiece.kind, v.prompiece.color,
