@@ -76,6 +76,11 @@ function sendDiscordLiveMessage(msg){
 
             client.channels.cache.get(discordPackage.livechannel)
                 .send(msg)
+
+            let playLinkMsg = process.env.PLAY_LINK_MESSAGE || `https://easychess.herokuapp.com/?ubertab=play`
+
+            client.channels.cache.get(discordPackage.livechannel)
+                .send(playLinkMsg)
         }
     }catch(err){console.log(err)}
 }
