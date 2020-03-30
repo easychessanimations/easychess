@@ -788,6 +788,9 @@ class ChessBoard_{
             else if(currentsq.file == sq2.file){
                 if(includelimits) sqs.push(currentsq.clone())
                 ok = false
+            }else{
+                console.log("warning, squaresbetween received equal files")
+                ok = false
             }
         }while(ok)
         return sqs
@@ -960,16 +963,18 @@ class ChessBoard_{
 
         if(move.castling) this.deletecastlingrights("kq", this.turn)
 
-        if(fromp.kind == "k"){
-            for(let side of ["k", "q"]){
-                if(this.cancastle(side, this.turn)){
-                    let letter = side
-                    let newLetter = this.squaretoalgeb(this.rookorigsq(side, this.turn))[0]
-                    if(this.turn == WHITE){
-                        letter = letter.toUpperCase()
-                        newLetter = newLetter.toUpperCase()
+        if(this.IS_SCHESS()){
+            if(fromp.kind == "k"){            
+                for(let side of ["k", "q"]){
+                    if(this.cancastle(side, this.turn)){
+                        let letter = side
+                        let newLetter = this.squaretoalgeb(this.rookorigsq(side, this.turn))[0]
+                        if(this.turn == WHITE){
+                            letter = letter.toUpperCase()
+                            newLetter = newLetter.toUpperCase()
+                        }
+                        this.castlefen = this.castlefen.replace(letter, newLetter)
                     }
-                    this.castlefen = this.castlefen.replace(letter, newLetter)
                 }
             }
         }
@@ -978,6 +983,10 @@ class ChessBoard_{
             let rosq = this.rookorigsq(side, this.turn)
             let rop = this.pieceatsquare(rosq)
             if(!rop.equalto(this.rookorigpiece(side, this.turn))) this.deletecastlingrights(side, this.turn)
+        }
+
+        if(fromp.kind == "k"){            
+            this.deletecastlingrights("kq", this.turn)
         }
 
         // calculate new state
