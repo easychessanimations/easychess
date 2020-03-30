@@ -41,3 +41,7 @@ try{
 }catch(err){
     console.log(`discord login failed`)
 }
+
+module.exports = {
+    client: client
+}

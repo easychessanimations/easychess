@@ -2606,6 +2606,7 @@ class Game_{
         this.playerSeatedAfterTermination = false
         this.chat.messages = []
         this.startThinking()
+        if(this.startCallback) this.startCallback()
     }
 
     // gbl

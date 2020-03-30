@@ -2,7 +2,7 @@ const { Bucket } = require('./bucket')
 
 const { Chat, ChatMessage, Game, Player, UNSEAT } = require('../shared/js/chessboard')
 
-var apisend, ssesend, bucket
+var apisend, ssesend, bucket, discordPackage
 
 var stateBucket, gamesBucket
 
@@ -32,10 +32,11 @@ function sendGames(){
     ssesend(sendGamesBlob())
 }
 
-function init(setApisend, setSsesend, setBucket){
+function init(setApisend, setSsesend, setBucket, setDiscordPackage){
     apisend = setApisend
     ssesend = setSsesend
     bucket = setBucket
+    discordPackage = setDiscordPackage
 
     stateBucket = new Bucket("easychessgamestate", bucket)
 
@@ -62,6 +63,25 @@ function init(setApisend, setSsesend, setBucket){
             console.log(err)
         }
     )
+
+    setTimeout(initDiscord, 20000)
+}
+
+function sendDiscordLiveMessage(msg){
+    console.log(msg)
+
+    try{
+        if(discordPackage.discordbot){
+            let client = discordPackage.discordbot.client
+
+            client.channels.cache.get(discordPackage.livechannel)
+                .send(msg)
+        }
+    }catch(err){console.log(err)}
+}
+
+function initDiscord(){    
+    sendDiscordLiveMessage(`easychess BOT logged in`)
 }
 
 function saveGameState(){    
@@ -140,15 +160,29 @@ function handleGameOperationResult(result, res, apiOkMessage){
 }
 
 function gameTerminated(){
-    console.log(`game terminated`)
     games.unshift(game.serialize())
+
     saveGameState()
+
     saveGames()
     sendGames()
+
+    let msg = `game terminated : ${game.playersVerbal()} ${game.resultVerbal()} ${game.resultReason}`    
+    
+    sendDiscordLiveMessage(msg)
+}
+
+function gameStarted(){
+    saveGameState()
+
+    let msg = `game started : ${game.playersVerbal()}`    
+
+    sendDiscordLiveMessage(msg)
 }
 
 function api(topic, payload, req, res){
     game.terminationCallback = gameTerminated
+    game.startCallback = gameStarted
 
     let player = Player({...req.user, ...{index: payload.index}})
 

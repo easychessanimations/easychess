@@ -4,8 +4,14 @@ const { LichessBot } = require('../client/nodejs/lichessbot')
 const utils = require('../client/nodejs/utils')
 if((!process.env.SKIP_FIREBASE) && (!process.env.SKIP_TOURNEYWATCH)) require('./tourneywatch')
 else console.log("skip tourneywatch")
-if(!process.env.SKIP_DISCORD_BOT) require('./discordbot')
+let discordbot = null
+if(!process.env.SKIP_DISCORD_BOT) discordbot = require('./discordbot')
 else console.log("skip discord bot")
+
+const discordPackage = {
+    discordbot: discordbot,
+    livechannel: process.env.LIVE_CHANNEL || "694116000710524978"
+}
 
 const GAMES_EXPORT_REPO = "easychessgames"
 
@@ -643,7 +649,7 @@ if(process.env.KEEPALIVE){
 
 if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
 
-play.init(apisend, ssesend, bucket)
+play.init(apisend, ssesend, bucket, discordPackage)
 
 monitor.setSendOnlineUsersFunc(online => {
     ssesend({
