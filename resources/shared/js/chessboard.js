@@ -3350,6 +3350,8 @@ if(typeof module != "undefined") if(typeof module.exports != "undefined"){
         ChatMessage: ChatMessage,    
         Chat: Chat,
         MAX_NUM_PLAYERS: MAX_NUM_PLAYERS,
-        UNSEAT: UNSEAT
+        UNSEAT: UNSEAT,
+        Square: Square,
+        Piece: Piece
     }
 }
