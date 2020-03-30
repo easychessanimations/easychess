@@ -2167,7 +2167,7 @@ class App extends SmartDomElement{
         if(node.childids.length > 1) rgb = randrgb()
 
         let captionDiv = div()
-            .w(node.gensan ? 60 : 600).cp().pad(2).mar(1)
+            .w(node.gensan ? 140 : 600).cp().pad(2).mar(1)
             .bdr("solid", 3, current ? "#0f0" : "#ddd")
             .bc(node.gensan ? node.turn() ? "#000" : "#fff" : "#0d0")
             .c(node.turn() ? "#fff" : "#000").tac()
