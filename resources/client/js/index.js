@@ -1,6 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
+const urlParams                 = new URLSearchParams(window.location.search)
+
+const IMPORT_GAME_DELAY             = 1000
 const DEFAULT_VIDEO_ANIMATION_DELAY         = 1
 const DEFAULT_VIDEO_ANIMATION_GRANULARITY   = 3
 const MAKE_THREE_DELAY              = 1000
@@ -11,11 +14,10 @@ const PGN_TEXT_AREA_HEIGHT          = 120
 const DISCORD_LOGIN_URL         = "auth/discord"
 const GITHUB_LOGIN_URL          = "auth/github"
 
-const urlParams                 = new URLSearchParams(window.location.search)
-
 const DO_ALERT                  = true
 
 const STOCKFISH_JS_PATH         = "resources/client/cdn/stockfish.wasm.js"
+const GAME_EXPORT_PATH          = "https://raw.githubusercontent.com/easychessanimations/easychessgames/master/gamexport"
 const BACKUP_FETCH_URL          = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
 const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
 
@@ -395,6 +397,41 @@ class App extends SmartDomElement{
 
         if(IS_PROD()) this.apiPingInterval = setInterval(this.apiPing.bind(this), 5 * QUERY_INTERVAL)
         if(IS_PROD()) this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
+
+        this.doLater("importGame", IMPORT_GAME_DELAY)
+    }
+
+    importGame(){
+        let importID = urlParams.get("import")
+
+        if(importID){
+            this.alert(`Importing ${importID} .`)
+
+            let url = `${GAME_EXPORT_PATH}/${importID}.txt`
+
+            fetch(url).then(
+                response => response.text().then(
+                    content => {
+                        try{
+                            let blob = JSON.parse(content)
+                            let game = Game().fromblob(blob)
+                            this.board.setgame(game)
+                            this.ubertabs.selectTab("analyze")
+                            this.tabs.selectTab("moves")
+                            this.alert(`${importID} imported ok .`, "success")
+                        }catch(err){
+                            this.alert(`Fetch parse error . Importing ${importID} failed .`, "error")
+                        }
+                    },
+                    err => {
+                        this.alert(`Fetch response text error . Importing ${importID} failed .`, "error")
+                    }
+                ),
+                err => {
+                    this.alert(`Fetch error . Importing ${importID} failed .`, "error")
+                }
+            )
+        }
     }
 
     renderFeedbackDiv(){
@@ -515,7 +552,11 @@ class App extends SmartDomElement{
         }, response => {
             if(response.ok){
                 let ID = response.ID
-                this.alert(`Game export done. ID ${ID} .`, "success")                
+                let delay = 5 * ALERT_DELAY
+                this.alert(`Game export done .<br><br> Exported game ID : ${ID} .<br><br>You will be redireted to the import url of the game .<br><br>Bookmark this page or copy its path from the address bar of your browser to share .`, "success", delay)                
+                setTimeout(_ => {
+                    document.location.href = `/?import=${ID}`
+                }, delay)
             }else{
                 this.alert(`Game export failed. ${response.error}`, "error")
             }
@@ -2284,7 +2325,7 @@ class App extends SmartDomElement{
         })   
     }
 
-    alert(msgOpt, kindOpt){        
+    alert(msgOpt, kindOpt, alertDelayOpt){        
         let msg = msgOpt || "Alert."
         let kind = kindOpt || "info"
 
@@ -2301,7 +2342,7 @@ class App extends SmartDomElement{
             .html(msg)
         )
 
-        this.doLater("hideAlert", ALERT_DELAY)
+        this.doLater("hideAlert", alertDelayOpt || ALERT_DELAY)
     }
 
     hideAlert(){
