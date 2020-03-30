@@ -492,3 +492,4 @@ module.exports.DAY = DAY
 module.exports.WEEK = WEEK
 module.exports.MONTH = MONTH
 module.exports.YEAR = YEAR
+module.exports.UID = UID

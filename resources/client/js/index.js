@@ -507,13 +507,31 @@ class App extends SmartDomElement{
         this.doLater("storeDefault", 2 * STORE_DEFAULT_DELAY)
     }
 
+    exportGame(){
+        let content = JSON.stringify(this.g.serialize(), null, 2)
+
+        api("git:exportgame", {
+            content: content            
+        }, response => {
+            if(response.ok){
+                let ID = response.ID
+                this.alert(`Game export done. ID ${ID} .`, "success")                
+            }else{
+                this.alert(`Game export failed. ${response.error}`, "error")
+            }
+        })
+    }
+
     renderMultiPGNDiv(){
         return div().a(
             div().mar(5).a(
-                div().addStyle("width", "100%").pad(2).bc("#eee").a(
-                    Button("Report", this.reportMultiPGN.bind(this, !DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
-                    Button("Report with comments", this.reportMultiPGN.bind(this, DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
-                    Button("Report with analysis", this.reportMultiPGNWithAnalysis.bind(this)).bc(YELLOW_BUTTON_COLOR),
+                div().a(
+                    Button("Export game", this.exportGame.bind(this)).fs(18).bc(GREEN_BUTTON_COLOR)
+                ),
+                div().mart(10).addStyle("width", "100%").pad(2).bc("#eee").a(
+                    Button("Report PGN", this.reportMultiPGN.bind(this, !DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
+                    Button("Report PGN with comments", this.reportMultiPGN.bind(this, DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
+                    Button("Report PGN with analysis", this.reportMultiPGNWithAnalysis.bind(this)).bc(YELLOW_BUTTON_COLOR),
                     Labeled("Keep base",
                         this.keepBaseLineCheckboxInput = CheckBoxInput({
                             id: "keepBaseLineCheckboxInput",
@@ -541,7 +559,7 @@ class App extends SmartDomElement{
                 ),
                 this.multiPGNTextAreaInput = TextAreaInput()
                     .mar(3)
-                    .addStyle("width", "calc(100% - 10px)").h(480)
+                    .addStyle("width", "calc(100% - 10px)").h(380)
                     .ae("paste", this.multiPGNPasted.bind(this))
                     .toolTip({msg: "Paste PGN here .", align: "center"})
             )

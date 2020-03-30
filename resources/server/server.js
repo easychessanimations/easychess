@@ -7,6 +7,8 @@ else console.log("skip tourneywatch")
 if(!process.env.SKIP_DISCORD_BOT) require('./discordbot')
 else console.log("skip discord bot")
 
+const GAMES_EXPORT_REPO = "easychessgames"
+
 const SSE_STARTUP_DELAY = IS_DEV() ? 250 : 3000
 
 const SITE_HOST = process.env.SITE_HOST || "easychess.herokuapp.com"
@@ -434,10 +436,24 @@ const HANDLERS = {
         let filename = payload.filename || "backup/backup.txt"    
         let content = payload.content
         clog(`git put ${filename} content size ${content.length}`)
-        update(filename, content, (result)=>{
+        update(payload.owner, payload.repo, filename, content, result => {
           if(result.error) apisend({}, result.status, res)
           else apisend(result.status, null, res)
-        })
+        })        
+      },
+      "git:exportgame":function(res, payload){    
+        let ID = utils.UID().replace("uid_", "game_")
+        let filename = "gamexport/" + ID + ".txt"
+        let content = payload.content
+        clog(`git exportgame ${filename} content size ${content.length}`)
+        update(payload.owner, GAMES_EXPORT_REPO, filename, content, result => {
+          if(result.error) apisend({}, result.status, res)
+          else apisend({
+              status: result.status,
+              ID: ID,
+              filename: filename
+          }, null, res)
+        })        
       }
 }  
 
