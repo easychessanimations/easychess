@@ -314,8 +314,6 @@ class App extends SmartDomElement{
 
         this.backupDiv = this.renderBackupDiv()
 
-        this.settingsDiv = this.renderSettingsForm()
-
         this.botSettingsDiv = this.renderBotSettingsForm()
 
         this.aboutDiv = this.renderAboutDiv()
@@ -349,6 +347,12 @@ class App extends SmartDomElement{
         this.playDiv = div()
 
         this.feedbackDiv = this.renderFeedbackDiv()
+
+        this.generalSettingsDiv = this.renderGeneralSettingsDiv()
+
+        this.engineSettingsDiv = this.renderEngineSettingsDiv()
+
+        this.lichessSettingsDiv = this.renderLichessSettingsDiv()
 
         this.createTabPanes()
 
@@ -401,6 +405,141 @@ class App extends SmartDomElement{
         if(IS_PROD()) this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
 
         this.doLater("importGame", IMPORT_GAME_DELAY)
+    }
+
+    renderGeneralSettingsDiv(){
+        return div().a(FormTable({
+            options: [
+                Combo({                    
+                    id: "variantCombo",                    
+                    display: "Variant",                                        
+                    options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
+                    selected: DEFAULT_VARIANT,
+                    settings: this.settings
+                }).fs(24).bc(GREEN_BUTTON_COLOR),
+                CheckBoxInput({
+                    id: "disable3dBoardCheckbox",                    
+                    display: "Disable 3d board",
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "boardBackgroundCombo",                    
+                    display: "Board bakcground",                    
+                    options: (PROPS.backgrounds || [DEFAULT_BOARD_BACKGROUND]).map(name => ({value: name, display: name})),
+                    selected: DEFAULT_BOARD_BACKGROUND,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "squaresizeCombo",                    
+                    display: "Square size",                    
+                    options: Array(21).fill(null).map((_, i) => ({value: 30 + i*2.5, display: 30 + i*2.5})),
+                    selected: DEFAULT_SQUARESIZE,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "treeMaxDepthCombo",                    
+                    display: "Tree max depth",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: TREE_MAX_DEPTH,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "treeBackwardDepthCombo",                    
+                    display: "Tree backward depth",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: TREE_BACKWARD_DEPTH,
+                    settings: this.settings
+                })
+            ]
+        }))
+    }
+
+    renderEngineSettingsDiv(){
+        return div().a(FormTable({
+            options: [                
+                CheckBoxInput({
+                    id: "useServerStockfishCheckbox",                    
+                    display: `Use server Stockfish${PROPS.ALLOW_SERVER_ENGINE ? "":" ( admin )"}`,                                        
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "multipvCombo",                    
+                    display: "MultiPV",                                        
+                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: DEFAULT_MULTIPV,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "threadsCombo",                    
+                    display: "Threads",                    
+                    options: Array(4).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
+                    selected: DEFAULT_THREADS,
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "showAnalysisInBoardCheckbox",                    
+                    display: "Show analysis in board",                                        
+                    settings: this.settings
+                }),                
+            ]
+        }))
+    }
+
+    renderLichessSettingsDiv(){
+        return div().a(FormTable({
+            options: [                
+                CheckBoxInput({
+                    id: "allowLichessBookCheckbox",                    
+                    display: "Allow lichess book",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowFreshGamesCheckbox",                    
+                    display: "Allow fresh games",                                        
+                    settings: this.settings
+                }),                
+                Combo({                    
+                    id: "fetchMaxFreshGamesCombo",                    
+                    display: "Fetch max fresh games",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: (i+1)*10, display: (i+1)*10})),
+                    selected: DEFAULT_MAX_GAMES,
+                    settings: this.settings
+                }),                
+                CheckBoxInput({
+                    id: "allowGameArchiveCheckbox",                    
+                    display: "Allow game archive",                                        
+                    settings: this.settings
+                }),                                
+                Combo({                    
+                    id: "lichessBookMaxMoves",                    
+                    display: "Lichess book max moves",                    
+                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: LICHESS_BOOK_MAX_MOVES,
+                    settings: this.settings,
+                    changeCallback: this.positionchanged.bind(this)
+                }),                
+                MultipleSelect({
+                    id: `lichessBookAvgRatingMultipleSelect`,                    
+                    display: `Lichess book average rating`,                    
+                    options: LICHESS_BOOK_AVG_RATINGS.map(avgrating => ({value: avgrating, display: avgrating})),
+                    selected: LICHESS_BOOK_AVG_RATINGS.map(avgrating => ({value: avgrating, display: avgrating})),
+                    hideDeleteButton: true,
+                    hideAddButton: true,
+                    settings: this.settings,
+                    changeCallback: this.positionchanged.bind(this)
+                }),
+                MultipleSelect({
+                    id: `lichessBookTimeControlsMultipleSelect`,                    
+                    display: `Lichess book time controls`,                    
+                    options: LICHESS_BOOK_TIME_CONTROLS.map(timecontrol => ({value: timecontrol, display: timecontrol})),
+                    selected: LICHESS_BOOK_TIME_CONTROLS.map(timecontrol => ({value: timecontrol, display: timecontrol})),
+                    hideDeleteButton: true,
+                    hideAddButton: true,
+                    settings: this.settings,
+                    changeCallback: this.positionchanged.bind(this)
+                })
+            ]
+        }))
     }
 
     renderAnimSettingsDiv(){
@@ -3255,6 +3394,12 @@ class App extends SmartDomElement{
         this.containerDiv.resize = (width, height) => this.containerPane.resize(width, height)
         this.containerDiv.noScroll = true
 
+        this.settingsTabPane = TabPane({id: "animstabpane"}).setTabs([
+            Tab({id: "general", caption: "General", content: this.generalSettingsDiv}),            
+            Tab({id: "engine", caption: "Engine", content: this.engineSettingsDiv}),            
+            Tab({id: "lichess", caption: "Lichess", content: this.lichessSettingsDiv}),                        
+        ])
+
         this.ubertabs = TabPane({id: "ubertabpane"}).setTabs([            
             Tab({id: "analyze", caption: "Analyze", content: this.containerDiv})
                 .toolTip({msg: "Analyze"}),            
@@ -3262,7 +3407,7 @@ class App extends SmartDomElement{
                 .toolTip({msg: "Play"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
-            Tab({id: "settings", caption: "Settings", content: this.settingsDiv})
+            Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
                 .toolTip({msg: "Settings"}),            
             Tab({id: "about", caption: "About", content: this.aboutDiv})
                 .toolTip({msg: "About easychess, ReadMe"}),
@@ -3547,128 +3692,7 @@ class App extends SmartDomElement{
             ]
         }))
     }
-
-    renderSettingsForm(){
-        return div().a(FormTable({
-            options: [
-                Combo({                    
-                    id: "variantCombo",                    
-                    display: "Variant",                                        
-                    options: SUPPORTED_VARIANTS.map(entry => ({value: entry[0], display: entry[1]})),
-                    selected: DEFAULT_VARIANT,
-                    settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "disable3dBoardCheckbox",                    
-                    display: "Disable 3d board",
-                    settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "allowLichessBookCheckbox",                    
-                    display: "Allow lichess book",                                        
-                    settings: this.settings
-                }),
-                CheckBoxInput({
-                    id: "allowFreshGamesCheckbox",                    
-                    display: "Allow fresh games",                                        
-                    settings: this.settings
-                }),                
-                Combo({                    
-                    id: "fetchMaxFreshGamesCombo",                    
-                    display: "Fetch max fresh games",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: (i+1)*10, display: (i+1)*10})),
-                    selected: DEFAULT_MAX_GAMES,
-                    settings: this.settings
-                }),                
-                CheckBoxInput({
-                    id: "allowGameArchiveCheckbox",                    
-                    display: "Allow game archive",                                        
-                    settings: this.settings
-                }),                
-                CheckBoxInput({
-                    id: "useServerStockfishCheckbox",                    
-                    display: `Use server Stockfish${PROPS.ALLOW_SERVER_ENGINE ? "":" ( admin )"}`,                                        
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "multipvCombo",                    
-                    display: "MultiPV",                                        
-                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
-                    selected: DEFAULT_MULTIPV,
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "threadsCombo",                    
-                    display: "Threads",                    
-                    options: Array(4).fill(null).map((_, i) => ({value: (i+1), display: (i+1)})),
-                    selected: DEFAULT_THREADS,
-                    settings: this.settings
-                }),                
-                Combo({                    
-                    id: "boardBackgroundCombo",                    
-                    display: "Board bakcground",                    
-                    options: (PROPS.backgrounds || [DEFAULT_BOARD_BACKGROUND]).map(name => ({value: name, display: name})),
-                    selected: DEFAULT_BOARD_BACKGROUND,
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "squaresizeCombo",                    
-                    display: "Square size",                    
-                    options: Array(21).fill(null).map((_, i) => ({value: 30 + i*2.5, display: 30 + i*2.5})),
-                    selected: DEFAULT_SQUARESIZE,
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "treeMaxDepthCombo",                    
-                    display: "Tree max depth",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
-                    selected: TREE_MAX_DEPTH,
-                    settings: this.settings
-                }),
-                Combo({                    
-                    id: "treeBackwardDepthCombo",                    
-                    display: "Tree backward depth",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
-                    selected: TREE_BACKWARD_DEPTH,
-                    settings: this.settings
-                }),                
-                Combo({                    
-                    id: "lichessBookMaxMoves",                    
-                    display: "Lichess book max moves",                    
-                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
-                    selected: LICHESS_BOOK_MAX_MOVES,
-                    settings: this.settings,
-                    changeCallback: this.positionchanged.bind(this)
-                }),                
-                MultipleSelect({
-                    id: `lichessBookAvgRatingMultipleSelect`,                    
-                    display: `Lichess book average rating`,                    
-                    options: LICHESS_BOOK_AVG_RATINGS.map(avgrating => ({value: avgrating, display: avgrating})),
-                    selected: LICHESS_BOOK_AVG_RATINGS.map(avgrating => ({value: avgrating, display: avgrating})),
-                    hideDeleteButton: true,
-                    hideAddButton: true,
-                    settings: this.settings,
-                    changeCallback: this.positionchanged.bind(this)
-                }),
-                MultipleSelect({
-                    id: `lichessBookTimeControlsMultipleSelect`,                    
-                    display: `Lichess book time controls`,                    
-                    options: LICHESS_BOOK_TIME_CONTROLS.map(timecontrol => ({value: timecontrol, display: timecontrol})),
-                    selected: LICHESS_BOOK_TIME_CONTROLS.map(timecontrol => ({value: timecontrol, display: timecontrol})),
-                    hideDeleteButton: true,
-                    hideAddButton: true,
-                    settings: this.settings,
-                    changeCallback: this.positionchanged.bind(this)
-                }),                
-                CheckBoxInput({
-                    id: "showAnalysisInBoardCheckbox",                    
-                    display: "Show analysis in board",                                        
-                    settings: this.settings
-                }),                
-            ]
-        }))
-    }
-
+    
     reset(){
         let variant = this.settings.variantCombo.selected
         if(!confirm(`Are you sure you want to delete all moves and create a new study with variant ${displayNameForVariant(variant)}?`, "reset")){
