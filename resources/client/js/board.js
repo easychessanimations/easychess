@@ -4,6 +4,19 @@ const DEFAULT_SQUARESIZE = 57.5
 
 const DEFAULT_BOARD_BACKGROUND = "maple.jpg"
 
+const PIECE_LETTER_TO_SOUND = {
+    n: "horseneigh",
+    N: "horse",
+    r: "engine",
+    R: "engine",
+    q: "accengine",
+    Q: "accengine",
+    b: "acceleration",
+    B: "acceleration",
+    p: "steps",
+    P: "steps",
+}
+
 const CANVAS_NAMES = [
     "background",
     "square",
@@ -676,6 +689,17 @@ class Board_ extends SmartDomElement{
         highlightcanvas.clear()        
         if(currentnode.genalgeb){                        
             let move = this.b.movefromalgeb(currentnode.genalgeb)                                    
+            let testb = ChessBoard().setfromfen(currentnode.getparent().fen, this.g.variant)
+            let fromp = testb.pieceatsquare(move.fromsq)
+            if(fromp.kind){
+                let sound = PIECE_LETTER_TO_SOUND[fromp.letter()]
+                if(sound){
+                    document.getElementById(sound).play().then(
+                        _ => {},
+                        _ => {}
+                    )
+                }                
+            }
             this.drawmovearrow(highlightcanvas, move, {
                 scalefactor: this.arrowscalefactor()
             })

@@ -336,6 +336,11 @@ class Piece_{
     clone(){
         return Piece(this.kind, this.color, this.direction)
     }
+
+    letter(){
+        if(!this.color) return this.kind
+        return this.kind.toUpperCase()
+    }
 }
 function Piece(kind, color, direction){return new Piece_(kind, color, direction)}
 function PieceL(letter){

@@ -8,6 +8,11 @@ let discordbot = null
 if(!process.env.SKIP_DISCORD_BOT) discordbot = require('./discordbot')
 else console.log("skip discord bot")
 
+const EXT_TO_MEDIA_TYPE = {
+    ogg: "ogg",
+    ogv: "ogg"
+}
+
 const discordPackage = {
     discordbot: discordbot,
     livechannel: process.env.LIVE_CHANNEL || "694116000710524978"
@@ -559,6 +564,20 @@ app.get('/logout', (req, res) => {
     res.redirect('/')
 })
 
+const soundFiles = getFiles(path.join(__rootdirname, "resources/client/sound"))
+
+function htmlForSoundFile(sf){
+    let mn = sf.match(/^([^\.]+)\.(.*)/)
+    let name = mn[1]
+    let ext = mn[2]
+    let mediaType = EXT_TO_MEDIA_TYPE[ext]
+    return `
+<audio id="${name}">
+<source src="resources/client/sound/${sf}" type="audio/${mediaType}">
+</audio>
+`
+}
+
 app.get('/', (req, res) => {
 res.send(`
 <!DOCTYPE html>
@@ -585,6 +604,8 @@ res.send(`
     </head>
 
     <body>    
+
+        ${soundFiles.map(sf => htmlForSoundFile(sf)).join("\n")}
 
         <div id="root"></div>
 
