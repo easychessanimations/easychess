@@ -172,7 +172,7 @@ function gameTerminated(){
     saveGames()
     sendGames()
 
-    let msg = `game terminated : ${game.playersVerbal()} ${game.resultVerbal()} ${game.resultReason}`    
+    let msg = `> game terminated : *${game.playersVerbal()}* **${game.resultVerbal()} ${game.resultReason}**`    
     
     sendDiscordLiveMessage(msg)
 }
@@ -180,7 +180,7 @@ function gameTerminated(){
 function gameStarted(){
     saveGameState()
 
-    let msg = `game started : ${game.playersVerbal()}`    
+    let msg = `> game started : *${game.playersVerbal()}*`    
 
     sendDiscordLiveMessage(msg)
 }
