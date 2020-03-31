@@ -705,7 +705,12 @@ class Board_ extends SmartDomElement{
             let fromp = testb.pieceatsquare(move.fromsq)
             if(fromp.kind){
                 let sound = PIECE_LETTER_TO_SOUND[fromp.letter()]
-                if(sound && (!this.parentApp.settings.disablePieceSoundsCheckbox.checked)){
+                let allowed = true
+                try{
+                    if(this.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
+                    if(this.parentApp.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
+                }catch(err){}
+                if(sound && allowed){
                     document.getElementById(sound).play().then(
                         _ => {},
                         _ => {}
