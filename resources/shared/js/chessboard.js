@@ -201,8 +201,8 @@ function PIECE_DIRECTIONS(kind){
     if(kind == "r") return [ROOK_DIRECTIONS(), true]    
     if(kind == "b") return [BISHOP_DIRECTIONS(), true]
     if(kind == "q") return [QUEEN_DIRECTIONS(), true]
-    if(kind == "k") return [KING_DIRECTIONS(), true]
-    if(kind == "n") return [KNIGHT_DIRECTIONS(), true]    
+    if(kind == "k") return [KING_DIRECTIONS(), false]
+    if(kind == "n") return [KNIGHT_DIRECTIONS(), false]    
     if(kind == "j") return [JAILER_DIRECTIONS(), true]    
     if(kind == "s") return [SENTRY_DIRECTIONS(), true]    
 }

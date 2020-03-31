@@ -350,7 +350,9 @@ class Board_ extends SmartDomElement{
         
                     let move = Move(this.draggedsq, this.dragtargetsq)
                     
-                    let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
+                    let lms = this.getlms()
+
+                    let valid = lms.find(testmove => testmove.roughlyequalto(move))
 
                     let allValid = this.getlms().filter((testmove) => testmove.roughlyequalto(move))
 
