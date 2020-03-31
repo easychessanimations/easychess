@@ -7,14 +7,26 @@ const DEFAULT_BOARD_BACKGROUND = "maple.jpg"
 const PIECE_LETTER_TO_SOUND = {
     n: "horseneigh",
     N: "horse",
+    e: "engine",
+    E: "engine",
     r: "engine",
     R: "engine",
     q: "accengine",
     Q: "accengine",
     b: "acceleration",
     B: "acceleration",
+    h: "acceleration",
+    H: "acceleration",
     p: "steps",
     P: "steps",
+    j: "lock",
+    J: "lock",
+    l: "lancer",
+    L: "lancer",
+    s: "sentry",
+    S: "sentry",
+    k: "king",
+    K: "king",
 }
 
 const CANVAS_NAMES = [
