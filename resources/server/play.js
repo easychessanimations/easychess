@@ -172,7 +172,9 @@ function gameTerminated(){
     saveGames()
     sendGames()
 
-    let msg = `> game terminated : *${game.playersVerbal()}* **${game.resultVerbal()} ${game.resultReason}**`    
+    let msg =
+`> game terminated : *${game.playersVerbal()}*
+**${game.resultVerbal()} ${game.resultReason}**`    
     
     sendDiscordLiveMessage(msg)
 }
