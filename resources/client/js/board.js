@@ -706,8 +706,10 @@ class Board_ extends SmartDomElement{
             if(fromp.kind){
                 let sound = PIECE_LETTER_TO_SOUND[fromp.letter()]
                 let allowed = true
-                try{
-                    if(this.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
+                try{                    
+                    if(this.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false                                        
+                }catch(err){}
+                try{                                        
                     if(this.parentApp.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
                 }catch(err){}
                 if(sound && allowed){
