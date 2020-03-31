@@ -136,19 +136,75 @@ const EIGHTPIECE_START_FEN = "jlsesqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneSQKBNR w 
 const WHITE = true
 const BLACK = false
 
-const ROOK_DIRECTIONS = [SquareDelta(1,0), SquareDelta(-1,0), SquareDelta(0,1), SquareDelta(0,-1) ]
-const BISHOP_DIRECTIONS = [SquareDelta(1,1), SquareDelta(-1,-1), SquareDelta(1,-1), SquareDelta(-1,1) ]
-const QUEEN_DIRECTIONS = ROOK_DIRECTIONS.concat(BISHOP_DIRECTIONS)
-const KNIGHT_DIRECTIONS = [SquareDelta(2,1), SquareDelta(2,-1), SquareDelta(-2,1), SquareDelta(-2,-1), SquareDelta(1,2), SquareDelta(1,-2), SquareDelta(-1,2), SquareDelta(-1,-2) ]
+const ROOK_DIRECTIONS = [
+    SquareDelta(1,0),
+    SquareDelta(-1,0),
+    SquareDelta(0,1),
+    SquareDelta(0,-1)
+]
+
+const BISHOP_DIRECTIONS = [
+    SquareDelta(1,1),
+    SquareDelta(-1,-1),
+    SquareDelta(1,-1),
+    SquareDelta(-1,1)
+]
+
+const QUEEN_DIRECTIONS = [
+    SquareDelta(1,0),
+    SquareDelta(-1,0),
+    SquareDelta(0,1),
+    SquareDelta(0,-1),
+    SquareDelta(1,1),
+    SquareDelta(-1,-1),
+    SquareDelta(1,-1),
+    SquareDelta(-1,1)
+]
+
+const KING_DIRECTIONS = [
+    SquareDelta(1,0),
+    SquareDelta(-1,0),
+    SquareDelta(0,1),
+    SquareDelta(0,-1),
+    SquareDelta(1,1),
+    SquareDelta(-1,-1),
+    SquareDelta(1,-1),
+    SquareDelta(-1,1)
+]
+
+const KNIGHT_DIRECTIONS = [
+    SquareDelta(2,1),
+    SquareDelta(2,-1),
+    SquareDelta(-2,1),
+    SquareDelta(-2,-1),
+    SquareDelta(1,2),
+    SquareDelta(1,-2),
+    SquareDelta(-1,2),
+    SquareDelta(-1,-2)
+]
+
+const JAILER_DIRECTIONS = [
+    SquareDelta(1,0),
+    SquareDelta(-1,0),
+    SquareDelta(0,1),
+    SquareDelta(0,-1)
+]
+
+const SENTRY_DIRECTIONS = [
+    SquareDelta(1,1),
+    SquareDelta(-1,-1),
+    SquareDelta(1,-1),
+    SquareDelta(-1,1)
+]
 
 const PIECE_DIRECTIONS = {
     r: [ROOK_DIRECTIONS, true],
     b: [BISHOP_DIRECTIONS, true],
     q: [QUEEN_DIRECTIONS, true],
-    k: [QUEEN_DIRECTIONS, false],
+    k: [KING_DIRECTIONS, false],
     n: [KNIGHT_DIRECTIONS, false],
-    j: [ROOK_DIRECTIONS, true],
-    s: [BISHOP_DIRECTIONS, true],
+    j: [JAILER_DIRECTIONS, true],
+    s: [SENTRY_DIRECTIONS, true],
 }
 
 function getPieceDirection(piece){
