@@ -420,6 +420,11 @@ class App extends SmartDomElement{
                     settings: this.settings
                 }).fs(24).bc(GREEN_BUTTON_COLOR),
                 CheckBoxInput({
+                    id: "disablePieceSoundsCheckbox",                    
+                    display: "Disable piece sounds",
+                    settings: this.settings
+                }),
+                CheckBoxInput({
                     id: "disable3dBoardCheckbox",                    
                     display: "Disable 3d board",
                     settings: this.settings
