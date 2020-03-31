@@ -310,6 +310,8 @@ class App extends SmartDomElement{
 
         this.videoDiv = this.renderVideoDiv()
 
+        this.randomDiv = this.renderRandomDiv()
+
         this.animSettingsDiv = this.renderAnimSettingsDiv()
 
         this.backupDiv = this.renderBackupDiv()
@@ -2807,6 +2809,42 @@ class App extends SmartDomElement{
         window.requestAnimationFrame(this.animateVideo.bind(this))
     }
 
+    playRandomMoves(){
+        this.playRandomMovesDelay = parseInt(this.settings.videoAnimationDelayCombo.selected * 1000)
+
+        let move = this.g.getRandomMove()
+
+        if(move){
+            this.randomAnimationInfo.bc(GREEN_BUTTON_COLOR).html(`making random move ${this.b.movetosan(move)}`)
+
+            this.board.makeMove(move)
+
+            this.playRandomMoveTimeout = setTimeout(_ => {
+                this.playRandomMoves()
+            }, this.playRandomMovesDelay)
+        }
+    }
+
+    stopPlayingRandomMoves(){
+        if(this.playRandomMoveTimeout){
+            clearTimeout(this.playRandomMoveTimeout)
+            this.playRandomMoveTimeout = null
+            this.randomAnimationInfo.bc(RED_BUTTON_COLOR).html(`playing random moves stopped`)
+        }
+    }
+
+    renderRandomDiv(){
+        return div().a(
+            div().mar(5).a(
+                div().dfc().a(
+                    Button("Play random moves", this.playRandomMoves.bind(this)).fs(24).mar(5).bc(GREEN_BUTTON_COLOR),                
+                    Button("Stop", this.stopPlayingRandomMoves.bind(this)).fs(24).mar(5).bc(RED_BUTTON_COLOR),                
+                    this.randomAnimationInfo = div().pad(6).padl(12).padr(12).ffm().fs(16).dib().marl(10),
+                )
+            )
+        )
+    }
+
     renderVideoDiv(){
         return div().a(
             div().mar(5).a(
@@ -3335,6 +3373,7 @@ class App extends SmartDomElement{
         this.animsTabPane = TabPane({id: "animstabpane"}).setTabs([
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),            
             Tab({id: "video", caption: "Video", content: this.videoDiv}),            
+            Tab({id: "random", caption: "Random", content: this.randomDiv}),            
             Tab({id: "threeanimation", caption: "Three Animation", content: this.threeAnimationDiv}),
             Tab({id: "settings", caption: "Settings", content: this.animSettingsDiv}),            
             Tab({id: "images", caption: "Images", content: this.imageDiv}),

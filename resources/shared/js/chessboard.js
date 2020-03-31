@@ -2211,6 +2211,20 @@ class Game_{
         this.fromblob(props)
     }
 
+    getRandomMove(){
+        let lms = this.board.pseudolegalmovesforallpieces()
+
+        if(lms.length){
+            let index = Math.floor(Math.random() * lms.length)
+
+            let move = lms[index]
+
+            return move
+        }
+
+        return null
+    }
+
     getForwardMove(){
         let scs = this.getcurrentnode().sortedchilds()        
         if(!scs.length) return null
