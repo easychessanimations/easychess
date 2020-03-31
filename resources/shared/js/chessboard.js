@@ -2212,7 +2212,7 @@ class Game_{
     }
 
     getRandomMove(){
-        let lms = this.board.pseudolegalmovesforallpieces()
+        let lms = this.board.legalmovesforallpieces()
 
         if(lms.length){
             let index = Math.floor(Math.random() * lms.length)
