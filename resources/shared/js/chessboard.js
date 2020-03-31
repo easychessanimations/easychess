@@ -136,21 +136,21 @@ const EIGHTPIECE_START_FEN = "jlsesqkbnr/pppppppp/8/8/8/8/PPPPPPPP/JLneSQKBNR w 
 const WHITE = true
 const BLACK = false
 
-const ROOK_DIRECTIONS = [
+function ROOK_DIRECTIONS(){return [
     SquareDelta(1,0),
     SquareDelta(-1,0),
     SquareDelta(0,1),
     SquareDelta(0,-1)
-]
+]}
 
-const BISHOP_DIRECTIONS = [
+function BISHOP_DIRECTIONS(){return [
     SquareDelta(1,1),
     SquareDelta(-1,-1),
     SquareDelta(1,-1),
     SquareDelta(-1,1)
-]
+]}
 
-const QUEEN_DIRECTIONS = [
+function QUEEN_DIRECTIONS(){return [
     SquareDelta(1,0),
     SquareDelta(-1,0),
     SquareDelta(0,1),
@@ -159,9 +159,9 @@ const QUEEN_DIRECTIONS = [
     SquareDelta(-1,-1),
     SquareDelta(1,-1),
     SquareDelta(-1,1)
-]
+]}
 
-const KING_DIRECTIONS = [
+function KING_DIRECTIONS(){return [
     SquareDelta(1,0),
     SquareDelta(-1,0),
     SquareDelta(0,1),
@@ -170,9 +170,9 @@ const KING_DIRECTIONS = [
     SquareDelta(-1,-1),
     SquareDelta(1,-1),
     SquareDelta(-1,1)
-]
+]}
 
-const KNIGHT_DIRECTIONS = [
+function KNIGHT_DIRECTIONS(){return [
     SquareDelta(2,1),
     SquareDelta(2,-1),
     SquareDelta(-2,1),
@@ -181,39 +181,42 @@ const KNIGHT_DIRECTIONS = [
     SquareDelta(1,-2),
     SquareDelta(-1,2),
     SquareDelta(-1,-2)
-]
+]}
 
-const JAILER_DIRECTIONS = [
+function JAILER_DIRECTIONS(){return [
     SquareDelta(1,0),
     SquareDelta(-1,0),
     SquareDelta(0,1),
     SquareDelta(0,-1)
-]
+]}
 
-const SENTRY_DIRECTIONS = [
+function SENTRY_DIRECTIONS(){return [
     SquareDelta(1,1),
     SquareDelta(-1,-1),
     SquareDelta(1,-1),
     SquareDelta(-1,1)
-]
+]}
 
-const PIECE_DIRECTIONS = {
-    r: [ROOK_DIRECTIONS, true],
-    b: [BISHOP_DIRECTIONS, true],
-    q: [QUEEN_DIRECTIONS, true],
-    k: [KING_DIRECTIONS, false],
-    n: [KNIGHT_DIRECTIONS, false],
-    j: [JAILER_DIRECTIONS, true],
-    s: [SENTRY_DIRECTIONS, true],
+function PIECE_DIRECTIONS(kind){
+    if(kind == "r") return [ROOK_DIRECTIONS(), true]    
+    if(kind == "b") return [BISHOP_DIRECTIONS(), true]
+    if(kind == "q") return [QUEEN_DIRECTIONS(), true]
+    if(kind == "k") return [KING_DIRECTIONS(), true]
+    if(kind == "n") return [KNIGHT_DIRECTIONS(), true]    
+    if(kind == "j") return [JAILER_DIRECTIONS(), true]    
+    if(kind == "s") return [SENTRY_DIRECTIONS(), true]    
 }
 
 function getPieceDirection(piece){
     if(piece.kind == "l") return [ [ piece.direction ] , true ]
-    return PIECE_DIRECTIONS[piece.kind]
+    return PIECE_DIRECTIONS(piece.kind)
 }
 
-let ADJACENT_DIRECTIONS = []
-for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)if((i!=0)||(j!=0))ADJACENT_DIRECTIONS.push(SquareDelta(i,j))
+function ADJACENT_DIRECTIONS(){
+    let adjDirs = []
+    for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)if((i!=0)||(j!=0)) adjDirs.push(SquareDelta(i,j))
+    return adjDirs
+}
 
 const PAWNDIRS_WHITE = {
     baserank: 6,
@@ -371,7 +374,7 @@ function Move(fromsq, tosq, prompiece, epclsq, epsq, promsq){return new Move_(fr
 const ADD_CANCEL = true
 
 function LANCER_PROMOTION_PIECES(color, addCancel){
-    let lpp = QUEEN_DIRECTIONS.map(qd => Piece("l", color, qd))
+    let lpp = QUEEN_DIRECTIONS().map(qd => Piece("l", color, qd))
     if(addCancel) lpp = lpp.concat([
         Piece("x", BLACK, SquareDelta(0, 0))
     ])
@@ -517,11 +520,11 @@ class ChessBoard_{
     }
 
     adjacentsquares(sq){
-        return ADJACENT_DIRECTIONS.map((dir)=>sq.adddelta(dir)).filter((sq)=>this.squareok(sq))
+        return ADJACENT_DIRECTIONS().map((dir)=>sq.adddelta(dir)).filter((sq)=>this.squareok(sq))
     }
 
     jailerAdjacentSquares(sq){
-        return ROOK_DIRECTIONS.map(dir => sq.adddelta(dir)).filter(sq => this.squareok(sq))
+        return JAILER_DIRECTIONS().map(dir => sq.adddelta(dir)).filter(sq => this.squareok(sq))
     }
 
     isSquareJailedBy(sq, color){
@@ -1359,7 +1362,7 @@ class ChessBoard_{
                 
                 if( (p.kind == "l") && (sq.equalto(disabledMove.fromsq)) ){
                     // nudged lancer has special moves
-                    let ndirs = QUEEN_DIRECTIONS.filter(qd => !qd.equalto(p.direction))
+                    let ndirs = QUEEN_DIRECTIONS().filter(qd => !qd.equalto(p.direction))
                     for(let dir of ndirs){
                         let nok = true
                         let ncurrentsq = sq
