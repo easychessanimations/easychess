@@ -630,10 +630,12 @@ class App extends SmartDomElement{
             if(m){
                 let variant = m[1]
                 let fen = m[2]
-                this.alert(`Setting to variant ${variant}, fen ${fen} .`, "success")
+                this.alert(`Setting variant to ${variant} .<br><br>FEN<br><br>${fen}`, "success", 5 * ALERT_DELAY)
 
-                this.g.variant = variant
-                this.resetFromFen(fen, SKIP_CONFIRM)
+                setTimeout(_ => {
+                    this.g.variant = variant
+                    this.resetFromFen(fen, SKIP_CONFIRM)
+                }, 5 * ALERT_DELAY)                
             }
         }
     }
