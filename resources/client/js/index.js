@@ -3,6 +3,7 @@
 
 const urlParams                 = new URLSearchParams(window.location.search)
 
+const SKIP_CONFIRM                  = true
 const CREATE_SETUP_BOARD_DELAY      = 3000
 const IMPORT_GAME_DELAY             = 1000
 const DEFAULT_VIDEO_ANIMATION_DELAY         = 1
@@ -620,6 +621,21 @@ class App extends SmartDomElement{
                 }
             )
         }
+
+        let importPosition = urlParams.get("position")
+
+        if(importPosition){
+            let m = importPosition.match(/^([^\/]+)\/(.+)/)
+
+            if(m){
+                let variant = m[1]
+                let fen = m[2]
+                this.alert(`Setting to variant ${variant}, fen ${fen} .`, "success")
+
+                this.g.variant = variant
+                this.resetFromFen(fen, SKIP_CONFIRM)
+            }
+        }
     }
 
     renderFeedbackDiv(){
@@ -1116,11 +1132,22 @@ class App extends SmartDomElement{
         )
     }
 
+    exportPosition(){
+        if(!confirm(`Export position and reduce game to the current position ?`, "reduce")) return
+        
+        let delay = 3 * ALERT_DELAY
+        this.alert(`You will be redireted to the import url of the position .<br><br>Bookmark this page or copy its path from the address bar of your browser to share .`, "success", delay)                
+        setTimeout(_ => {
+            document.location.href = `/?position=${this.g.variant}/${this.g.fen()}`
+        }, delay)
+    }
+
     renderFenDiv(){
         return div().a(
             div().mar(5).a(
-                div().addStyle("width", "100%").pad(2).bc("#eee").a(
-                    Button("Report", this.reportFen.bind(this)).bc(GREEN_BUTTON_COLOR),                    
+                div().df().jc("space-between").addStyle("width", "100%").pad(2).bc("#eee").a(
+                    Button("Report FEN", this.reportFen.bind(this)).bc(GREEN_BUTTON_COLOR),                    
+                    Button("Export position", this.exportPosition.bind(this)).fs(18).bc(YELLOW_BUTTON_COLOR)
                 ),
                 this.fenTextInput = TextInput()
                     .mar(3)
@@ -1201,8 +1228,8 @@ class App extends SmartDomElement{
         this.tabs.selectTab("moves")
     }
 
-    resetFromFen(content){
-        if(!confirm(`Are you sure you want to reset study from FEN ${content}. All moves will be lost.`, "reset")) return
+    resetFromFen(content, skipConfirm){
+        if(!skipConfirm) if(!confirm(`Are you sure you want to reset study from FEN ${content}. All moves will be lost.`, "reset")) return
 
         this.g.setfromfen(content)
 
