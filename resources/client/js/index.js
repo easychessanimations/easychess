@@ -3,6 +3,7 @@
 
 const urlParams                 = new URLSearchParams(window.location.search)
 
+const CREATE_SETUP_BOARD_DELAY      = 3000
 const IMPORT_GAME_DELAY             = 1000
 const DEFAULT_VIDEO_ANIMATION_DELAY         = 1
 const DEFAULT_VIDEO_ANIMATION_GRANULARITY   = 3
@@ -326,6 +327,8 @@ class App extends SmartDomElement{
 
         this.fenDiv = this.renderFenDiv()
 
+        this.setupDiv = div()
+
         this.studyDiv = this.renderStudyDiv()
 
         this.smartdomDiv = this.renderSmartdomDiv()
@@ -407,6 +410,7 @@ class App extends SmartDomElement{
         if(IS_PROD()) this.checkApiInterval = setInterval(this.checkApi.bind(this), 5 * QUERY_INTERVAL)
 
         this.doLater("importGame", IMPORT_GAME_DELAY)
+        this.doLater("createSetupBoard", CREATE_SETUP_BOARD_DELAY)
     }
 
     renderGeneralSettingsDiv(){
@@ -1197,16 +1201,20 @@ class App extends SmartDomElement{
         this.tabs.selectTab("moves")
     }
 
-    fenResetPasted(ev){
-        ev.preventDefault()        
-
-        let content = ev.clipboardData.getData('Text')        
-
+    resetFromFen(content){
         if(!confirm(`Are you sure you want to reset study from FEN ${content}. All moves will be lost.`, "reset")) return
 
         this.g.setfromfen(content)
 
         this.board.setgame(this.g)
+    }
+
+    fenResetPasted(ev){
+        ev.preventDefault()        
+
+        let content = ev.clipboardData.getData('Text')        
+
+        this.resetFromFen(content)
     }
 
     multiPGNResetPasted(ev){
@@ -3334,6 +3342,14 @@ class App extends SmartDomElement{
         })
     }
 
+    createSetupBoard(){
+        this.setupDiv.x().am(div().mar(5).a(this.setupBoard = SetupBoard({
+            id: "setupboard",
+            parentApp: this,
+            squaresize: this.board.squaresize * 0.9
+        })))
+    }
+
     renderAnalysisInfoDiv(){
         return div().w(260).ovfs()
     }
@@ -3388,6 +3404,7 @@ class App extends SmartDomElement{
             Tab({id: "log", caption: "Log", content: this.logDiv}),
             Tab({id: "multiPGN", caption: "Multi PGN", content: this.multiPGNDiv}),
             Tab({id: "fen", caption: "FEN", content: this.fenDiv}),
+            Tab({id: "setup", caption: "Setup", content: this.setupDiv}),
             Tab({id: "study", caption: "Studies", content: this.studyDiv}),            
             Tab({id: "smartdom", caption: "Smartdom", content: this.smartdomDiv}),
             Tab({id: "tourney", caption: "Tourney", content: this.tourneyDiv}),

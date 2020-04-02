@@ -1,3 +1,6 @@
+const SETUP_FEN = "lnwlnlne5/lw1lejs3/lswlslseeh3/kqrbnp2/KQRBNP2/LnwLnLneEH3/Lw1LeJS3/LswLsLse5 w KQkq - 0 1"
+const CLEAR_FEN = "4k3/8/8/8/8/8/8/4K3 w KQkq - 0 1"
+
 const RICH = true
 
 const DEFAULT_SQUARESIZE = 57.5
@@ -33,6 +36,7 @@ const CANVAS_NAMES = [
     "background",
     "square",
     "check",
+    "click",
     "highlight",            
     "weights",
     "showanalysis",
@@ -90,11 +94,26 @@ class Board_ extends SmartDomElement{
                     .op(0.8).poa().c("#00a").fwb()
                     .w(this.boardsize()).h(this.boardsize() * 0.6).dfcc().jcsa(),
                 this.mouseDiv = div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb(),
-                this.mouseClickDiv = div().ae("click", this.handleAwaitSquareClick.bind(this)).w(this.boardsize()).h(this.boardsize()).poa().disp("none")
+                this.mouseClickDiv = div().ae("click", this.handleAwaitSquareClick.bind(this)).w(this.boardsize()).h(this.boardsize()).poa().disp("none"),                
             )            
         )
 
+        if(this.props.squareClickCallback) this.mouseDiv.ae("click", this.handleSquareClick.bind(this))
+
         this.draw()
+    }
+
+    handleSquareClick(ev){
+        if(!this.props.squareClickCallback) return        
+        let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
+        this.piececlickorig = Vect(ev.clientX - bcr.x, ev.clientY - bcr.y)        
+        let clickedsq = this.coordstosq(this.piececlickorig)                                  
+        let coords = this.fasquarecoords(clickedsq)
+        let canvas = this.getCanvasByName("check")
+        canvas.clear()
+        canvas.fillStyle("#0f0")
+        canvas.fillRect(coords, Vect(this.squaresize, this.squaresize))
+        this.props.squareClickCallback(clickedsq)
     }
 
     reset(variant){
@@ -309,6 +328,8 @@ class Board_ extends SmartDomElement{
             switch(sev.kind){                
                 case "dragstart":
                     sev.ev.preventDefault()                        
+
+                    if(this.props.squareClickCallback) return
 
                     if(this.g.terminated) return
                     if(this.awaitSquareClick) return                    
@@ -698,6 +719,7 @@ class Board_ extends SmartDomElement{
     }
 
     highlightLastMove(){
+        if(this.props.nohighlight) return
         let currentnode = this.getcurrentnode()
         let highlightcanvas = this.getCanvasByName("highlight")
         highlightcanvas.clear()        
@@ -764,7 +786,7 @@ class Board_ extends SmartDomElement{
         }
     }
 
-    highlightCheck(){
+    highlightCheck(){        
         let wk = this.b.whereisking(this.b.turn)
         if(wk){
             if(this.b.iskingincheck(this.b.turn)){
@@ -796,6 +818,10 @@ class Board_ extends SmartDomElement{
         this.createCommentCanvas()
 
         this.drawResult()
+
+        if(this.props.squareClickCallback){
+            this.getCanvasByName("check").clear()
+        }
     }
 
     drawResult(){
@@ -901,3 +927,94 @@ class Board_ extends SmartDomElement{
     }
 }
 function Board(props){return new Board_(props)}
+
+class SetupBoard_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.parentApp = this.props.parentApp
+    }
+
+    setRestFen(){
+        let restfen = this.posBoard.b.fen.split(" ").slice(1).join(" ")
+        this.restfeninput.setValue(restfen)
+    }
+
+    setCurrentPosition(){
+        let pg = Game().fromblob(this.parentApp.g.serialize())
+        this.posBoard.setgame(pg)
+
+        this.setRestFen()
+        this.rawfeninput.setValue(this.posBoard.b.reportRawFen())        
+    }
+
+    posboardClicked(clickedsq){
+        if(!this.setupPiece){
+            if(this.posBoard.b.pieceatsquare(clickedsq).isempty()){
+                this.parentApp.alert("Select a piece to set from the right board .", "error")
+            }else{
+                this.posBoard.b.setpieaceatsquare(clickedsq, Piece())                
+            }                        
+        }else{
+            if(this.posBoard.b.pieceatsquare(clickedsq).isempty()){
+                this.posBoard.b.setpieaceatsquare(clickedsq, this.setupPiece)
+            }else{
+                this.posBoard.b.setpieaceatsquare(clickedsq, Piece())                
+            }                        
+        }
+        this.posBoard.draw()
+        this.rawfeninput.setValue(this.posBoard.b.reportRawFen())        
+    }
+
+    pieceboardClicked(clickedsq){
+        this.setupPiece = this.pieceBoard.b.pieceatsquare(clickedsq)
+    }
+
+    setGameFromThisFen(){
+        let fen = this.rawfeninput.value() + " " + this.restfeninput.value()
+
+        this.parentApp.resetFromFen(fen)
+    }
+
+    clearPosition(){
+        this.posBoard.b.setfromfen(CLEAR_FEN)
+        this.posBoard.draw()
+        this.rawfeninput.setValue(this.posBoard.b.reportRawFen())        
+    }
+
+    init(){        
+        this.a(
+            div().dfcc().a(div().dib().tac().pad(3).bc("#aaa").a(
+                Button("Set current position", this.setCurrentPosition.bind(this)).bc(GREEN_BUTTON_COLOR),
+                Button("Clear", this.clearPosition.bind(this)).bc(RED_BUTTON_COLOR),
+                Button("Set game from this fen", this.setGameFromThisFen.bind(this)).bc(YELLOW_BUTTON_COLOR),
+                div().dfc().ffm().a(
+                    this.rawfeninput = TextInput().w(480).pad(3),
+                    this.restfeninput = TextInput().w(300).pad(3),
+                )                
+            ),
+            div().mart(3).dib().pad(3).bc("#ddd").a(div().dfc().am(
+                this.posBoard = Board({
+                    id: "posboard",
+                    parentApp: this,
+                    nohighlight: true,
+                    squareClickCallback: this.posboardClicked.bind(this),
+                    squaresize: this.props.squaresize || DEFAULT_SQUARESIZE                    
+                }),
+                this.pieceBoard = Board({
+                    id: "pieceboard",
+                    parentApp: this,
+                    nohighlight: true,
+                    squareClickCallback: this.pieceboardClicked.bind(this),
+                    squaresize: this.props.squaresize || DEFAULT_SQUARESIZE
+                }).marl(5)
+            )))
+        )
+
+        let sg = Game().setfromfen(SETUP_FEN)
+        this.pieceBoard.setgame(sg)
+
+        this.setCurrentPosition()
+    }
+}
+function SetupBoard(props){return new SetupBoard_(props)}

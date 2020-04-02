@@ -1131,6 +1131,33 @@ class ChessBoard_{
         if(this.disablefen) this.fen += " " + this.disablefen
     }
 
+    reportRawFen(){
+        let rawfenbuff = ""
+        let cumul = 0
+
+        for(let sq of ALL_SQUARES){
+            let p = this.pieceatsquare(sq)
+            if(p.isempty()){
+                cumul++
+            }else{
+                if(cumul > 0){
+                    rawfenbuff += `${cumul}`
+                    cumul = 0
+                }
+                rawfenbuff += p.toString()
+            }
+            if( (cumul > 0) && ( sq.file == LAST_SQUARE ) ){
+                rawfenbuff += `${cumul}`
+                cumul = 0
+            }
+            if( (sq.file == LAST_SQUARE) && (sq.rank < LAST_SQUARE) ){
+                rawfenbuff += "/"
+            }
+        }
+
+        return rawfenbuff
+    }
+
     squareok(sq){
         return ( sq.file >= 0 ) && ( sq.rank >= 0 ) && ( sq.file < NUM_SQUARES ) && ( sq.rank < NUM_SQUARES)
     }
