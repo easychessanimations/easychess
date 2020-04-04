@@ -1,4 +1,6 @@
-const { ChessBoard } = require('./resources/shared/js/chessboard')
+if(typeof ChessBoard == "undefined"){
+    var { ChessBoard } = require('./resources/shared/js/chessboard')
+}
 
 b = ChessBoard().setfromfen()
 
