@@ -591,6 +591,9 @@ class App extends SmartDomElement{
     }
 
     importGame(){
+        this.ubertabs.selectTab("analyze")
+        this.tabs.selectTab("moves")
+        
         let importID = urlParams.get("import")
 
         if(importID){
@@ -604,9 +607,7 @@ class App extends SmartDomElement{
                         try{
                             let blob = JSON.parse(content)
                             let game = Game().fromblob(blob)
-                            this.board.setgame(game)
-                            this.ubertabs.selectTab("analyze")
-                            this.tabs.selectTab("moves")
+                            this.board.setgame(game)                            
                             this.alert(`${importID} imported ok .`, "success")
                         }catch(err){
                             this.alert(`Fetch parse error . Importing ${importID} failed .`, "error")
