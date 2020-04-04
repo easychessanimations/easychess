@@ -590,10 +590,12 @@ class App extends SmartDomElement{
         }))
     }
 
-    importGame(){
+    switchToAnalyzeMoves(){
         this.ubertabs.selectTab("analyze")
         this.tabs.selectTab("moves")
-        
+    }
+
+    importGame(){
         let importID = urlParams.get("import")
 
         if(importID){
@@ -608,6 +610,7 @@ class App extends SmartDomElement{
                             let blob = JSON.parse(content)
                             let game = Game().fromblob(blob)
                             this.board.setgame(game)                            
+                            this.switchToAnalyzeMoves()
                             this.alert(`${importID} imported ok .`, "success")
                         }catch(err){
                             this.alert(`Fetch parse error . Importing ${importID} failed .`, "error")
@@ -636,6 +639,7 @@ class App extends SmartDomElement{
                 setTimeout(_ => {
                     this.g.variant = variant
                     this.resetFromFen(fen, SKIP_CONFIRM)
+                    this.switchToAnalyzeMoves()
                 }, 5 * ALERT_DELAY)                
             }
         }
