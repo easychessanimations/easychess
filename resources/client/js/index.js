@@ -601,7 +601,7 @@ class App extends SmartDomElement{
         let importID = urlParams.get("import")
 
         if(importID){
-            this.alert(`Importing game [ ${importID} ] .`, "info")
+            this.alert(`Importing game [ ${importID} ] .`, "info", IMPORT_TIMEOUT)
 
             let url = `${GAME_EXPORT_PATH}/${importID}.txt`
 
