@@ -86,6 +86,8 @@ const DEFAULT_REDUCE_THINKING_TIME  = 1
 const DEFAULT_THREE_ANIMATION_DELAY = 250
 const ALL_THREE_PIECES              = ["Queen", "Rook"]
 
+const IMPORT_TIMEOUT                = 3 * ALERT_DELAY
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class LocalEngine extends AbstractEngine{
@@ -599,7 +601,7 @@ class App extends SmartDomElement{
         let importID = urlParams.get("import")
 
         if(importID){
-            this.alert(`Importing ${importID} .`)
+            this.alert(`Importing game [ ${importID} ] .`, "info")
 
             let url = `${GAME_EXPORT_PATH}/${importID}.txt`
 
@@ -609,9 +611,11 @@ class App extends SmartDomElement{
                         try{
                             let blob = JSON.parse(content)
                             let game = Game().fromblob(blob)
-                            this.board.setgame(game)                            
-                            this.switchToAnalyzeMoves()
-                            this.alert(`${importID} imported ok .`, "success")
+                            setTimeout(_ => {
+                                this.board.setgame(game)                            
+                                this.switchToAnalyzeMoves()
+                                this.alert(`Game [ ${importID} ] imported ok .`, "success")
+                            }, IMPORT_TIMEOUT)                            
                         }catch(err){
                             this.alert(`Fetch parse error . Importing ${importID} failed .`, "error")
                         }
@@ -634,13 +638,14 @@ class App extends SmartDomElement{
             if(m){
                 let variant = m[1]
                 let fen = m[2]
-                this.alert(`Setting variant to ${variant} .<br><br>FEN<br><br>${fen}`, "success", 5 * ALERT_DELAY)
+                this.alert(`Importing ${variant} position .<br><br>FEN<br><br>${fen}`, "info", IMPORT_TIMEOUT)
 
                 setTimeout(_ => {
                     this.g.variant = variant
                     this.resetFromFen(fen, SKIP_CONFIRM)
                     this.switchToAnalyzeMoves()
-                }, 5 * ALERT_DELAY)                
+                    this.alert(`Position imported ok .`, "success")
+                }, IMPORT_TIMEOUT)                
             }
         }
     }
