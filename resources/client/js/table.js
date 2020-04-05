@@ -61,7 +61,7 @@ class PlayerPanel_ extends SmartDomElement{
         if(this.g.inProgress){
             this.a(
                 div().dfc().a(
-                    ThinkingTimeLabel({...this.player,...{isTurn: isTurn}}).marr(3),
+                    ThinkingTimeLabel({...this.player,...{isTurn: isTurn}}).marr(8),
                     UserLabel(this.player),                    
                     IS_ME(this.player) ?
                         this.player.offerDraw ?
