@@ -349,6 +349,11 @@ class Table_ extends SmartDomElement{
         )
 
         this.ame(this.uberContainer)
+
+        this.uberContainer.pad(5).mih(window.innerHeight - 80)
+            .addStyle("width", "100%")
+            .addStyle("height", "100%")
+            .bimg("url(resources/client/img/backgrounds/wood_texture.jpg)")            
     }
 }
 function Table(props){return new Table_(props)}
