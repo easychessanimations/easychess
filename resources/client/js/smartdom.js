@@ -2353,3 +2353,32 @@ class GameLabel_ extends SmartDomElement{
     }
 }
 function GameLabel(props){return new GameLabel_(props)}
+
+class ChatText_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.messages = this.props.messages
+
+        this.build()
+    }
+
+    build(){
+        let first = true
+        this.x().a(this.messages.map(message =>{
+            let content = div().bdr("solid", 1, "#aaa", 5).mar(3).pad(2).bc("#ffa").a(
+                UserLabel(message.author),
+                div()
+                    .fw(first ? "bold" : "initial")
+                    .fst(first ? "initial" : "italic")
+                    .c("#303").marl(10).marr(5).html(message.msg)
+            )
+
+
+            first = false
+
+            return content 
+        }))
+    }
+}
+function ChatText(props){return new ChatText_(props)}

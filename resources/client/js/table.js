@@ -241,7 +241,7 @@ class Table_ extends SmartDomElement{
     }
 
     build(){
-        this.chatText.setValue(this.g.chat.asText())                                        
+        this.chatTextDiv.x().a(ChatText(this.g.chat))
         this.players.forEach(player => this.playerPanels[this.g.flip ? 1 - player.index : player.index].setPlayer(player))
         this.timecontrolDiv.x().a(
             VariantLabel(this.g),
@@ -304,7 +304,7 @@ class Table_ extends SmartDomElement{
         this.chatContainer = div().por().a(
             this.timecontrolFormHook = div().poa().zi(100),
             div().dfcc().a(            
-                this.chatText = TextAreaInput().w(this.chatWidth).h(this.chatHeight),
+                this.chatTextDiv = div().w(this.chatWidth).h(this.chatHeight).ovfs(),
                 this.chatInput = TextInput({
                     enterCallback: this.chatMessageEntered.bind(this)
                 })
