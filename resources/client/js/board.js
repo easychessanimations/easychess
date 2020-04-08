@@ -647,7 +647,7 @@ class Board_ extends SmartDomElement{
         return div().a(
             div().df().jc("space-between").a(
                 Button("Minimax", this.parentApp.minimax.bind(this.parentApp, false)).marl(10).w(130).padl(20).padr(20).mart(2).acs("button green"),
-                Button("Unminimax", this.parentApp.clearMinimax.bind(this.parentApp, true)).marl(5).mart(2).acs("button red"),
+                Button("Unminimax", this.parentApp.clearMinimax.bind(this.parentApp, true)).marl(5).marr(10).mart(2).acs("button red"),
             ),
             items
         )
