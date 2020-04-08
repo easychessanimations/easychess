@@ -605,11 +605,11 @@ class Board_ extends SmartDomElement{
             .c(scoretorgb(item.scorenumerical))
             .a(
                 div()
-                    .pad(1).w(80)
+                    .pad(1).ww(140)
                     .html(item.san).fs(26).fwb().cp()
                     .ae("mousedown", this.parentApp.moveClicked.bind(this.parentApp, item.detailedmove)),
                 div()
-                    .pad(1).w(100).cp()                    
+                    .pad(1).ww(100).cp()                    
                     .html(`${item.scorenumerical}`).fs(22).fwb()
                     .ae("mousedown", this.parentApp.addLegalMove.bind(this.parentApp, item.detailedmove, 0)),
                 div()
@@ -645,8 +645,10 @@ class Board_ extends SmartDomElement{
         let items = richanalysisinfo.analysisinfo.summary.map(item =>
             this.createAnalysisInfoItem(item, richanalysisinfo.analysisinfo.lastcompleteddepth))
         return div().a(
-            Button("Minimax", this.parentApp.minimax.bind(this.parentApp, false)).marl(10).w(130).padl(20).padr(20).mart(2).acs("button green"),
-            Button("Unminimax", this.parentApp.clearMinimax.bind(this.parentApp, true)).marl(5).mart(2).acs("button red"),
+            div().df().jc("space-between").a(
+                Button("Minimax", this.parentApp.minimax.bind(this.parentApp, false)).marl(10).w(130).padl(20).padr(20).mart(2).acs("button green"),
+                Button("Unminimax", this.parentApp.clearMinimax.bind(this.parentApp, true)).marl(5).mart(2).acs("button red"),
+            ),
             items
         )
     }
@@ -694,7 +696,7 @@ class Board_ extends SmartDomElement{
                 this.createAnalysisInfoSummary(richanalysisinfo),
                 richanalysisinfo.isLive ? div() :
                     Button("Delete", this.parentApp.deleteAnalysis.bind(this.parentApp))
-                        .mart(20).marl(180).bc(RED_BUTTON_COLOR),
+                        .mart(20).marl(210).bc(RED_BUTTON_COLOR),
             )
         }
     }

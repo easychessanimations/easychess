@@ -949,12 +949,12 @@ class ChessBoard_{
 
         let lms = this.legalmovesforallpieces()
 
-        move = lms.find(move => this.movetoalgeb(move) == algeb)
+        let move = lms.find(testmove => this.movetoalgeb(testmove) == algeb)
 
         if(move) return move
 
         // try non chess960
-        return lms.find(move => this.movetoalgeb(move, NON_CHESS960) == algeb)
+        return lms.find(testmove => this.movetoalgeb(testmove, NON_CHESS960) == algeb)
     }
 
     pushalgeb(algeb){
@@ -3186,13 +3186,12 @@ class AbstractEngine{
         let state = this.analyzedboard.getstate()
         let pvsan = []
         for(let algeb of pv){
-          try{
-              
-            let move = this.analyzedboard.algebtomove(algeb)            
+          try{              
+            let move = this.analyzedboard.algebtomove(algeb)                        
             pvsan.push(this.analyzedboard.movetosan(move))            
             this.analyzedboard.pushalgeb(algeb)
           }catch(err){
-            if(VERBOSE) console.log(err)                        
+            if(VERBOSE) console.log(err)                                    
           }                                
         }
 

@@ -39,7 +39,7 @@ const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
 const GAME_TEXT_AREA_HEIGHT     = 95
 const GAME_TEXT_AREA_WIDTH      = 882
-const COMMENT_TEXT_AREA_WIDTH   = 270
+const COMMENT_TEXT_AREA_WIDTH   = 240
 
 const THUMB_SIZE                = 150
 
@@ -1833,7 +1833,7 @@ class App extends SmartDomElement{
         return (this.storedrai.analysisinfo.lastcompleteddepth <= this.rai.analysisinfo.lastcompleteddepth)
     }
 
-    processanalysisinfo(analysisinfo){        
+    processanalysisinfo(analysisinfo){                
         this.rai = new RichAnalysisInfo(analysisinfo).live(true)
 
         IDB.get("engine", this.board.analysiskey()).then(result => {
@@ -3389,7 +3389,7 @@ class App extends SmartDomElement{
     }
 
     renderAnalysisInfoDiv(){
-        return div().w(260).ovfs()
+        return div().w(290).ovfs()
     }
 
     renderGamesDiv(){
