@@ -11,7 +11,7 @@ const VARIANT_TO_ENGINE = {
     standard: "stockfish",
     atomic: "stockfish",
     seirawan: "fairy",
-    eightpiece: null
+    eightpiece: "gochess"
 }
 
 const VARIANT_TO_LOCAL_ENGINE = {
@@ -3109,6 +3109,7 @@ class AbstractEngine{
   }
 
   processstdoutline(line){           
+      if(line.match(/^info string/)) return
     if(VERBOSE) console.log("line", line)
 
     let bm = line.match(/^bestmove ([^\s]+)/)
@@ -3164,18 +3165,19 @@ class AbstractEngine{
 
       let mp = line.match(/ pv (.+)/)      
 
-      if(mp){
+      if(mp){        
         let pv = mp[1].split(" ")
-        move = pv[0]          
+        move = pv[0]                  
         let state = this.analyzedboard.getstate()
         let pvsan = []
         for(let algeb of pv){
           try{
-            let move = this.analyzedboard.algebtomove(algeb)
+              
+            let move = this.analyzedboard.algebtomove(algeb)            
             pvsan.push(this.analyzedboard.movetosan(move))            
             this.analyzedboard.pushalgeb(algeb)
           }catch(err){
-            if(VERBOSE) console.log(err)
+            if(VERBOSE) console.log(err)                        
           }                                
         }
 
@@ -3187,7 +3189,7 @@ class AbstractEngine{
       if(depth){
         if(depth < this.highestdepth) return
         this.highestdepth = depth
-      }        
+      }      
 
       if(!move) return
 
@@ -3414,6 +3416,8 @@ class RichAnalysisInfo{
                 item.detailedmove = detailedmove                                
             }
         }
+
+        this.analysisinfo.summary = this.analysisinfo.summary.filter(item => item.pvsans.length > 0)
     }
 
     get hasScorenumerical(){
@@ -3436,7 +3440,7 @@ class RichAnalysisInfo{
         return this
     }
 
-    asText(){
+    asText(){        
         let npsInfo = this.isLive ? ` --> nps ${this.analysisinfo.nps || "0"}` : ""
         return `--> ${this.isLive ? "running -->" : "stored  -->"} depth  ${this.analysisinfo.lastcompleteddepth.toString().padEnd(3, " ") + npsInfo}\n${this.analysisinfo.summary.map(item => item.pvsans[0].padEnd(8, " ") + ((item.scorenumerical < 0 ? "" : "+") + item.scorenumerical.toString()).padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`
     }

@@ -1835,7 +1835,7 @@ class App extends SmartDomElement{
         return (this.storedrai.analysisinfo.lastcompleteddepth <= this.rai.analysisinfo.lastcompleteddepth)
     }
 
-    processanalysisinfo(analysisinfo){
+    processanalysisinfo(analysisinfo){        
         this.rai = new RichAnalysisInfo(analysisinfo).live(true)
 
         IDB.get("engine", this.board.analysiskey()).then(result => {
@@ -2508,6 +2508,7 @@ class App extends SmartDomElement{
 
         this.source.addEventListener('message', e => {                        
             let analysisinfo = JSON.parse(e.data)                 
+            analysisinfo.kind = analysisinfo.kind || "engine"
             let m            
             if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()
@@ -2515,7 +2516,7 @@ class App extends SmartDomElement{
                 this.showOnline(analysisinfo.online)
             }else if(m = analysisinfo.kind.match(/^play:(.+)$/)){
                 this.table.processApi(m[1], analysisinfo)
-            }else{
+            }else{                
                 this.processanalysisinfo(analysisinfo)
             }            
         }, false)

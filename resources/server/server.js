@@ -293,6 +293,7 @@ if(!process.env.SKIP_OAUTH){
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
 const FAIRY_PATH = path.join(__dirname, "bin/fairy")
+const GOCHESS_PATH = path.join(__dirname, "bin/gochess")
 
 let clientScripts = readJson('resources/conf/clientscripts.json')[IS_DEV() ? "dev" : "prod"]
 let clientStyleSheets = readJson('resources/conf/clientstylesheets.json')[IS_DEV() ? "dev" : "prod"]
@@ -522,12 +523,12 @@ class ServerEngine extends AbstractEngine{
     constructor(sendanalysisinfo, path){
         super(sendanalysisinfo, path)
 
-        this.minDepth = 10
+        if(!path.match("gochess")) this.minDepth = 10
     }
 
     processstdout(data){
         data = data.replace(/\r/g, "")        
-        for(let line of data.split("\n")){
+        for(let line of data.split("\n")){            
             this.processstdoutline(line)
         }
     }
@@ -553,6 +554,7 @@ class ServerEngine extends AbstractEngine{
 const engines = {
     stockfish: new ServerEngine(ssesend, STOCKFISH_PATH),
     fairy:  new ServerEngine(ssesend, FAIRY_PATH),
+    gochess:  new ServerEngine(ssesend, GOCHESS_PATH),
 }
 
 if(IS_PROD()) setInterval(function(){
