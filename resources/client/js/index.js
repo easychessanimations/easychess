@@ -781,10 +781,7 @@ class App extends SmartDomElement{
 
     renderMultiPGNDiv(){
         return div().a(
-            div().mar(5).a(
-                div().a(
-                    Button("Export game", this.exportGame.bind(this)).fs(18).bc(GREEN_BUTTON_COLOR)
-                ),
+            div().mar(5).a(                
                 div().mart(10).addStyle("width", "100%").pad(2).bc("#eee").a(
                     Button("Report PGN", this.reportMultiPGN.bind(this, !DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
                     Button("Report PGN with comments", this.reportMultiPGN.bind(this, DO_COMMENTS)).bc(GREEN_BUTTON_COLOR),
@@ -1159,6 +1156,7 @@ class App extends SmartDomElement{
             div().mar(5).a(
                 div().df().jc("space-between").addStyle("width", "100%").pad(2).bc("#eee").a(
                     Button("Report FEN", this.reportFen.bind(this)).bc(GREEN_BUTTON_COLOR),                    
+                    Button("Export game", this.exportGame.bind(this)).fs(18).bc(GREEN_BUTTON_COLOR),
                     Button("Export position", this.exportPosition.bind(this)).fs(18).bc(YELLOW_BUTTON_COLOR)
                 ),
                 this.fenTextInput = TextInput()

@@ -1,3 +1,5 @@
+const NON_CHESS960 = true
+
 const MAX_PLMS_GEN_DEPTH = 1
 
 const SUPPORTED_VARIANTS = [
@@ -648,8 +650,12 @@ class ChessBoard_{
 
     squaretoalgeb(sq){return `${String.fromCharCode(sq.file + 'a'.charCodeAt(0))}${String.fromCharCode(NUM_SQUARES - 1 - sq.rank + '1'.charCodeAt(0))}`}
 
-    movetoalgeb(move){
+    movetoalgeb(move, nochess960){
         if(!move) return "-"
+
+        if(!nochess960 && move.castling){
+            return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.delrooksq)}`
+        }
 
         if(this.IS_SCHESS()){            
             if(move.castling){                
@@ -668,14 +674,16 @@ class ChessBoard_{
         }
 
         let fromp = this.pieceatsquare(move.fromsq)
+        let top = this.pieceatsquare(move.tosq)
 
         let prom = move.prompiece ? move.prompiece.kind : ""
 
-        if(fromp.kind == "l"){
+        if((fromp.kind == "l") || ((fromp.kind == "s")) && (top.kind == "l")){
             if(move.prompiece){
-                prom = move.prompiece.direction.toPieceDirectionString()
+                prom += move.prompiece.direction.toPieceDirectionString()
             }else{
                 // lancer prompiece may be missing when lancer is pushed
+                prom += fromp.direction.toPieceDirectionString()
             }            
         }
 
@@ -941,7 +949,12 @@ class ChessBoard_{
 
         let lms = this.legalmovesforallpieces()
 
-        return lms.find(move => this.movetoalgeb(move) == algeb)
+        move = lms.find(move => this.movetoalgeb(move) == algeb)
+
+        if(move) return move
+
+        // try non chess960
+        return lms.find(move => this.movetoalgeb(move, NON_CHESS960) == algeb)
     }
 
     pushalgeb(algeb){
@@ -1590,14 +1603,16 @@ class ChessBoard_{
 
     movefromalgeb(algeb){
         let move = new Move(this.squarefromalgeb(algeb.slice(0,2)), this.squarefromalgeb(algeb.slice(2,4)))
+
         if(algeb.includes("@")){            
             if(this.IS_SCHESS()){                
                 let sq = this.squarefromalgeb(algeb.slice(2,4))
                 let p = new Piece(algeb.slice(0,1).toLowerCase(), this.turnfen == "w")
                 return new Move(sq, sq, p)    
             }            
+
             if(this.IS_EIGHTPIECE()){
-                let sq = this.squarefromalgeb(algeb.slice(6,8))
+                let sq = this.squarefromalgeb(algeb.match(/@(.*)/)[1])
                 move.promsq = sq
             }
         }        

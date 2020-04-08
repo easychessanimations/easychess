@@ -85,11 +85,11 @@ To set the study from a PGN, go to `Tools / FEN` and paste the PGN into the `Res
 
 To set the study from a FEN, go to `Tools / FEN` and paste the PGN into the `Reset from this FEN` text box. This will delete the entire study and set it as a single position described by the FEN. The variant will be the current variant.
 
-### Export and import game
+## Export and import game
 
 To export a game visit
 
-[Tools / MultiPGN](https://easychess.herokuapp.com/?ubertab=analyze&tab=tools/multiPGN)
+[Tools / FEN](https://easychess.herokuapp.com/?ubertab=analyze&tab=tools/fen)
 
 and press "Export game" .
 
