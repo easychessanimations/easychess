@@ -721,6 +721,12 @@ class Board_ extends SmartDomElement{
     }
 
     highlightLastMove(){
+        try{
+            this.highlightLastMoveInner()
+        }catch(err){}
+    }
+
+    highlightLastMoveInner(){
         if(this.props.nohighlight) return
         let currentnode = this.getcurrentnode()
         let highlightcanvas = this.getCanvasByName("highlight")
