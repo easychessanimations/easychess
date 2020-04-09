@@ -10,7 +10,8 @@ else console.log("skip discord bot")
 
 const EXT_TO_MEDIA_TYPE = {
     ogg: "ogg",
-    ogv: "ogg"
+    ogv: "ogg",
+    mp3: "mpeg",
 }
 
 const discordPackage = {

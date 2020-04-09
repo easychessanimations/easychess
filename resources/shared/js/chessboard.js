@@ -653,10 +653,6 @@ class ChessBoard_{
     movetoalgeb(move, nochess960){
         if(!move) return "-"
 
-        if(!nochess960 && move.castling){
-            return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.delrooksq)}`
-        }
-
         if(this.IS_SCHESS()){            
             if(move.castling){                
                 let from = move.fromsq
@@ -688,6 +684,10 @@ class ChessBoard_{
         }
 
         if(move.promsq) prom += "@" + this.squaretoalgeb(move.promsq)
+
+        if((!nochess960) && move.castling){
+            return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.delrooksq)}`
+        }
 
         return `${this.squaretoalgeb(move.fromsq)}${this.squaretoalgeb(move.tosq)}${prom}`
     }
@@ -3424,7 +3424,7 @@ class RichAnalysisInfo{
         for(let item of this.analysisinfo.summary){
             let move = this.board.movefromalgeb(item.uci)
             item.move = move
-            let detailedmove = this.lms.find((m)=>this.board.movetoalgeb(m) == item.uci)
+            let detailedmove = this.board.algebtomove(item.uci)
             if(detailedmove){
                 item.san = this.board.movetosan(detailedmove)                
                 item.detailedmove = detailedmove                                

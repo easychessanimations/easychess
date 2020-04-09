@@ -725,25 +725,37 @@ class Board_ extends SmartDomElement{
         let currentnode = this.getcurrentnode()
         let highlightcanvas = this.getCanvasByName("highlight")
         highlightcanvas.clear()        
-        if(currentnode.genalgeb){                        
-            let move = this.b.movefromalgeb(currentnode.genalgeb)                                    
+        if(currentnode.genalgeb){                               
             let testb = ChessBoard().setfromfen(currentnode.getparent().fen, this.g.variant)
+            let move = testb.algebtomove(currentnode.genalgeb)                                                
             let fromp = testb.pieceatsquare(move.fromsq)
+            let top = testb.pieceatsquare(move.tosq)
+            let sounds = [PIECE_LETTER_TO_SOUND[fromp.letter()]]
+            if(!top.isempty()){
+                sounds.push("explosion")
+            }            
+            if(this.b.iskingincheck(this.b.turn)){
+                sounds.push("foghorn")
+            }
             if(fromp.kind){
-                let sound = PIECE_LETTER_TO_SOUND[fromp.letter()]
-                let allowed = true
-                try{                    
-                    if(this.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false                                        
-                }catch(err){}
-                try{                                        
-                    if(this.parentApp.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
-                }catch(err){}
-                if(sound && allowed){
-                    document.getElementById(sound).play().then(
-                        _ => {},
-                        _ => {}
-                    )
-                }                
+                let delay = 0
+                for(let sound of sounds){                
+                    let allowed = true
+                    try{                    
+                        if(this.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false                                        
+                    }catch(err){}
+                    try{                                        
+                        if(this.parentApp.parentApp.settings.disablePieceSoundsCheckbox.checked) allowed = false
+                    }catch(err){}
+                    if(sound && allowed){
+                        setTimeout(_ => document.getElementById(sound).play().then(
+                            _ => {},
+                            _ => {}
+                        ), delay)
+                            
+                        delay += 1000
+                    }                
+                }
             }
             this.drawmovearrow(highlightcanvas, move, {
                 scalefactor: this.arrowscalefactor()
