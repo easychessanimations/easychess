@@ -2,7 +2,7 @@ const { Bucket } = require('./bucket')
 
 const { Chat, ChatMessage, Game, Player, UNSEAT } = require('../shared/js/chessboard')
 
-var apisend, ssesend, bucket, discordPackage
+var apisend, ssesend, bucket, discordbot
 
 var stateBucket, gamesBucket
 
@@ -32,11 +32,11 @@ function sendGames(){
     ssesend(sendGamesBlob())
 }
 
-function init(setApisend, setSsesend, setBucket, setDiscordPackage){
+function init(setApisend, setSsesend, setBucket, setDiscordbot){
     apisend = setApisend
     ssesend = setSsesend
     bucket = setBucket
-    discordPackage = setDiscordPackage
+    discordbot = setDiscordbot
 
     stateBucket = new Bucket("easychessgamestate", bucket)
 
@@ -71,21 +71,21 @@ function sendDiscordLiveMessage(msg){
     console.log(msg)
 
     try{
-        if(discordPackage.discordbot){
-            let client = discordPackage.discordbot.client
+        if(discordbot){
+            let client = discordbot.client
 
-            client.channels.cache.get(discordPackage.livechannel)
+            client.channels.cache.get(discordbot.livechannel)
                 .send(msg)
 
             let playLinkMsg = process.env.PLAY_LINK_MESSAGE || `https://easychess.herokuapp.com/?ubertab=play`
 
-            client.channels.cache.get(discordPackage.livechannel)
+            client.channels.cache.get(discordbot.livechannel)
                 .send(playLinkMsg)
         }
     }catch(err){console.log(err)}
 }
 
-function initDiscord(){    
+function initDiscord(){        
     sendDiscordLiveMessage(`easychess BOT logged in`)
 }
 

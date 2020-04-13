@@ -14,11 +14,6 @@ const EXT_TO_MEDIA_TYPE = {
     mp3: "mpeg",
 }
 
-const discordPackage = {
-    discordbot: discordbot,
-    livechannel: process.env.LIVE_CHANNEL || "694116000710524978"
-}
-
 const GAMES_EXPORT_REPO = "easychessgames"
 
 const SSE_STARTUP_DELAY = IS_DEV() ? 250 : 3000
@@ -673,7 +668,7 @@ if(process.env.KEEPALIVE){
 
 if(process.env.OTHER_SITE) fetch(process.env.OTHER_SITE)
 
-play.init(apisend, ssesend, bucket, discordPackage)
+play.init(apisend, ssesend, bucket, discordbot)
 
 monitor.setSendOnlineUsersFunc(online => {
     ssesend({
