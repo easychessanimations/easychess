@@ -5,12 +5,12 @@ const livechannel = process.env.LIVE_CHANNEL || "694116000710524978"
 
 async function purgeLivechannel(){
     let channel = client.channels.cache.get(livechannel)
-    const fetched = await channel.messages.fetch({limit: process.env.PURGE_LIVE_CHANNEL_LIMIT || 1})    
+    const fetched = await channel.messages.fetch({limit: process.env.PURGE_LIVE_CHANNEL_LIMIT || 100})    
 
     let prev = null
 
     let del = 0
-    fetched.forEach(message => {        
+    fetched.forEach(message => {                
         let messageAgeHours = Math.round((new Date().getTime() - message.createdTimestamp)/1000/3600)
         let purgeAgeLimitHours = process.env.PURGE_AGE_LIMIT_HOURS || 24
         if(messageAgeHours > purgeAgeLimitHours){
