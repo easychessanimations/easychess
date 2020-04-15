@@ -3150,7 +3150,7 @@ class AbstractEngine{
       return
     }
 
-    if(line.match(/^info/)){
+    if(line.match(/^info/)){        
       let depth = null
       let mdepth = line.match(/ depth (.+)/)
 
@@ -3181,7 +3181,7 @@ class AbstractEngine{
       let mp = line.match(/ pv (.+)/)      
 
       if(mp){        
-        let pv = mp[1].split(" ")
+        let pv = mp[1].split(" ")        
         move = pv[0]                  
         let state = this.analyzedboard.getstate()
         let pvsan = []
@@ -3189,9 +3189,9 @@ class AbstractEngine{
           try{              
             let move = this.analyzedboard.algebtomove(algeb)                        
             pvsan.push(this.analyzedboard.movetosan(move))            
-            this.analyzedboard.pushalgeb(algeb)
+            this.analyzedboard.push(move)
           }catch(err){
-            if(VERBOSE) console.log(err)                                    
+            if(VERBOSE) console.log(err)                                                
           }                                
         }
 
@@ -3245,17 +3245,23 @@ class AbstractEngine{
 
       this.pvs = newpvs        
 
-      this.sortedpvs = Object.keys(this.pvs).sort((a, b)=>this.pvs[b].scorenumerical - this.pvs[a].scorenumerical)                                
-
-      if(this.sortedpvs.length >= this.multipv){
-        let mindepth = null
-        for(let move of this.sortedpvs.slice(0, this.multipv)){            
-          let currentdepth = this.pvs[move].depth
-          if(mindepth === null) mindepth = currentdepth
-          else if(currentdepth < mindepth) mindepth = currentdepth
+      this.sortedpvs = Object.keys(this.pvs)
+        .sort((a, b)=>this.pvs[b].scorenumerical - this.pvs[a].scorenumerical)                                
+        .sort((a, b)=>this.pvs[b].depth - this.pvs[a].depth)                                
+    
+    let pvsAtDepth = {}
+    this.completeddepth = 0
+    for(let move of this.sortedpvs.slice(0, this.multipv)){            
+        let currentdepth = this.pvs[move].depth
+        if(typeof pvsAtDepth[currentdepth] != "undefined"){
+            pvsAtDepth[currentdepth]++
+        }else{
+            pvsAtDepth[currentdepth]=1
         }
-        this.completeddepth = mindepth          
-      }        
+        if(pvsAtDepth[currentdepth] >= this.multipv){
+            this.completeddepth = currentdepth
+        }
+    }
 
       if(this.completeddepth > this.lastcompleteddepth){
         this.lastcompleteddepth = this.completeddepth        
@@ -3279,7 +3285,7 @@ class AbstractEngine{
         this.analysisinfo.lastcompleteddepth = this.lastcompleteddepth
         this.analysisinfo.summary = summary
         
-        if(this.analysisinfo.lastcompleteddepth >= ( this.minDepth ? this.minDepth : 0 ) ){
+        if(this.analysisinfo.lastcompleteddepth >= ( this.minDepth ? this.minDepth : 0 ) ){            
           this.sendanalysisinfo(this.analysisinfo)
         }        
       }

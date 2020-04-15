@@ -2505,7 +2505,7 @@ class App extends SmartDomElement{
         this.source = new EventSource('/stream')
 
         this.source.addEventListener('message', e => {                        
-            let analysisinfo = JSON.parse(e.data)                 
+            let analysisinfo = JSON.parse(e.data)                             
             analysisinfo.kind = analysisinfo.kind || "engine"
             let m            
             if(analysisinfo.kind == "tick"){
