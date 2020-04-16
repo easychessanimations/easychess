@@ -691,7 +691,7 @@ setTimeout(_ => {
                 localFileName = engineName.replace("_upload", "")
                 console.log("saving engine as", localFileName)
                 fs.writeFileSync(path.join(__dirname, "bin", localFileName), contents)
-                exec("chmod a+x bin/*", (error, stdout, stderr) => {
+                exec("chmod a+x resources/server/bin/*", (error, stdout, stderr) => {
                     if (error) {
                         console.log(`chmod error: ${error.message}`);
                         return;
