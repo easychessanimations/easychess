@@ -3280,12 +3280,13 @@ class AbstractEngine{
           i++
         }
 
-        if(VERBOSE) console.log(summary)
-
         this.analysisinfo.lastcompleteddepth = this.lastcompleteddepth
         this.analysisinfo.summary = summary
+
+        if(VERBOSE) console.log("summary", summary, "mindepth", this.minDepth, "lascompleteddepth", this.analysisinfo.lastcompleteddepth)
         
         if(this.analysisinfo.lastcompleteddepth >= ( this.minDepth ? this.minDepth : 0 ) ){            
+            if(VERBOSE) console.log("sending analysisinfo")
           this.sendanalysisinfo(this.analysisinfo)
         }        
       }

@@ -289,7 +289,7 @@ if(!process.env.SKIP_OAUTH){
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
 const FAIRY_PATH = path.join(__dirname, "bin/fairy")
-const GOCHESS_PATH = path.join(__dirname, "bin/gochess")
+const GOCHESS_PATH = path.join(__dirname, "bin/zurimain")
 
 let clientScripts = readJson('resources/conf/clientscripts.json')[IS_DEV() ? "dev" : "prod"]
 let clientStyleSheets = readJson('resources/conf/clientstylesheets.json')[IS_DEV() ? "dev" : "prod"]
@@ -338,6 +338,10 @@ function setcommandVariantEngine(command, payload, res){
     let engineKey = VARIANT_TO_ENGINE[payload.variant || "standard"]
     if(!engineKey){
         apisend({}, `Error: No engine for variant ${payload.variant} .`, res)
+        return
+    }
+    if(!engines[engineKey]){
+        apisend({}, `Error: Engine is being loaded for variant ${payload.variant} . Please try again .`, res)
         return
     }
     engines[engineKey].setcommand(command, payload)    
@@ -519,7 +523,7 @@ class ServerEngine extends AbstractEngine{
     constructor(sendanalysisinfo, path){
         super(sendanalysisinfo, path)
 
-        if(!path.match("gochess")) this.minDepth = 10
+        if(!path.match("zurimain")) this.minDepth = 10
     }
 
     processstdout(data){
@@ -549,8 +553,7 @@ class ServerEngine extends AbstractEngine{
 
 const engines = {
     stockfish: new ServerEngine(ssesend, STOCKFISH_PATH),
-    fairy:  new ServerEngine(ssesend, FAIRY_PATH),
-    gochess:  new ServerEngine(ssesend, GOCHESS_PATH),
+    fairy:  new ServerEngine(ssesend, FAIRY_PATH),    
 }
 
 if(IS_PROD()) setInterval(function(){
@@ -676,5 +679,22 @@ monitor.setSendOnlineUsersFunc(online => {
         online: online
     })
 })
+
+setTimeout(_ => {
+    if(bucket){
+        let engineName = IS_DEV() ? "zurimain_upload.exe" : "zurimain_upload"
+        console.log("downloading engine", engineName)
+        bucket.file(engineName).download((err, contents)=>{
+            if(err){
+                console.log("engine download failed", err)
+            }else{
+                localFileName = engineName.replace("_upload", "")
+                console.log("saving engine as", localFileName)
+                fs.writeFileSync(path.join(__dirname, "bin", localFileName), contents)
+                engines.gochess = new ServerEngine(ssesend, GOCHESS_PATH)
+            }            
+        })
+    }
+}, 20000)
 
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))
