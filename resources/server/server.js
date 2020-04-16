@@ -48,7 +48,7 @@ var LichessStrategy = require('passport-lichess').Strategy;
 var DiscordStrategy = require('passport-discord').Strategy;
 var GitHubStrategy = require('passport-github').Strategy;
 const path = require('path')
-const spawn = require('child_process').spawn
+const { spawn, exec } = require('child_process')
 const fs = require('fs')
 const fetch = require('node-fetch')
 const { getFiles } = require('../utils/fileutils')
@@ -691,7 +691,18 @@ setTimeout(_ => {
                 localFileName = engineName.replace("_upload", "")
                 console.log("saving engine as", localFileName)
                 fs.writeFileSync(path.join(__dirname, "bin", localFileName), contents)
-                engines.gochess = new ServerEngine(ssesend, GOCHESS_PATH)
+                exec("chmod a+x bin/*", (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`chmod error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`chmod stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`chmod stdout: ${stdout}`);
+                    engines.gochess = new ServerEngine(ssesend, GOCHESS_PATH)
+                });                
             }            
         })
     }
