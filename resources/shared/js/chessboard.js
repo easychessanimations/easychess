@@ -370,6 +370,18 @@ class Move_{
     roughlyequalto(move){
         return this.fromsq.equalto(move.fromsq) && this.tosq.equalto(move.tosq)
     }
+
+    strictlyEqualTo(move){
+        if(this.promsq){
+            if(!move.promsq) return false
+            if(!this.promsq.equalto(move.promsq)) return false
+        }
+        if(this.prompiece){
+            if(!move.prompiece) return false
+            if(!this.prompiece.equalto(move.prompiece)) return false
+        }
+        return this.fromsq.equalto(move.fromsq) && this.tosq.equalto(move.tosq)
+    }
 }
 function Move(fromsq, tosq, prompiece, epclsq, epsq, promsq){return new Move_(fromsq, tosq, prompiece, epclsq, epsq, promsq)}
 
@@ -1556,9 +1568,9 @@ class ChessBoard_{
 
             if(move.promsq) prom += "@" + this.squaretoalgeb(move.promsq)
         }
-        if(fromp.kind == "l"){
+        /*if(fromp.kind == "l"){
             prom = move.prompiece.direction.toPieceDirectionString()
-        }
+        }*/
         let place = move.placePiece ? "/" + move.placePiece.kind.toUpperCase() : ""
 
         if(fromp.kind == "p"){

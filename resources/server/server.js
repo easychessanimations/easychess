@@ -680,7 +680,9 @@ monitor.setSendOnlineUsersFunc(online => {
     })
 })
 
-setTimeout(_ => {
+if(IS_DEV()){
+    engines.gochess = new ServerEngine(ssesend, GOCHESS_PATH)
+}else setTimeout(_ => {
     if(bucket){
         let engineName = IS_DEV() ? "zurimain_upload.exe" : "zurimain_upload"
         console.log("downloading engine", engineName)

@@ -2274,6 +2274,7 @@ class App extends SmartDomElement{
     }
 
     positionchanged(){
+        //console.log(this.g)
         this.rai = null
         this.storedrai = null
         this.board.clearanalysisinfo()

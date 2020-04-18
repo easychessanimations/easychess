@@ -159,7 +159,10 @@ class Board_ extends SmartDomElement{
         return lms
     }
 
-    makeMove(move){
+    makeMove(move){                
+        let trueMove = this.getlms().find(lm => lm.strictlyEqualTo(move))
+        if(!trueMove) return
+        move = trueMove
         let san = this.b.movetosan(move)
         this.g.makemove(move)
         this.positionchanged()
@@ -245,7 +248,7 @@ class Board_ extends SmartDomElement{
 
         if(valid.prompiece && (this.draggedpiece.kind != "l") && (this.draggedpiece.kind != "s")){                            
             this.awaitSquareClick = true
-            this.inputtedMove = valid
+            this.inputtedMove = valid            
             this.buildPromotionSquares(this.b.PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
             return
         }
@@ -297,7 +300,7 @@ class Board_ extends SmartDomElement{
 
         if( (this.draggedpiece.kind == "l") && (!valid.keepDirection) ){                            
             this.awaitSquareClick = true
-            this.inputtedMove = valid
+            this.inputtedMove = valid            
             this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
             return
         }
@@ -315,7 +318,7 @@ class Board_ extends SmartDomElement{
                     this.draw()
                 }
             }
-        }else{
+        }else{            
             this.makeMove(valid)
         }                            
     }
