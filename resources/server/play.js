@@ -195,6 +195,9 @@ function api(topic, payload, req, res){
 
     switch(topic){        
         case "postChatMessage":
+            if(!assert(req, res, {
+                login: `Log in to post in the chat.`                
+            })) return                        
             let chatMessage = ChatMessage(payload.chatMessage)
             game.chat.postMessage(chatMessage)
             apisend(`playapi:chatMessagePosted`, null, res)
