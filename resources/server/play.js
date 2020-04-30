@@ -198,7 +198,10 @@ function api(topic, payload, req, res){
             if(!assert(req, res, {
                 login: `Log in to post in the chat.`                
             })) return                        
-            let chatMessage = ChatMessage(payload.chatMessage)
+            let chatMessage = ChatMessage(payload.chatMessage) || ""
+            if(chatMessage.length > 200){
+                chatMessage = chatMessage.substring(0, 200)
+            }
             game.chat.postMessage(chatMessage)
             apisend(`playapi:chatMessagePosted`, null, res)
             sendGame()
