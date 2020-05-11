@@ -60,7 +60,7 @@ client.on('message', msg => {
         console.log("admin message", content)
 
         if(m = content.match(/^!del (\d+)/)){
-            bulkDelete(msg.channel, parseInt(m[1]))
+            //bulkDelete(msg.channel, parseInt(m[1]))
         }
 
         ////////////////////////////////////////////////
