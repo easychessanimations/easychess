@@ -3729,7 +3729,7 @@ class App extends SmartDomElement{
                     .toolTip({msg: "Lichess analysis"}),                                                  
                 Button("R", this.reloadPage.bind(this)).bc(YELLOW_BUTTON_COLOR)
                     .toolTip({msg: "Reload page"}),                                                                                        
-                this.commandInput = TextInput().w(60).ae("keyup", this.commandChanged.bind(this)),                                
+                this.commandInput = TextInput().w(30).ae("keyup", this.commandChanged.bind(this)),                                
                 Button("G", this.loadLatestGame.bind(this)).bc(GREEN_BUTTON_COLOR)
                     .toolTip({msg: "Load latest lichess game"}),                                                                                        
             )
