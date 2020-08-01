@@ -1607,7 +1607,9 @@ class App extends SmartDomElement{
             })
 
             setTimeout(() => {                
-                this.writeBotChat(id, ["player", "spectator"], msg)
+                if(!this.settings.muteMoveInfoCheckbox.checked){
+                    this.writeBotChat(id, ["player", "spectator"], msg)
+                }                
 
                 this.botEventLogger.log(LogItem({
                     text: msg,
@@ -1655,6 +1657,22 @@ class App extends SmartDomElement{
                     ok = false
                     status = "wrong variant"
                 }
+            }
+
+            let disableRated = this.settings.disableRatedCheckbox.checked
+            let disableCasual = this.settings.disableCasualCheckbox.checked
+
+            let rated = event.challenge.rated
+            let casual = !rated
+
+            if(rated && disableRated){
+                ok = false
+                status = "rated disabled"
+            }
+
+            if(casual && disableCasual){
+                ok = false
+                status = "casual disabled"
             }
 
             if(event.challenge.timeControl.limit < 60){
@@ -3748,7 +3766,23 @@ class App extends SmartDomElement{
             options: [
                 TextAreaInput({
                     id: "acceptBotVariantsTextAreaInput",                    
-                    display: "Accept variants",                                        
+                    display: "Accept variants",          
+                    text: "standard",                              
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "disableCasualCheckbox",                    
+                    display: "Disable casual",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "disableRatedCheckbox",                    
+                    display: "Disable rated",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "muteMoveInfoCheckbox",                    
+                    display: "Mute move info",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
