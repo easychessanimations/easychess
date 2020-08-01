@@ -1675,6 +1675,17 @@ class App extends SmartDomElement{
                 status = "casual disabled"
             }
 
+            let speed = event.challenge.speed
+
+            let acceptSpeeds = this.settings.acceptSpeedsTextAreaInput.text
+
+            if(acceptSpeeds){
+                if(!acceptSpeeds.split(" ").includes(speed)){
+                    ok = false
+                    status = "wrong speed"    
+                }
+            }
+
             if(event.challenge.timeControl.limit < 60){
                 ok = false
                 status = "initial clock < 60"
@@ -3766,8 +3777,13 @@ class App extends SmartDomElement{
             options: [
                 TextAreaInput({
                     id: "acceptBotVariantsTextAreaInput",                    
-                    display: "Accept variants",          
+                    display: "Accept variants ( space separated variant keys )",          
                     text: "standard",                              
+                    settings: this.settings
+                }),
+                TextAreaInput({
+                    id: "acceptSpeedsTextAreaInput",                    
+                    display: "Accept speeds ( space separated, empty for all )",                              
                     settings: this.settings
                 }),
                 CheckBoxInput({
