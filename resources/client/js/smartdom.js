@@ -547,7 +547,9 @@ class TextAreaInput_ extends SmartDomElement{
 
     init(){        
         this.ae("input", this.textChanged.bind(this))
-        if(typeof this.props.text != "undefined") this.state.text = this.props.text
+        if(typeof this.props.text != "undefined"){
+            if(!this.state.text) this.state.text = this.props.text
+        }
         this.setFromState()
     }
 
