@@ -1864,7 +1864,7 @@ class Chat_{
     postMessage(chatMessamge){
         this.messages.unshift(chatMessamge)
 
-        if(chatMessamge == "delall"){
+        if(chatMessamge.msg == "delall"){
             this.messages = []
         }
 
