@@ -1864,6 +1864,10 @@ class Chat_{
     postMessage(chatMessamge){
         this.messages.unshift(chatMessamge)
 
+        if(chatMessamge == "delall"){
+            this.messages = []
+        }
+
         while(this.messages.length > this.capacity) this.messages.pop()
     }
 
