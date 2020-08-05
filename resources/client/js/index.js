@@ -1686,10 +1686,12 @@ class App extends SmartDomElement{
                 }
             }
 
-            if(event.challenge.timeControl.limit < 60){
-                ok = false
-                status = "initial clock < 60"
-            }
+            if(!this.settings.allowFastTimeControlsCheckbox.checked){
+                if(event.challenge.timeControl.limit < 60){
+                    ok = false
+                    status = "initial clock < 60"
+                }
+            }            
 
             if(ok) acceptLichessChallenge(event.challenge.id, this.USER().accessToken).then(result => {                
                 this.logBotEvent(result)                
@@ -3784,6 +3786,11 @@ class App extends SmartDomElement{
                 TextAreaInput({
                     id: "acceptSpeedsTextAreaInput",                    
                     display: "Accept speeds ( space separated, empty for all )",                              
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "allowFastTimeControlsCheckbox",                    
+                    display: "Allow fast time controls",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
