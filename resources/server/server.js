@@ -662,11 +662,16 @@ app.get('/book.worker.js', function(req, res) {
 
 app.get('/online', function(req, res) {  
     let online_all = monitor.online_all
+    let keys = []
     for(let key in online_all){
         online_all[key].lastSeenTime = new Date(online_all[key].lastSeen).toLocaleTimeString()
+        keys.push(key)
     }
     res.send(
-`<pre>
+`
+<b>${keys.length}</b> user(s) : ${keys.join(" , ")}
+<br>
+<pre>
 ${JSON.stringify(online_all, null, 2)}
 </pre>`
     )
