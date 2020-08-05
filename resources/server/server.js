@@ -660,6 +660,12 @@ app.get('/book.worker.js', function(req, res) {
     res.sendFile(`${__rootdirname}/resources/client/js/book.worker.js`)
 })
 
+app.get('/online', function(req, res) {  
+    res.send(`<pre>
+    ${JSON.stringify(monitor.online_all, null, 2)}
+</pre>`)
+})
+
 if(process.env.KEEPALIVE){
     let keepalive = parseInt(process.env.KEEPALIVE)
     let keepaliveInterval = setInterval(()=>{

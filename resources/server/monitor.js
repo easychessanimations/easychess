@@ -1,4 +1,5 @@
 var online = {}
+var online_all = {}
 
 const FORGET_DELAY = 60 * 1000
 
@@ -18,6 +19,7 @@ module.exports = {
     setSendOnlineUsersFunc: setSendOnlineUsersFunc,
     sendOnlineUsers: sendOnlineUsers,
     online: online,
+    online_all: online_all,
     monitor: function (req, res, next) {
         let changed = false
 
@@ -32,6 +34,8 @@ module.exports = {
                 username: req.user.username,
                 lastSeen: new Date().getTime()
             }
+
+            online_all[userPath] = online[userPath]
         }
 
         for(let userPath in online){
