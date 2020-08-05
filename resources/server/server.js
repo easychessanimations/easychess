@@ -661,9 +661,15 @@ app.get('/book.worker.js', function(req, res) {
 })
 
 app.get('/online', function(req, res) {  
-    res.send(`<pre>
-    ${JSON.stringify(monitor.online_all, null, 2)}
-</pre>`)
+    let online_all = monitor.online_all
+    for(let key in online_all){
+        online_all[key].lastSeenTime = new Date(online_all[key].lastSeen).toLocaleTimeString()
+    }
+    res.send(
+`<pre>
+${JSON.stringify(online_all, null, 2)}
+</pre>`
+    )
 })
 
 if(process.env.KEEPALIVE){
