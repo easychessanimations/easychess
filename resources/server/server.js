@@ -675,7 +675,7 @@ app.get('/online', function(req, res) {
 `
 <b>${keys.length}</b> user(s) : ${keys.join(" , ")}
 <br>
-${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}">${username}</a>`).join(" | ")}
+${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
