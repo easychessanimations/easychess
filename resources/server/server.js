@@ -663,13 +663,19 @@ app.get('/book.worker.js', function(req, res) {
 app.get('/online', function(req, res) {  
     let online_all = monitor.online_all
     let keys = []
+    let lichess_profiles = []
     for(let key in online_all){
         online_all[key].lastSeenTime = new Date(online_all[key].lastSeen).toLocaleTimeString()
         keys.push(key)
+        if(online_all[key].provider == "lichess"){
+            lichess_profiles.push(online_all[key].username)
+        }
     }
     res.send(
 `
 <b>${keys.length}</b> user(s) : ${keys.join(" , ")}
+<br>
+${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}">${username}</a>`).join(" | ")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
