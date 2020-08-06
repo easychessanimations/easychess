@@ -1607,7 +1607,7 @@ class App extends SmartDomElement{
             })
 
             setTimeout(() => {                
-                if(!this.settings.muteMoveInfoCheckbox.checked){
+                if(this.settings.showMoveInfoCheckbox.checked){
                     this.writeBotChat(id, ["player", "spectator"], msg)
                 }                
 
@@ -3804,8 +3804,8 @@ class App extends SmartDomElement{
                     settings: this.settings
                 }),
                 CheckBoxInput({
-                    id: "muteMoveInfoCheckbox",                    
-                    display: "Mute move info",                                        
+                    id: "showMoveInfoCheckbox",                    
+                    display: "Show move info in chat",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
