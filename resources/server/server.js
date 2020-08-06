@@ -8,6 +8,9 @@ let discordbot = null
 if(!process.env.SKIP_DISCORD_BOT) discordbot = require('./discordbot')
 else console.log("skip discord bot")
 
+const serverCreatedAt = new Date()
+const serverCreatedAtStr = serverCreatedAt.toLocaleString()
+
 const EXT_TO_MEDIA_TYPE = {
     ogg: "ogg",
     ogv: "ogg",
@@ -673,6 +676,8 @@ app.get('/online', function(req, res) {
     }
     res.send(
 `
+server created at ${serverCreatedAtStr}
+<br><br>
 <b>${keys.length}</b> user(s) : ${keys.join(" , ")}
 <br>
 ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
