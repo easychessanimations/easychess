@@ -3651,7 +3651,7 @@ class App extends SmartDomElement{
     renderAuthDiv(){
         let authDiv = div().a(
             div().bc("#777").pad(10).mar(5).a(                
-                div().ac("blink_me").bc("#fff").tac().pad(10).fs(20).html(`To create a bot ( upgrade a normal lichess account to a bot account ) register a new lichess account or use an existing lichess account that has not played a game yet, then press 'Login with lichess-bot' while logged into that lichess account and when prompted, approve bot authorizations.`),
+                div().ac("blink_me").bc("#fff").tac().pad(10).fs(20).html(`To create a bot ( upgrade a normal lichess account to a bot account ) register a new lichess account or use an existing lichess account that has not played a game yet, then press 'Login with lichess-bot' while logged into that lichess account and when prompted, approve bot authorizations. While logged into easychess with your bot account, the bot will accept challanges and play games. Your bot can be configured in Analyze / Bot / Settings.`),
                 div().bc("#bbf").mart(10).tac().pad(10).fs(20).html(`Note: The application is running on a free Heroku account, which has a monthly limit of 550 hours. The application may very well be down in the last week of the month due to exhausted quota and report Application error. In this case you can expect the application to be up again in the beginning of the next month.`),
                 div().tac().mart(10).bdr("solid", 5, "#fff", 20).bc("#000").pad(10).a(
                     Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["lichess"]),
