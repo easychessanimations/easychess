@@ -3651,7 +3651,8 @@ class App extends SmartDomElement{
     renderAuthDiv(){
         let authDiv = div().a(
             div().bc("#777").pad(10).mar(5).a(                
-                div().tac().bdr("solid", 5, "#fff", 20).bc("#000").pad(10).a(
+                div().ac("blink_me").bc("#fff").tac().pad(10).fs(20).html(`To create a bot ( upgrade a normal lichess account to a bot account ) register a new lichess account or use an existing lichess account that has not played a game yet, then press 'Login with lichess-bot' while logged into that lichess account and when prompted, approve bot authorizations.`),
+                div().tac().mart(10).bdr("solid", 5, "#fff", 20).bc("#000").pad(10).a(
                     Button("Login with lichess", this.loginWithLichess.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["lichess"]),
                     Button("Login with Discord", this.loginWithDiscord.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["discord"]),
                     Button("Login with GitHub", this.loginWithGitHub.bind(this)).fs(20).mar(5).pad(5).bc(PROVIDER_BACKGROUND_COLORS["github"]),
