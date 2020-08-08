@@ -150,9 +150,9 @@ const { fromchunks } = require('../utils/firebase')
 
 const PORT = process.env.PORT || 3000
 
-const MAX_SSE_CONNECTIONS = process.env.MAX_SSE_CONNECTIONS || 100
+const MAX_SSE_CONNECTIONS = parseInt(process.env.MAX_SSE_CONNECTIONS || "100")
 
-const QUERY_INTERVAL = 3000
+const QUERY_INTERVAL = parseInt(process.env.QUERY_INTERVAL || "30000")
 
 let AUTH_TOPICS = [
     "bucket:put",
