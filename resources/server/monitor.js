@@ -1,7 +1,7 @@
 var online = {}
 var online_all = {}
 
-const FORGET_DELAY = 60 * 1000
+const FORGET_DELAY = parseInt(process.env.FORGET_DELAY || "300000")
 
 var sendOnlineUsersFunc = null
 
