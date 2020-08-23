@@ -688,6 +688,7 @@ ${Object.keys(monitor.online).map((key,i) => `${i+1}. <a href="https://lichess.o
 ${JSON.stringify(online_all, null, 2)}
 </pre>
 <script>
+document.title = "${Object.keys(monitor.online).length} online"
 setTimeout(_=>document.location.reload(), 30000)
 </script>`
     )
