@@ -681,10 +681,15 @@ server created at ${serverCreatedAtStr}
 <b>${keys.length}</b> user(s) : ${keys.join(" , ")}
 <br>
 ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
+<br><br>
+${Object.keys(monitor.online).map(key => `<a href="https://lichess.org/@/${monitor.online[key].username}" rel="noopener noreferrer" target="_blank">${monitor.online[key].username}</a>`).join(" | ")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
-</pre>`
+</pre>
+<script>
+setTimeout(_=>document.location.reload(), 30000)
+</script>`
     )
 })
 
