@@ -682,7 +682,7 @@ server created at ${serverCreatedAtStr}
 <br>
 ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
 <br><br>
-${Object.keys(monitor.online).map(key => `<a href="https://lichess.org/@/${monitor.online[key].username}" rel="noopener noreferrer" target="_blank">${monitor.online[key].username}</a>`).join(" | ")}
+${Object.keys(monitor.online).map((key,i) => `${i+1}. <a href="https://lichess.org/@/${monitor.online[key].username}" rel="noopener noreferrer" target="_blank">${monitor.online[key].username}</a>`).join(" | ")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
