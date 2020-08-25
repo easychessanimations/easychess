@@ -90,6 +90,12 @@ const IMPORT_TIMEOUT                = 3 * ALERT_DELAY
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function oppMessage(msg, oppName){
+    return oppName ? `${msg}, ${oppName} !` : `${msg} !`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 class LocalEngine extends AbstractEngine{
     constructor(sendanalysisinfo){
         super(sendanalysisinfo)
@@ -1452,7 +1458,7 @@ class App extends SmartDomElement{
 
                 state = gameFull.state
 
-                this.writeBotChat(id, ["player", "spectator"], `Good luck, ${gameFull.opponentName} !`)                
+                this.writeBotChat(id, ["player", "spectator"], oppMessage("Good luck", gameFull.opponentName))                
                 poweredBy()
             }
 
@@ -1561,7 +1567,7 @@ class App extends SmartDomElement{
 
         let processTermination = () => {
             this.botEventLogger.log(LogItem({text: `Game ${id} terminated.`, cls: "red large"}))
-            this.writeBotChat(id, ["player", "spectator"], `Good game, ${gameFull.opponentName} !`)
+            this.writeBotChat(id, ["player", "spectator"], oppMessage("Good game", gameFull.opponentName))
             poweredBy()
             engine.terminate()
         }
