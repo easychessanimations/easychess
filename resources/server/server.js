@@ -55,7 +55,7 @@ const { spawn, exec } = require('child_process')
 const fs = require('fs')
 const fetch = require('node-fetch')
 const { getFiles } = require('../utils/fileutils')
-const { YEAR, MINUTE } = require('../shared/js/commonutils')
+const { YEAR, HOUR, MINUTE } = require('../shared/js/commonutils')
 const liapi = require('liapi')
 
 var admin = null
@@ -225,7 +225,7 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     cookie: {
-        maxAge: 1 * YEAR
+        maxAge: 12 * HOUR
     },
     store: firestore ? new FirestoreStore({
         database: firestore
