@@ -14,6 +14,10 @@ It runs in the Heroku cloud:
 
 [Easy Chess online](https://easychess.herokuapp.com)
 
+If the main application is down due to exhausted quota, try the reserve application:
+
+[Easy Chess online reserve](https://easychessreserve.herokuapp.com)
+
 It is open source under the MIT license:
 
 [Source on GitHub](https://github.com/easychessanimations/easychess)
