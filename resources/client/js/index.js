@@ -681,7 +681,7 @@ Convenience wrapper around the lichess game download API ( <a href="https://lich
 <a href="https://lichessgamedownload.netlify.app" rel="noopener noreferrer" target="_blank">lichessgamedownload.netlify.app</a>
 `),
                 div().mart(10).pad(10).tac().fs(22).bc("#aff").html(`
-Streaming advanced games search using the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you search and download a user's games filtered by advanced criteria, or by custom Javascript funtion ( more powerful than lichess search ):<br><br>
+Streaming advanced games search using the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you search and download a user's games filtered by advanced criteria, or by custom Javascript function ( more powerful than lichess search ):<br><br>
 <a href="https://fbserv.herokuapp.com/games.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/games.html</a>
 `)
             )
@@ -3560,8 +3560,8 @@ Streaming advanced games search using the lichess game download API ( <a href="h
                 .toolTip({msg: "Analyze"}),            
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
-            Tab({id: "feedback", caption: "Lichess game download / advanced search", content: this.gameSearchDiv})
-                .toolTip({msg: "Advanced game search and download API"}),            
+            Tab({id: "feedback", caption: "Lichess game download / Advanced search", content: this.gameSearchDiv})
+                .toolTip({msg: "Advanced lichess game search and download API"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
