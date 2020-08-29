@@ -3561,7 +3561,7 @@ Streaming advanced games search using the lichess game download API ( <a href="h
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
             Tab({id: "feedback", caption: "Lichess game download / Advanced search", content: this.gameSearchDiv})
-                .toolTip({msg: "Advanced lichess game search and download API"}),            
+                .toolTip({msg: "Advanced lichess game search and download API, with more convenience and search power than lichess offers"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
