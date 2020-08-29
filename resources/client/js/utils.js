@@ -95,7 +95,7 @@ function logRemote(msg){
     if(typeof PROPS == "undefined") return
     let lru = PROPS.LOG_REMOTE_URL
     if(!lru) return
-    if(PROPS.LOG_REMOTE) fetch(`${lru}${msg}`)
+    //if(PROPS.LOG_REMOTE) fetch(`${lru}${msg}`)
 }
 
 function readFile(file, method){

@@ -360,6 +360,8 @@ class App extends SmartDomElement{
 
         this.playDiv = div()
 
+        this.gameSearchDiv = this.renderGameSearchDiv()
+
         this.feedbackDiv = this.renderFeedbackDiv()
 
         this.generalSettingsDiv = this.renderGeneralSettingsDiv()
@@ -667,6 +669,21 @@ class App extends SmartDomElement{
                     a().fs(20).fwb().href("https://github.com/easychessanimations/easychess/issues", TARGET_BLANK)
                         .html("Open an issue on GitHub")
                 )
+            )
+        )
+    }
+
+    renderGameSearchDiv(){
+        return div().a(
+            div().dfcc().mar(5).a(
+                div().pad(10).tac().fs(22).bc("#afa").html(`
+Convenience wrapper around the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you download a user's games filtered by various criteria:<br><br>
+<a href="https://lichessgamedownload.netlify.app" rel="noopener noreferrer" target="_blank">lichessgamedownload.netlify.app</a>
+`),
+                div().mart(10).pad(10).tac().fs(22).bc("#aff").html(`
+Streaming advanced games search using the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you search and download a user's games filtered by advanced criteria, or by custom Javascript funtion ( more powerful than lichess search ):<br><br>
+<a href="https://fbserv.herokuapp.com/games.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/games.html</a>
+`)
             )
         )
     }
@@ -3543,6 +3560,8 @@ class App extends SmartDomElement{
                 .toolTip({msg: "Analyze"}),            
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
+            Tab({id: "feedback", caption: "Lichess game download / advanced search", content: this.gameSearchDiv})
+                .toolTip({msg: "Advanced game search and download API"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
