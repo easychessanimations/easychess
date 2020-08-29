@@ -583,6 +583,13 @@ function htmlForSoundFile(sf){
 }
 
 app.get('/', (req, res) => {
+
+if(process.env.SITE_HOST == "easychessreserve.herokuapp.com"){
+    if(new Date().getDate() < 23){
+        res.redirect("https://easychess.herokuapp.com")
+    }
+}
+
 res.send(`
 <!DOCTYPE html>
 <html lang="en">
