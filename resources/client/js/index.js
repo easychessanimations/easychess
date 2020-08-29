@@ -676,13 +676,25 @@ class App extends SmartDomElement{
     renderGameSearchDiv(){
         return div().a(
             div().dfcc().mar(5).a(
-                div().pad(10).tac().fs(22).bc("#afa").html(`
+                div().addStyle("width", "98%").pad(10).tac().fs(22).bc("#afa").html(`
 Convenience wrapper around the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you download a user's games filtered by various criteria:<br><br>
 <a href="https://lichessgamedownload.netlify.app" rel="noopener noreferrer" target="_blank">lichessgamedownload.netlify.app</a>
 `),
-                div().mart(10).pad(10).tac().fs(22).bc("#aff").html(`
+                div().addStyle("width", "98%").mart(10).pad(10).tac().fs(22).bc("#aff").html(`
 Streaming advanced games search using the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you search and download a user's games filtered by advanced criteria, or by custom Javascript function ( more powerful than lichess search ):<br><br>
 <a href="https://fbserv.herokuapp.com/games.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/games.html</a>
+`),
+                div().addStyle("width", "98%").mart(10).pad(10).tac().fs(22).bc("#ffa").html(`
+Recognize the position on a chess board screenshot and open it in lichess game explorer:<br><br>
+<a href="https://img2lichess.herokuapp.com" rel="noopener noreferrer" target="_blank">img2lichess.herokuapp.com</a>
+`),
+                div().addStyle("width", "98%").mart(10).pad(10).tac().fs(22).bc("#faf").html(`
+Filter lichess tourneys by various criteria and present them in a clear tabulated form:<br><br>
+<a href="https://fbserv.herokuapp.com/tourneys.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/tourneys.html</a>
+`),
+                div().addStyle("width", "98%").mart(10).pad(10).tac().fs(22).bc("#aaf").html(`
+Insert unicode smileys, use unicode bold, underline etc. formatting for forums which allow only plain text:<br><br>
+<a href="https://fbserv.herokuapp.com/smileyeditor.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/smileyeditor.html</a>
 `)
             )
         )
@@ -3560,7 +3572,7 @@ Streaming advanced games search using the lichess game download API ( <a href="h
                 .toolTip({msg: "Analyze"}),            
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
-            Tab({id: "feedback", caption: "Lichess game download / Advanced search", content: this.gameSearchDiv})
+            Tab({id: "feedback", caption: "Lichess game download / Advanced search and More", content: this.gameSearchDiv})
                 .toolTip({msg: "Advanced lichess game search and download API, with more convenience and search power than lichess offers"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
