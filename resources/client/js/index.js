@@ -3593,7 +3593,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
                 .toolTip({msg: "Settings"}),            
-            Tab({id: "about", caption: "Faq", content: this.faqDiv})
+            Tab({id: "faq", caption: "Faq", content: this.faqDiv})
                 .toolTip({msg: "Frequently asked questions"}),
             Tab({id: "about", caption: "About", content: this.aboutDiv})
                 .toolTip({msg: "About easychess, ReadMe"}),
