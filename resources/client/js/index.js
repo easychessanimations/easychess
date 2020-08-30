@@ -328,6 +328,8 @@ class App extends SmartDomElement{
 
         this.botSettingsDiv = this.renderBotSettingsForm()
 
+        this.faqDiv = div()
+
         this.aboutDiv = this.renderAboutDiv()
 
         this.logDiv = this.renderLogDiv()
@@ -422,6 +424,18 @@ class App extends SmartDomElement{
 
         this.doLater("importGame", IMPORT_GAME_DELAY)
         this.doLater("createSetupBoard", CREATE_SETUP_BOARD_DELAY)
+
+        this.doLater("loadFaq", 1000)
+    }
+
+    loadFaq(){
+        let faqDiv = this.faqDiv        
+        fetch("https://raw.githubusercontent.com/easychessanimations/faq/master/easychess_faq.html").then(resp=>resp.text()).then(content=>{            
+            faqDiv.x().a(
+                div(),
+                div().pad(10).html(content)
+            )
+        })
     }
 
     renderGeneralSettingsDiv(){
@@ -3579,6 +3593,8 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
                 .toolTip({msg: "Settings"}),            
+            Tab({id: "about", caption: "Faq", content: this.faqDiv})
+                .toolTip({msg: "Frequently asked questions"}),
             Tab({id: "about", caption: "About", content: this.aboutDiv})
                 .toolTip({msg: "About easychess, ReadMe"}),
             Tab({
