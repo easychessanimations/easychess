@@ -198,13 +198,29 @@ function api(topic, payload, req, res){
             if(!assert(req, res, {
                 login: `Log in to post in the chat.`                
             })) return                        
-            let chatMessage = ChatMessage(payload.chatMessage || {author: "?"})
-            if(chatMessage.length > 200){
-                chatMessage = chatMessage.substring(0, 200)
-            }
-            game.chat.postMessage(chatMessage)
-            apisend(`playapi:chatMessagePosted`, null, res)
-            sendGame()
+            let chatMessage = ChatMessage(payload.chatMessage || {author: "?", msg:"Chat message."})            
+            chatMessage.msg = chatMessage.msg | "Chat message."
+            try{
+                if(chatMessage.msg.length > 200){
+                   chatMessage.msg = chatMessage.msg.substring(0, 200)
+                }
+
+                let lastMessage = game.chat.messages[0]
+
+                if((lastMessage.author == chatMessage.author)&&(lastMessage.msg == chatMessage.msg)){
+                    apisend({
+                        alert: "Message already sent.",
+                        alertKind: "error"
+                    }, null, res)
+
+                    return
+                }
+
+                game.chat.postMessage(chatMessage)
+
+                apisend(`playapi:chatMessagePosted`, null, res)
+                sendGame()
+            }catch(err){console.log(err)}                        
             break
         case "setTimecontrol":            
             if(!assert(req, res, {
