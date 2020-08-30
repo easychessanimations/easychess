@@ -214,6 +214,25 @@ function api(topic, payload, req, res){
 
                     return
                 }
+
+                let sameAuthorCount = 0
+                for(let i=0;i<game.chat.messages.length;i++){
+                    if(game.chat.messages[i].author.username == chatMessage.author.username){
+                        sameAuthorCount++
+                    }else{
+                        break
+                    }
+                }
+                if(sameAuthorCount > 2){
+                    if(((new Date().getTime() - game.chat.messages[0].createdAt)/1000) < sameAuthorCount*sameAuthorCount){
+                        apisend({
+                            alert: "Too many messages in too short time. Calm down a little.",
+                            alertKind: "error"
+                        }, null, res)
+
+                        return
+                    }
+                }
             }catch(err){console.log(err)}                        
             game.chat.postMessage(chatMessage)
 

@@ -1840,6 +1840,7 @@ class ChatMessage_{
         let props = propsOpt || {}
         this.author = Player(props.author)
         this.msg = props.msg || "Chat message."
+        this.createdAt = new Date().getTime()
         return this
     }
 
