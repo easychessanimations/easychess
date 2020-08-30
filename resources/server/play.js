@@ -198,7 +198,7 @@ function api(topic, payload, req, res){
             if(!assert(req, res, {
                 login: `Log in to post in the chat.`                
             })) return                        
-            let chatMessage = ChatMessage(payload.chatMessage || {author: "?", msg:"Chat message."})            
+            let chatMessage = ChatMessage(payload.chatMessage || {author: {}, msg:"Chat message."})            
             chatMessage.msg = chatMessage.msg || "Chat message."
             if(chatMessage.msg.length > 200){
                chatMessage.msg = chatMessage.msg.substring(0, 200)
@@ -208,7 +208,7 @@ function api(topic, payload, req, res){
 
                 console.log("last",lastMessage,"msg",chatMessage)
 
-                if((lastMessage.author == chatMessage.author)&&(lastMessage.msg == chatMessage.msg)){
+                if((lastMessage.author.username == chatMessage.author.username)&&(lastMessage.msg == chatMessage.msg)){
                     apisend({
                         alert: "Message already sent.",
                         alertKind: "error"
