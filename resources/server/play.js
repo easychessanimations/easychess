@@ -206,6 +206,8 @@ function api(topic, payload, req, res){
             try{
                 let lastMessage = game.chat.messages[0]
 
+                console.log("last",lastMessage,"msg",chatMessage)
+
                 if((lastMessage.author == chatMessage.author)&&(lastMessage.msg == chatMessage.msg)){
                     apisend({
                         alert: "Message already sent.",
