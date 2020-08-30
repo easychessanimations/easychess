@@ -142,6 +142,10 @@ passport.deserializeUser(function(obj, cb) {
 
 const app = express()
 
+app.get('/firebase/sacckey.json', function(req, res) {  
+    res.send("Forbidden.")
+})
+
 const { readJson } = require('../utils/rwjson')
 const { update } = require('../utils/octokit')
 const sse = require('./sse')
