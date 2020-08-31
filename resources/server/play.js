@@ -203,6 +203,12 @@ function api(topic, payload, req, res){
             if(chatMessage.msg.length > 200){
                chatMessage.msg = chatMessage.msg.substring(0, 200)
             }
+            if(chatMessage.msg == "faq"){
+                chatMessage.msg = `see <a href="https://easychess.herokuapp.com/?ubertab=faq">Faq</a>`
+            }
+            if(chatMessage.msg == "faqr"){
+                chatMessage.msg = `see <a href="https://easychessreserve.herokuapp.com/?ubertab=faq">Faq</a>`
+            }
             try{
                 let lastMessage = game.chat.messages[0]
 
