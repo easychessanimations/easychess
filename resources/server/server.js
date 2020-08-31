@@ -590,7 +590,19 @@ app.get('/', (req, res) => {
 
 if(process.env.SITE_HOST == "easychessreserve.herokuapp.com"){
     if(new Date().getDate() < 23){
-        res.redirect("https://easychess.herokuapp.com")
+        //res.redirect("https://easychess.herokuapp.com")
+        res.send(`
+<div style="margin-left:10%;width:80%;text-align:center;font-size:22px;background-color:#fbb;padding:10px;">
+<p>Easychess runs on a free Heroku account which has a monthly quota of 550 hours.</p>
+<p>In the first part of the month you should use the main site.</p>
+<p>This reserve site is for the time when the main site is down due to using up quota.</p>
+<p>Please in the first part of the month don't visit this reserve site.</p>
+<p>Soon you will be redirected to the main site, or if you are impatient, click <a href="https://easychess.herokuapp.com">easychess.herokuapp.com</a> .</p>
+</div>
+<script>
+setTimeout(_=>document.location.href="https://easychess.herokuapp.com", 20000)
+</script>
+`)
         return
     }
 }
