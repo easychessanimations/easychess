@@ -77,7 +77,7 @@ function sendDiscordLiveMessage(msg){
             client.channels.cache.get(discordbot.livechannel)
                 .send(msg)
 
-            let playLinkMsg = process.env.PLAY_LINK_MESSAGE || `https://easychess.herokuapp.com/?ubertab=play`
+            let playLinkMsg = process.env.PLAY_LINK_MESSAGE || `https://${process.env.SITE_HOST || "easychess.herokuapp.com/"}?ubertab=play`
 
             client.channels.cache.get(discordbot.livechannel)
                 .send(playLinkMsg)
