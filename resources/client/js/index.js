@@ -1725,6 +1725,16 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 status = "casual disabled"
             }
 
+            let disableBotOpponent = this.settings.disableBotOpponent.checked
+
+            let challenger = event.challenge.challenger
+            let challTitle = challenger.title
+
+            if(disableBotOpponent && (challTitle == "BOT")){
+                ok = false
+                status = "bot disabled"
+            }
+
             let speed = event.challenge.speed
 
             let acceptSpeeds = this.settings.acceptSpeedsTextAreaInput.text
@@ -3858,6 +3868,11 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 CheckBoxInput({
                     id: "disableRatedCheckbox",                    
                     display: "Disable rated",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "disableBotOpponentCheckbox",                    
+                    display: "Disable BOT opponent",                                        
                     settings: this.settings
                 }),
                 CheckBoxInput({
