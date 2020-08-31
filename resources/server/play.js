@@ -198,11 +198,44 @@ function api(topic, payload, req, res){
             if(!assert(req, res, {
                 login: `Log in to post in the chat.`                
             })) return                        
-            let chatMessage = ChatMessage(payload.chatMessage || {author: "?"})
-            if(chatMessage.length > 200){
-                chatMessage = chatMessage.substring(0, 200)
+            let chatMessage = ChatMessage(payload.chatMessage || {author: Player(), msg: ChatMessage()})            
+            chatMessage.msg = chatMessage.msg || "Chat message."
+            if(chatMessage.msg.length > 200){
+               chatMessage.msg = chatMessage.msg.substring(0, 200)
             }
+            try{
+                let lastMessage = game.chat.messages[0]
+
+                if((lastMessage.author.username == chatMessage.author.username)&&(lastMessage.msg == chatMessage.msg)){
+                    apisend({
+                        alert: "Message already sent. Please send a different message.",
+                        alertKind: "error"
+                    }, null, res)
+
+                    return
+                }
+
+                let sameAuthorCount = 0
+                for(let i=0;i<game.chat.messages.length;i++){
+                    if(game.chat.messages[i].author.username == chatMessage.author.username){
+                        sameAuthorCount++
+                    }else{
+                        break
+                    }
+                }
+                if(sameAuthorCount > 2){
+                    if(((new Date().getTime() - game.chat.messages[0].createdAt)/1000) < sameAuthorCount*sameAuthorCount){
+                        apisend({
+                            alert: "Too many messages in too short time. Calm down a little.",
+                            alertKind: "error"
+                        }, null, res)
+
+                        return
+                    }
+                }
+            }catch(err){console.log(err)}                        
             game.chat.postMessage(chatMessage)
+
             apisend(`playapi:chatMessagePosted`, null, res)
             sendGame()
             break

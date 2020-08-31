@@ -109,7 +109,14 @@ class Table_ extends SmartDomElement{
 
     showOnline(online){
         this.onlineUsersDiv.x().a(
-            Object.entries(online).map(entry => UserLabel(entry[1]).fs(11))
+            Object.entries(online).map(entry => {
+                let props = entry[1]
+                let label = UserLabel(props).fs(11)
+                if(props.provider == "lichess"){
+                    label.cp().ae("mousedown", _ => window.open(`https://lichess.org/@/${props.username}` , "_blank"))
+                }
+                return label
+            })
         )
     }
 

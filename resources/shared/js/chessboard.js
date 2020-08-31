@@ -1840,6 +1840,7 @@ class ChatMessage_{
         let props = propsOpt || {}
         this.author = Player(props.author)
         this.msg = props.msg || "Chat message."
+        this.createdAt = new Date().getTime()
         return this
     }
 
@@ -1861,10 +1862,10 @@ class Chat_{
         this.fromBlob(props)
     }
 
-    postMessage(chatMessamge){
-        this.messages.unshift(chatMessamge)
+    postMessage(chatMessage){
+        this.messages.unshift(chatMessage)
 
-        if(chatMessamge.msg == "delall"){
+        if(chatMessage.msg == "delall"){
             this.messages = []
         }
 
