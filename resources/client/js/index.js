@@ -1725,7 +1725,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 status = "casual disabled"
             }
 
-            let disableBotOpponent = this.settings.disableBotOpponent.checked
+            let disableBotOpponent = this.settings.disableBotOpponentCheckbox.checked
 
             let challenger = event.challenge.challenger
             let challTitle = challenger.title
