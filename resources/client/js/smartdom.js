@@ -1945,8 +1945,8 @@ class FormTable_ extends SmartDomElement{
                 th().html(this.props.optionValueHeader || "Option Value")
             )),
             tbody().a(
-                (this.props.options || []).map(option=>
-                    tr().a(
+                (this.props.options || []).map((option,i)=>
+                    tr().bc(i%2?"#ded":"#ddf").a(
                         td().html(option.props.display || option.id),
                         td().a(option)
                     )
