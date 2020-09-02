@@ -1658,7 +1658,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
 
             setTimeout(() => {                
                 if(this.settings.showMoveInfoCheckbox.checked){
-                    this.writeBotChat(id, ["player", "spectator"], msg)
+                    //this.writeBotChat(id, ["player", "spectator"], msg)
                 }                
 
                 this.botEventLogger.log(LogItem({
