@@ -324,5 +324,6 @@ module.exports = {
     init: init,
     api: api,
     sendGameBlob: sendGameBlob,
-    sendGamesBlob: sendGamesBlob
+    sendGamesBlob: sendGamesBlob,
+    game: game
 }

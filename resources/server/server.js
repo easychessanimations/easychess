@@ -707,6 +707,8 @@ server created at ${serverCreatedAtStr}
 ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
 <br><br>
 ${Object.keys(monitor.online).map((key,i) => `${i+1}. <a href="https://lichess.org/@/${monitor.online[key].username}" rel="noopener noreferrer" target="_blank">${monitor.online[key].username}</a>`).join(" | ")}
+<br><br>
+${play.game.chat.messages.map(msg=>`<b>${msg.author}</b> ${msg.msg}`).join("<br>")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
