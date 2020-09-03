@@ -320,10 +320,14 @@ function api(topic, payload, req, res){
     }
 }
 
+function getChatMessages(){
+    return game.chat.messages
+}
+
 module.exports = {
     init: init,
     api: api,
     sendGameBlob: sendGameBlob,
     sendGamesBlob: sendGamesBlob,
-    game: game
+    getChatMessages: getChatMessages
 }

@@ -708,11 +708,11 @@ ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" 
 <br><br>
 ${Object.keys(monitor.online).map((key,i) => `${i+1}. <a href="https://lichess.org/@/${monitor.online[key].username}" rel="noopener noreferrer" target="_blank">${monitor.online[key].username}</a>`).join(" | ")}
 <br><br>
-${play.game.chat.messages.map(msg=>`<b>${msg.author.username}</b> ${msg.msg}`).join("<br>")}
+${play.getChatMessages().map(msg=>`<b>${msg.author.username}</b> ${msg.msg}`).join("<br>")}
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
-${JSON.stringify(play.game.chat, null, 2)}
+${JSON.stringify(play.getChatMessages(), null, 2)}
 </pre>
 <script>
 document.title = "${Object.keys(monitor.online).length} online"
