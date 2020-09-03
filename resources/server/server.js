@@ -712,7 +712,7 @@ ${play.game.chat.messages.map(msg=>`<b>${msg.author.username}</b> ${msg.msg}`).j
 <br>
 <pre>
 ${JSON.stringify(online_all, null, 2)}
-${JSON.stringify(game.chat, null, 2)}
+${JSON.stringify(play.game.chat, null, 2)}
 </pre>
 <script>
 document.title = "${Object.keys(monitor.online).length} online"
