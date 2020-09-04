@@ -392,8 +392,8 @@ class App extends SmartDomElement{
 
         this.doLater("loadLichessUsers", LOAD_LICHESS_USERS_DELAY)
 
-        if(window.location.search.match(/login-bot=ok|login-lichess=ok/)) this.ubertabs.selectTab("analyze")
-        if(window.location.search.match(/login-bot=ok/)) this.tabs.selectTab("bot")
+        if(window.location.search.match(/login-lichess-bot=ok|login-lichess=ok/)) this.ubertabs.selectTab("analyze")
+        if(window.location.search.match(/login-lichess-bot=ok/)) this.tabs.selectTab("bot")
         if(window.location.search.match(/login-lichess=ok/)) this.tabs.selectTab("moves")
 
         if(this.USER().isBot){
