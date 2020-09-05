@@ -1459,7 +1459,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
         let ratingDiff = 0
 
         let poweredBy = () => {
-            this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychess.herokuapp.com .`)
+            //this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychess.herokuapp.com .`)
             this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychessreserve.herokuapp.com .`)
         }
 

@@ -338,7 +338,7 @@ class Table_ extends SmartDomElement{
                 td()
             ),
             tr().a(                
-                td().sa("colspan", 2).a(this.onlineUsersDiv = div().pad(2).bc("#eee"))
+                td().sa("colspan", 2).a(this.onlineUsersDiv = div().ww(760).ovfys().hh(40).pad(2).bc("#eee"))
             ),
         )
 
