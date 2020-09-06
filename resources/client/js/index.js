@@ -37,6 +37,8 @@ const LOAD_LICHESS_USERS_DELAY  = 5000
 
 const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 30000
 
+const TICK_INTERVAL             = PROPS.TICK_INTERVAL || 10000
+
 const GAME_TEXT_AREA_HEIGHT     = 95
 const GAME_TEXT_AREA_WIDTH      = 882
 const COMMENT_TEXT_AREA_WIDTH   = 240
@@ -417,7 +419,7 @@ class App extends SmartDomElement{
 
         this.setupsource()        
 
-        if(IS_PROD()) this.checkSourceInterval = setInterval(this.checksource.bind(this), QUERY_INTERVAL)
+        if(IS_PROD()) this.checkSourceInterval = setInterval(this.checksource.bind(this), TICK_INTERVAL)
 
         this.lastApiTick = performance.now()
 

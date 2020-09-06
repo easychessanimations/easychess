@@ -158,6 +158,8 @@ const MAX_SSE_CONNECTIONS = parseInt(process.env.MAX_SSE_CONNECTIONS || "100")
 
 const QUERY_INTERVAL = parseInt(process.env.QUERY_INTERVAL || "30000")
 
+const TICK_INTERVAL = parseInt(process.env.TICK_INTERVAL || "10000")
+
 let AUTH_TOPICS = [
     "bucket:put",
     "bucket:get",
@@ -518,6 +520,7 @@ app.post('/api', (req, res) => {
 const PROPS = {    
     IS_DEV: IS_DEV(),
     QUERY_INTERVAL: QUERY_INTERVAL,
+    TICK_INTERVAL: TICK_INTERVAL,
     LOG_REMOTE_URL: process.env.LOG_REMOTE_URL || "https://fbserv.herokuapp.com/games.html?ref=",
     ACCEPT_VARIANT: process.env.ACCEPT_VARIANT,
     ALLOW_SERVER_ENGINE: !!process.env.ALLOW_SERVER_ENGINE,
@@ -565,7 +568,7 @@ const engines = {
 
 if(IS_PROD()) setInterval(function(){
     ssesend({kind: "tick"})
-}, QUERY_INTERVAL)
+}, TICK_INTERVAL)
 
 app.get('/logout', (req, res) => {
     req.logout()
