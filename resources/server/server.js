@@ -718,7 +718,7 @@ ${JSON.stringify(online_all, null, 2)}
 ${JSON.stringify(play.getChatMessages(), null, 2)}
 </pre>
 <script>
-document.title = "${Object.keys(monitor.online).length} online"
+document.title = "${Object.keys(monitor.online).length} ${Object.keys(monitor.online).reverse().map(key => monitor.online[key].username).join(" ")}"
 setTimeout(_=>document.location.reload(), 30000)
 </script>`
     )
