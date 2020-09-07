@@ -1,3 +1,10 @@
+const rateLimit = require("express-rate-limit")
+
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_WINDOW || "300000"),
+  max: parseInt(process.env.RATE_MAX || "50")
+})
+
 const play = require('./play')
 const monitor = require('./monitor')
 const { LichessBot } = require('../client/nodejs/lichessbot')
@@ -141,6 +148,8 @@ passport.deserializeUser(function(obj, cb) {
 })
 
 const app = express()
+
+app.use(limiter)
 
 app.get('/firebase/sacckey.json', function(req, res) {  
     res.send("Forbidden.")
