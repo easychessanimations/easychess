@@ -716,7 +716,7 @@ app.get('/online', function(req, res) {
 `
 server created at ${serverCreatedAtStr}
 <br><br>
-<b>${keys.length}</b> user(s) : ${keys.join(" , ")}
+<b>${keys.length}</b> user(s) : ${keys.map(key => `${key} ( ${Math.floor(online_all[key].onlineDurationMins)} )`).join(" , ")}
 <br>
 ${lichess_profiles.map(username => `<a href="https://lichess.org/@/${username}" rel="noopener noreferrer" target="_blank">${username}</a>`).join(" | ")}
 <br><br>
