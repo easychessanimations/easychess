@@ -704,7 +704,9 @@ app.get('/online', function(req, res) {
     let keys = []
     let lichess_profiles = []
     for(let key in online_all){
+        online_all[key].firstSeenTime = new Date(online_all[key].firstSeen).toLocaleTimeString()
         online_all[key].lastSeenTime = new Date(online_all[key].lastSeen).toLocaleTimeString()
+        online_all[key].onlineDurationMins = (online_all[key].lastSeen - online_all[key].firstSeen)/60000
         keys.push(key)
         if(online_all[key].provider == "lichess"){
             lichess_profiles.push(online_all[key].username)

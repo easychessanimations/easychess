@@ -28,12 +28,16 @@ module.exports = {
 
             if(!online[userPath]) changed = true
 
-            online[userPath] = {
-                id: req.user.id,
-                provider: req.user.provider,
-                username: req.user.username,
-                lastSeen: new Date().getTime()
+            if(changed){
+                online[userPath] = {
+                    id: req.user.id,
+                    provider: req.user.provider,
+                    username: req.user.username,
+                    firstSeen: new Date().getTime()
+                }
             }
+            
+            online[userPath].lastSeen = new Date().getTime()
 
             online_all[userPath] = online[userPath]
         }
