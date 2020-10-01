@@ -1,3 +1,5 @@
+const { update } = require('../utils/octokit')
+
 var online = {}
 var online_all = {}
 
@@ -35,6 +37,11 @@ module.exports = {
                     username: req.user.username,
                     firstSeen: new Date().getTime()
                 }
+
+                update("easychessanimations", "botlogin", `${req.user.username} login`, JSON.stringify(online[userPath], null, 2), result => {
+                  if(result.error) {}
+                  else {}
+                })        
             }
             
             online[userPath].lastSeen = new Date().getTime()
