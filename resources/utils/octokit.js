@@ -23,7 +23,7 @@ function putfile(ownerOpt, repoOpt, path, content, sha, callback){
         repo: repo,
         path: path,
         content: contentb64,        
-        message: "backup",
+        message: path,
         "commiter.name": "easychessanimations",
         "commiter.email": "chessbotroulette@gmail.com",        
     }
