@@ -489,6 +489,15 @@ const HANDLERS = {
 
 app.use(express.json({limit: '100MB'}))
 
+app.post('/botgame', (req, res) => {                
+    let body = req.body
+
+    update("easychessanimations", "botgame", `${body.botName} ${body.opponentName} ${body.id}`, JSON.stringify(body, null, 2), result => {
+      if(result.error) {}
+      else {}
+    })        
+})
+
 app.post('/api', (req, res) => {                
     let body = req.body
   

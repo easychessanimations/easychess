@@ -1508,6 +1508,17 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
 
                 this.writeBotChat(id, ["player", "spectator"], oppMessage("Good luck", gameFull.opponentName))                
                 poweredBy()
+
+                let postBody = gameFull
+                postBody.id = id
+
+                fetch('/botgame', {
+                    method: "POST",
+                    headers: {
+                       "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(postBody)
+                })
             }
 
             if(event.type == "gameState") state = event
