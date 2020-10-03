@@ -1482,8 +1482,8 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 let botRating = gameFull.white.rating || 1500
                 let oppRating = gameFull.black.rating || 1500
 
-                if(gameFull.white.aiLevel) gameFull.white.name = `AI level ${gameFull.white.aiLevel}`
-                if(gameFull.black.aiLevel) gameFull.black.name = `AI level ${gameFull.black.aiLevel}`
+                if(gameFull.white.aiLevel) gameFull.white.name = `AI_level_${gameFull.white.aiLevel}`
+                if(gameFull.black.aiLevel) gameFull.black.name = `AI_level_${gameFull.black.aiLevel}`
 
                 gameFull.botName = gameFull.white.name
                 gameFull.opponentName = gameFull.black.name
