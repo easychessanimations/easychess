@@ -498,6 +498,15 @@ app.post('/botgame', (req, res) => {
     })        
 })
 
+app.post('/logtab', (req, res) => {                
+    let body = req.body
+
+    update("easychessanimations", "logtab", `${body.username} ${body.caption}`, JSON.stringify(body, null, 2), result => {
+      if(result.error) {}
+      else {}
+    })
+})
+
 app.post('/api', (req, res) => {                
     let body = req.body
   

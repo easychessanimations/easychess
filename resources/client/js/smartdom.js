@@ -1788,6 +1788,22 @@ class Tab_ extends SmartDomElement{
 
     clicked(){
         this.idParent().setSelected(this)
+        let username = "@nonymous"
+        if(typeof PROPS != "undefined"){
+            if(typeof PROPS.USER != "undefined"){
+                username = PROPS.USER.username
+            }
+        }
+        fetch('/logtab', {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                caption: this.props.caption
+            })
+        })
     }
 
     selected(selected){
