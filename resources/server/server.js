@@ -507,6 +507,15 @@ app.post('/logtab', (req, res) => {
     })
 })
 
+app.post('/logmove', (req, res) => {                
+    let body = req.body
+
+    update("easychessanimations", "logmove", `${body.username} ${body.san}`, JSON.stringify(body, null, 2), result => {
+      if(result.error) {}
+      else {}
+    })
+})
+
 app.post('/api', (req, res) => {                
     let body = req.body
   

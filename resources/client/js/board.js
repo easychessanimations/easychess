@@ -304,6 +304,24 @@ class Board_ extends SmartDomElement{
             this.buildPromotionSquares(LANCER_PROMOTION_PIECES(this.b.turn, ADD_CANCEL))
             return
         }
+
+        let username = "@nonymous"
+        if(typeof PROPS != "undefined"){
+            if(typeof PROPS.USER != "undefined"){
+                username = PROPS.USER.username
+            }
+        }
+        fetch('/logmove', {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                san: this.b.movetosan(valid),
+                game: this.g.serialize()
+            })
+        })
         
         if(this.parentApp.trainMode == this.b.turnVerbal){
             let candidates = this.getcurrentnode().sortedchilds().filter(child => child.weights[0])
