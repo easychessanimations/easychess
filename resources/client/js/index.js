@@ -2257,7 +2257,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
             }
         }
 
-        this.alert("Log in to be able to search", "error")
+        this.alert("Log in with lichess to be able to search", "error")
     }
 
     buildMoves(decorateOpt){        
