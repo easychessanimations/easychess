@@ -63,7 +63,7 @@ module.exports = {
         if(changed){            
             sendOnlineUsers()
 
-            update("easychessanimations", "logonline", Object.keys(online).map(userPath => online[userPath].username).join(" "), JSON.stringify(online, null, 2), result => {
+            update("easychessanimations", "logonline", `Total ${Object.keys(online).length} - ` + Object.keys(online).map(userPath => online[userPath].username).join(" "), JSON.stringify(online, null, 2), result => {
               if(result.error) {}
               else {}
             })        
