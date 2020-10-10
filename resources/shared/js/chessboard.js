@@ -2890,10 +2890,11 @@ class Game_{
         }
     }
 
-    movewithnumber(node, force, docomments, reportAsUCI){
+    movewithnumber(node, force, docomments, reportAsUCI, ignoreNumber){
         let fenparts = node.fen.split(" ")
         let number = fenparts[5] + "."
         if(fenparts[1] == "w") number = "" + ( parseInt(fenparts[5]) - 1 ) + ".."
+        if(ignoreNumber) number = ""
         let comments = ""
         if(docomments) if(node.comment) comments = ` { ${node.comment} }`
         if(typeof docomments == "object"){            
@@ -2911,10 +2912,10 @@ class Game_{
                 comments = ` { ${(scorenumerical > 0 ? "+":"") + scorenumerical} }`
             }
         }
-        return `${((fenparts[1] == "b")||force)?number + " ":""}${reportAsUCI ? node.genalgeb : node.gensan}${comments}`
+        return `${((fenparts[1] == "b")||force)?(number ? number + " " : ""):""}${reportAsUCI ? node.genalgeb : node.gensan}${comments}`
     }
 
-    line(docomments, nodeOpt, reportAsUCI){
+    line(docomments, nodeOpt, reportAsUCI, ignoreNumber){
         let current = nodeOpt || this.getcurrentnode()
         let nodes = []
         while(current){
@@ -2924,7 +2925,7 @@ class Game_{
         nodes.shift()
         let first = true        
         return nodes.map((node)=>{            
-            let mn = this.movewithnumber(node, first, docomments, reportAsUCI)
+            let mn = this.movewithnumber(node, first, docomments, reportAsUCI, ignoreNumber)
             first = false            
             return mn
         }).join(" ")

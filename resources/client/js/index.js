@@ -2244,6 +2244,20 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
         )
     }
 
+    advancedSearch(){
+        let line = this.g.line(false, this.g.getcurrentnode(), false, true)
+        
+        if(typeof PROPS != "undefined"){
+            if(typeof PROPS.USER != "undefined"){
+                let url = `http://fbserv.herokuapp.com/games.html?username=${"PROPS.USER.username"}&token=${"PROS.USER.accessToken"}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true`
+                window.open(url)
+                return
+            }
+        }
+
+        this.alert("Log in to be able to search", "error")
+    }
+
     buildMoves(decorateOpt){        
         this.decorate = decorateOpt || this.decorate
 
@@ -2256,7 +2270,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
         this.movesDiv.x().ame(
             div().hh(this.board.boardsize() - MOVESDIV_HEIGHT_CORRECTION).df().a(
                 div().ovfys().a(
-                    lms.map(lm => this.createNodeForLegalMove(lm))
+                    [div().mar(3).a(Button("Search moves in advanced search", this.advancedSearch.bind(this)))].concat(lms.map(lm => this.createNodeForLegalMove(lm)))
                 ),
                 this.analysisinfoDiv,
                 div().a(                    
