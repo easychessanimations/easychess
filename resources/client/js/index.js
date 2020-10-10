@@ -2249,7 +2249,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
         
         if(typeof PROPS != "undefined"){
             if(typeof PROPS.USER != "undefined"){
-                let url = `http://fbserv.herokuapp.com/games.html?username=${PROPS.USER.username}&token=${PROS.USER.accessToken}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true`
+                let url = `http://fbserv.herokuapp.com/games.html?username=${PROPS.USER.username}&token=${PROPS.USER.accessToken}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true`
                 window.open(url)
                 return
             }
