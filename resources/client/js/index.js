@@ -2251,6 +2251,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
             if(typeof PROPS.USER != "undefined"){
                 if(PROPS.USER.provider == "lichess"){
                     let url = `http://fbserv.herokuapp.com/games.html?username=${PROPS.USER.username}&token=${PROPS.USER.accessToken}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true&variant=${this.variant}`
+                    url = url.replace(/\+/g, "\\+")
                     window.open(url)
                 }                
                 return
