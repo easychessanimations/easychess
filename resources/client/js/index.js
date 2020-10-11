@@ -694,7 +694,11 @@ class App extends SmartDomElement{
     renderGameSearchDiv(){
         return div().a(
             div().dfcc().mar(5).a(
-                div().addStyle("width", "98%").pad(10).tac().fs(22).bc("#afa").html(`
+                div().addStyle("width", "98%").pad(10).tac().fs(22).bc("#abc").html(`
+Yet an other chess interface with cool features:<br><br>
+<a href="https://pgneditor.herokuapp.com" rel="noopener noreferrer" target="_blank">pgneditor.herokuapp.com</a>
+`),
+                div().addStyle("width", "98%").mart(10).pad(10).tac().fs(22).bc("#afa").html(`
 Convenience wrapper around the lichess game download API ( <a href="https://lichess.org/api#operation/apiGamesUser" rel="noopener noreferrer" target="_blank">lichess.org/api#operation/apiGamesUser</a> ) that lets you download a user's games filtered by various criteria:<br><br>
 <a href="https://lichessgamedownload.netlify.app" rel="noopener noreferrer" target="_blank">lichessgamedownload.netlify.app</a>
 `),
@@ -2250,7 +2254,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
         if(typeof PROPS != "undefined"){
             if(typeof PROPS.USER != "undefined"){
                 if(PROPS.USER.provider == "lichess"){
-                    let url = `http://fbserv.herokuapp.com/games.html?username=${PROPS.USER.username}&token=${PROPS.USER.accessToken}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true&variant=${this.variant}`                    
+                    let url = `http://fbserv.herokuapp.com/games.html?username=${PROPS.USER.username}&token=${PROPS.USER.accessToken}&color=${this.g.flip ? "black" : "white"}&eco=${line}&autocreatecode=true&autostart=true&variant=${this.variant}&oppkind=human`                    
                     window.open(url)
                 }                
                 return
