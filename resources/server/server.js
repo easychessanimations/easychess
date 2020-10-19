@@ -812,4 +812,12 @@ if(IS_DEV()){
     }
 }, 20000)
 
+setInterval(_=>{
+    let hours = new Date().getHours()
+    if((hours > 5)&&(hours<23)){
+        console.log("hours ok", hours, "keep alive")
+        fetch("https://hyperchessbot.herokuapp.com/")
+    }        
+}, 30 * 60 * 1000)
+
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))
