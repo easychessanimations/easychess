@@ -200,8 +200,8 @@ function api(topic, payload, req, res){
             })) return                        
             let chatMessage = ChatMessage(payload.chatMessage || {author: Player(), msg: ChatMessage()})            
             chatMessage.msg = chatMessage.msg || "Chat message."
-            if(chatMessage.msg.length > 200){
-               chatMessage.msg = chatMessage.msg.substring(0, 200)
+            if(chatMessage.msg.length > 1000){
+               chatMessage.msg = chatMessage.msg.substring(0, 1000)
             }
             if(chatMessage.msg == "faq"){
                 chatMessage.msg = `see <a href="https://easychess.herokuapp.com/?ubertab=faq">Faq</a>`
