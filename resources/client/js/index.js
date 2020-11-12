@@ -1672,6 +1672,8 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 }
             }
 
+            if(this.settings.disableOfferingDrawCheckbox.checked) offeringDraw = false
+
             if(offeringDraw) msg += " I would agree to a draw ."
 
             makeLichessBotMove(id, moveObj.bestmove, offeringDraw, this.USER().accessToken).then(result => {
@@ -3942,6 +3944,11 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 CheckBoxInput({
                     id: "makeRandomBotMovesCheckbox",                    
                     display: "Make random bot moves",                                        
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "disableOfferingDrawCheckbox",                    
+                    display: "Disable offering draw",                                        
                     settings: this.settings
                 }),
                 Combo({                    
