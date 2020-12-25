@@ -35,9 +35,7 @@ if(process.env.BOT_TOKEN && (!process.env.SKIP_BOT)){
     try{
 
         let b = LichessBot({
-            token: process.env.BOT_TOKEN,
-            acceptVariant: process.env.BOT_VARIANT || "atomic",
-            useBotBook: true
+            token: process.env.BOT_TOKEN
         })
         
         console.log("created", b)

@@ -196,7 +196,7 @@ class LichessBotGame_{
                         if(this.timecontrol.wtime > utils.HOUR) this.timecontrol.wtime = 10000
                         if(this.timecontrol.btime > utils.HOUR) this.timecontrol.btime = 10000                            
 
-                        if(this.parentBot.props.makeRandomMoves){
+                        if(true){
                             let selmove = lms[Math.floor(Math.random() * lms.length)]
                             let algeb = this.board.movetoalgeb(selmove)
                             this.playBotMove("random", {bestmove: algeb, scorenumerical: null})
@@ -348,7 +348,7 @@ class LichessBot_{
 
             if(this.acceptVariant){
                 if(!this.acceptVariant.includes(challenge.variant.key)){
-                    return this.challengeRefused(`Wrong variant . Acceptable variant(s) : ${this.acceptVariant.join(" , ")} .`)            
+                    //return this.challengeRefused(`Wrong variant . Acceptable variant(s) : ${this.acceptVariant.join(" , ")} .`)            
                 }
             }
 
