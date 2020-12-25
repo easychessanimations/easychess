@@ -315,7 +315,7 @@ class LichessBot_{
 
         this.token = props.token
 
-        this.userId = "atomicroulettebot"
+        this.userId = "randommoverbot"
 
         if(typeof window != "undefined") this.userId = utils.GET_USER().id
 
