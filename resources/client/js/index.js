@@ -1464,11 +1464,6 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
 
         let ratingDiff = 0
 
-        let poweredBy = () => {
-            //this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychess.herokuapp.com .`)
-            this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychessreserve.herokuapp.com .`)
-        }
-
         let processGameEvent = (event) => {
             setTimeout(() => {
                 this.botEventLogger.log(LogItem({text: "game event", json: event, cls: "brown"}))
@@ -1513,7 +1508,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
 
                 state = gameFull.state
 
-                this.writeBotChat(id, ["player", "spectator"], oppMessage("Good luck", gameFull.opponentName))                
+                this.writeBotChat(id, ["player"], oppMessage("Good luck", gameFull.opponentName))                
                 poweredBy()
 
                 let postBody = gameFull
@@ -1633,7 +1628,7 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
 
         let processTermination = () => {
             this.botEventLogger.log(LogItem({text: `Game ${id} terminated.`, cls: "red large"}))
-            this.writeBotChat(id, ["player", "spectator"], oppMessage("Good game", gameFull.opponentName))
+            this.writeBotChat(id, ["player"], oppMessage("Good game", gameFull.opponentName))
             poweredBy()
             engine.terminate()
         }
