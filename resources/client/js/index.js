@@ -366,6 +366,8 @@ class App extends SmartDomElement{
 
         this.gameSearchDiv = this.renderGameSearchDiv()
 
+        this.liatomicDiv = this.renderLiatomicDiv()
+
         this.feedbackDiv = this.renderFeedbackDiv()
 
         this.generalSettingsDiv = this.renderGeneralSettingsDiv()
@@ -718,6 +720,17 @@ Filter lichess tourneys by various criteria and present them in a clear tabulate
 Insert unicode smileys, use unicode bold, underline etc. formatting for forums which allow only plain text:<br><br>
 <a href="https://fbserv.herokuapp.com/smileyeditor.html" rel="noopener noreferrer" target="_blank">fbserv.herokuapp.com/smileyeditor.html</a>
 `)
+            )
+        )
+    }
+
+    renderLiatomicDiv(){
+        return div().a(
+            div().dfcc().mar(5).a(
+                div().addStyle("width", "98%").pad(10).tac().fs(22).bc("#afa").html(`
+Site dedicated solely to playing atomic chess, including Atomic960:<br><br>
+<a href="https://liatomic.herokuapp.com/" rel="noopener noreferrer" target="_blank">https://liatomic.herokuapp.com/</a>
+`),
             )
         )
     }
@@ -3637,8 +3650,10 @@ Insert unicode smileys, use unicode bold, underline etc. formatting for forums w
                 .toolTip({msg: "Analyze"}),            
             Tab({id: "play", caption: "Play", content: this.playDiv})
                 .toolTip({msg: "Play"}),            
-            Tab({id: "feedback", caption: "Lichess game download / Advanced search and More", content: this.gameSearchDiv})
-                .toolTip({msg: "Advanced lichess game search and download API, with more convenience and search power than lichess offers"}),            
+            Tab({id: "links", caption: "Lichess game download / Advanced search and More", content: this.gameSearchDiv})
+                .toolTip({msg: "Advanced lichess game search and download API, with more convenience and search power than lichess offers"}),
+            Tab({id: "liatomic", caption: "Liatomic", content: this.liatomicDiv})
+                .toolTip({msg: "Liatomic - a site dedicated solely to playing atomic chess, including Atomic960"}),            
             Tab({id: "feedback", caption: "Discussion / Feedback", content: this.feedbackDiv})
                 .toolTip({msg: "Join Discord Server"}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsTabPane})
