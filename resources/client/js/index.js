@@ -1477,11 +1477,6 @@ Site dedicated solely to playing atomic chess, including Atomic960:<br><br>
 
         let ratingDiff = 0
 
-        let poweredBy = () => {
-            //this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychess.herokuapp.com .`)
-            this.writeBotChat(id, ["player", "spectator"], `${gameFull.botName} powered by https://easychessreserve.herokuapp.com .`)
-        }
-
         let processGameEvent = (event) => {
             setTimeout(() => {
                 this.botEventLogger.log(LogItem({text: "game event", json: event, cls: "brown"}))
@@ -1526,7 +1521,7 @@ Site dedicated solely to playing atomic chess, including Atomic960:<br><br>
 
                 state = gameFull.state
 
-                this.writeBotChat(id, ["player", "spectator"], oppMessage("Good luck", gameFull.opponentName))                
+                this.writeBotChat(id, ["player"], oppMessage("Good luck", gameFull.opponentName))                
                 poweredBy()
 
                 let postBody = gameFull
@@ -1646,7 +1641,7 @@ Site dedicated solely to playing atomic chess, including Atomic960:<br><br>
 
         let processTermination = () => {
             this.botEventLogger.log(LogItem({text: `Game ${id} terminated.`, cls: "red large"}))
-            this.writeBotChat(id, ["player", "spectator"], oppMessage("Good game", gameFull.opponentName))
+            this.writeBotChat(id, ["player"], oppMessage("Good game", gameFull.opponentName))
             poweredBy()
             engine.terminate()
         }
